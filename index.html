@@ -147,21 +147,38 @@
       }
     }
 
-    // Load animations first
+    // Load animations first (need both General and MovementBasic)
     async function loadAnimations() {
       return new Promise((resolve) => {
         let loaded = 0;
+        const needed = 4;
 
+        // Medium rig - General (idle, death, etc)
         gltfLoader.load('assets/animations/rig_medium/General.glb', (gltf) => {
-          animationClips.medium = gltf.animations;
+          animationClips.mediumGeneral = gltf.animations;
           loaded++;
-          if (loaded === 2) resolve();
+          if (loaded === needed) resolve();
         });
 
-        gltfLoader.load('assets/animations/rig_large/General.glb', (gltf) => {
-          animationClips.large = gltf.animations;
+        // Medium rig - Movement (walk, run, jump)
+        gltfLoader.load('assets/animations/rig_medium/MovementBasic.glb', (gltf) => {
+          animationClips.mediumMovement = gltf.animations;
           loaded++;
-          if (loaded === 2) resolve();
+          if (loaded === needed) resolve();
+        });
+
+        // Large rig - General
+        gltfLoader.load('assets/animations/rig_large/General.glb', (gltf) => {
+          animationClips.largeGeneral = gltf.animations;
+          loaded++;
+          if (loaded === needed) resolve();
+        });
+
+        // Large rig - Movement
+        gltfLoader.load('assets/animations/rig_large/MovementBasic.glb', (gltf) => {
+          animationClips.largeMovement = gltf.animations;
+          loaded++;
+          if (loaded === needed) resolve();
         });
       });
     }
@@ -196,19 +213,25 @@
         this.swayAmount = 0.02 + Math.random() * 0.02;
         this.baseY = startPos.y;
 
-        // Apply animations
-        const clips = rig === 'large' ? animationClips.large : animationClips.medium;
-        if (clips && clips.length > 0) {
-          // Find idle animation
-          const idleClip = clips.find(c => c.name.toLowerCase().includes('idle')) || clips[0];
+        // Apply animations from correct sources
+        const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
+        const movementClips = rig === 'large' ? animationClips.largeMovement : animationClips.mediumMovement;
+
+        // Get idle animation from General.glb (Idle_A or Idle_B)
+        if (generalClips && generalClips.length > 0) {
+          const idleOptions = generalClips.filter(c => c.name.includes('Idle'));
+          const idleClip = idleOptions[Math.floor(Math.random() * idleOptions.length)] || generalClips[0];
           if (idleClip) {
             this.idleAction = this.mixer.clipAction(idleClip);
             this.idleAction.setEffectiveTimeScale(0.8 + Math.random() * 0.4);
             this.idleAction.play();
           }
+        }
 
-          // Find walk animation
-          const walkClip = clips.find(c => c.name.toLowerCase().includes('walk'));
+        // Get walk animation from MovementBasic.glb (Walking_A, Walking_B, Walking_C)
+        if (movementClips && movementClips.length > 0) {
+          const walkOptions = movementClips.filter(c => c.name.includes('Walking'));
+          const walkClip = walkOptions[Math.floor(Math.random() * walkOptions.length)];
           if (walkClip) {
             this.walkAction = this.mixer.clipAction(walkClip);
             this.walkAction.setEffectiveTimeScale(0.9 + Math.random() * 0.2);
