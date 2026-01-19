@@ -71,8 +71,8 @@
     scene.fog = new THREE.FogExp2(0x7EC8E3, 0.012);
 
     // Camera
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(30, 22, 30);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera.position.set(60, 45, 60);
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -90,7 +90,7 @@
     controls.dampingFactor = 0.05;
     controls.maxPolarAngle = Math.PI / 2.1;
     controls.minDistance = 5;
-    controls.maxDistance = 80;
+    controls.maxDistance = 200;
     controls.target.set(0, 0, 0);
 
     // Lighting
@@ -103,11 +103,11 @@
     sunLight.shadow.mapSize.width = 4096;
     sunLight.shadow.mapSize.height = 4096;
     sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 150;
-    sunLight.shadow.camera.left = -50;
-    sunLight.shadow.camera.right = 50;
-    sunLight.shadow.camera.top = 50;
-    sunLight.shadow.camera.bottom = -50;
+    sunLight.shadow.camera.far = 300;
+    sunLight.shadow.camera.left = -100;
+    sunLight.shadow.camera.right = 100;
+    sunLight.shadow.camera.top = 100;
+    sunLight.shadow.camera.bottom = -100;
     sunLight.shadow.bias = -0.0001;
     scene.add(sunLight);
 
@@ -116,7 +116,7 @@
     scene.add(fillLight);
 
     // Ground
-    const groundGeometry = new THREE.PlaneGeometry(200, 200, 50, 50);
+    const groundGeometry = new THREE.PlaneGeometry(500, 500, 100, 100);
     const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x4a7c4e, roughness: 0.9 });
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
@@ -140,42 +140,42 @@
     }
 
     // ==================== ROAD NETWORK ====================
-    // Define waypoints for roads - characters will walk between these
+    // Define waypoints for roads - characters will walk between these (scaled 3x)
     const waypoints = {
       // Main street (north-south)
-      northGate: { x: 0, z: -9 },
-      northPlaza: { x: 0, z: -5 },
+      northGate: { x: 0, z: -30 },
+      northPlaza: { x: 0, z: -15 },
       center: { x: 0, z: 0 },
-      southPlaza: { x: 0, z: 5 },
-      southGate: { x: 0, z: 9 },
+      southPlaza: { x: 0, z: 15 },
+      southGate: { x: 0, z: 30 },
 
       // Cross street (east-west)
-      westGate: { x: -9, z: 0 },
-      westPlaza: { x: -5, z: 0 },
-      eastPlaza: { x: 5, z: 0 },
-      eastGate: { x: 9, z: 0 },
+      westGate: { x: -30, z: 0 },
+      westPlaza: { x: -15, z: 0 },
+      eastPlaza: { x: 15, z: 0 },
+      eastGate: { x: 30, z: 0 },
 
       // Tavern district (northwest)
-      tavernFront: { x: -5, z: -4 },
-      tavernBack: { x: -7, z: -6 },
+      tavernFront: { x: -15, z: -12 },
+      tavernBack: { x: -21, z: -18 },
 
       // Market district (northeast)
-      marketFront: { x: 5, z: -4 },
-      marketBack: { x: 7, z: -6 },
+      marketFront: { x: 15, z: -12 },
+      marketBack: { x: 21, z: -18 },
 
       // Residential west (southwest)
-      houseWest1: { x: -6, z: 4 },
-      houseWest2: { x: -7, z: 6 },
+      houseWest1: { x: -18, z: 12 },
+      houseWest2: { x: -21, z: 18 },
 
       // Residential east (southeast)
-      houseEast1: { x: 6, z: 4 },
-      houseEast2: { x: 7, z: 6 },
+      houseEast1: { x: 18, z: 12 },
+      houseEast2: { x: 21, z: 18 },
 
       // Side streets
-      nwCorner: { x: -5, z: -5 },
-      neCorner: { x: 5, z: -5 },
-      swCorner: { x: -5, z: 5 },
-      seCorner: { x: 5, z: 5 },
+      nwCorner: { x: -15, z: -15 },
+      neCorner: { x: 15, z: -15 },
+      swCorner: { x: -15, z: 15 },
+      seCorner: { x: 15, z: 15 },
     };
 
     // Define connected routes (which waypoints connect to which)
@@ -429,143 +429,146 @@
     async function buildTown() {
       await loadAnimations();
 
+      // Scale factor for all structures (3x bigger)
+      const S = 3;
+
       // === GROUND TILES ===
-      const hexW = 1.73, hexH = 1.5;
-      for (let x = -6; x <= 6; x++) {
-        for (let z = -6; z <= 6; z++) {
+      const hexW = 1.73 * S, hexH = 1.5 * S;
+      for (let x = -8; x <= 8; x++) {
+        for (let z = -8; z <= 8; z++) {
           const offX = z % 2 === 0 ? 0 : hexW / 2;
           const px = x * hexW + offX, pz = z * hexH;
 
           // Road pattern - main cross + side streets
-          const isMainRoad = (Math.abs(x) <= 1 && Math.abs(z) <= 6) || (Math.abs(z) <= 1 && Math.abs(x) <= 6);
-          const isSideStreet = (Math.abs(x) >= 2 && Math.abs(x) <= 4 && Math.abs(z) === 3) ||
-                               (Math.abs(z) >= 2 && Math.abs(z) <= 4 && Math.abs(x) === 3);
+          const isMainRoad = (Math.abs(x) <= 1 && Math.abs(z) <= 8) || (Math.abs(z) <= 1 && Math.abs(x) <= 8);
+          const isSideStreet = (Math.abs(x) >= 2 && Math.abs(x) <= 4 && Math.abs(z) === 4) ||
+                               (Math.abs(z) >= 2 && Math.abs(z) <= 4 && Math.abs(x) === 4);
 
           if (isMainRoad || isSideStreet) {
-            loadTownAsset('tiles', 'hex_road_A', { x: px, y: 0.01, z: pz }, 1);
+            loadTownAsset('tiles', 'hex_road_A', { x: px, y: 0.01, z: pz }, S);
           } else {
-            loadTownAsset('tiles', 'hex_grass', { x: px, y: 0, z: pz }, 1);
+            loadTownAsset('tiles', 'hex_grass', { x: px, y: 0, z: pz }, S);
           }
         }
       }
 
       // === HOUSES - Northwest District (Tavern Area) ===
-      loadTownAsset('buildings', 'building_stage_A', { x: -6, y: 0, z: -5 }, 1.3, Math.PI/4);
-      loadTownAsset('buildings', 'building_stage_B', { x: -8, y: 0, z: -4 }, 1.2, Math.PI/3);
-      loadTownAsset('buildings', 'building_stage_C', { x: -7, y: 0, z: -7 }, 1.1, Math.PI/5);
-      loadTownAsset('buildings', 'building_grain', { x: -5, y: 0, z: -7 }, 1.0, Math.PI/6);
+      loadTownAsset('buildings', 'building_stage_A', { x: -18, y: 0, z: -15 }, S * 1.3, Math.PI/4);
+      loadTownAsset('buildings', 'building_stage_B', { x: -24, y: 0, z: -12 }, S * 1.2, Math.PI/3);
+      loadTownAsset('buildings', 'building_stage_C', { x: -21, y: 0, z: -21 }, S * 1.1, Math.PI/5);
+      loadTownAsset('buildings', 'building_grain', { x: -15, y: 0, z: -21 }, S * 1.0, Math.PI/6);
 
       // === HOUSES - Northeast District (Market Area) ===
-      loadTownAsset('buildings', 'building_stage_A', { x: 6, y: 0, z: -5 }, 1.3, -Math.PI/4);
-      loadTownAsset('buildings', 'building_stage_B', { x: 8, y: 0, z: -4 }, 1.2, -Math.PI/3);
-      loadTownAsset('buildings', 'building_stage_C', { x: 7, y: 0, z: -7 }, 1.1, -Math.PI/5);
-      loadTownAsset('buildings', 'building_grain', { x: 5, y: 0, z: -7 }, 1.0, -Math.PI/6);
+      loadTownAsset('buildings', 'building_stage_A', { x: 18, y: 0, z: -15 }, S * 1.3, -Math.PI/4);
+      loadTownAsset('buildings', 'building_stage_B', { x: 24, y: 0, z: -12 }, S * 1.2, -Math.PI/3);
+      loadTownAsset('buildings', 'building_stage_C', { x: 21, y: 0, z: -21 }, S * 1.1, -Math.PI/5);
+      loadTownAsset('buildings', 'building_grain', { x: 15, y: 0, z: -21 }, S * 1.0, -Math.PI/6);
 
       // === HOUSES - Southwest District (Residential) ===
-      loadTownAsset('buildings', 'building_stage_A', { x: -6, y: 0, z: 5 }, 1.2, Math.PI * 0.75);
-      loadTownAsset('buildings', 'building_stage_B', { x: -8, y: 0, z: 4 }, 1.1, Math.PI * 0.6);
-      loadTownAsset('buildings', 'building_stage_C', { x: -7, y: 0, z: 7 }, 1.3, Math.PI * 0.8);
-      loadTownAsset('buildings', 'building_dirt', { x: -5, y: 0, z: 7 }, 1.0, Math.PI * 0.7);
+      loadTownAsset('buildings', 'building_stage_A', { x: -18, y: 0, z: 15 }, S * 1.2, Math.PI * 0.75);
+      loadTownAsset('buildings', 'building_stage_B', { x: -24, y: 0, z: 12 }, S * 1.1, Math.PI * 0.6);
+      loadTownAsset('buildings', 'building_stage_C', { x: -21, y: 0, z: 21 }, S * 1.3, Math.PI * 0.8);
+      loadTownAsset('buildings', 'building_dirt', { x: -15, y: 0, z: 21 }, S * 1.0, Math.PI * 0.7);
 
       // === HOUSES - Southeast District (Residential) ===
-      loadTownAsset('buildings', 'building_stage_A', { x: 6, y: 0, z: 5 }, 1.2, -Math.PI * 0.75);
-      loadTownAsset('buildings', 'building_stage_B', { x: 8, y: 0, z: 4 }, 1.1, -Math.PI * 0.6);
-      loadTownAsset('buildings', 'building_stage_C', { x: 7, y: 0, z: 7 }, 1.3, -Math.PI * 0.8);
-      loadTownAsset('buildings', 'building_grain', { x: 5, y: 0, z: 7 }, 1.0, -Math.PI * 0.7);
+      loadTownAsset('buildings', 'building_stage_A', { x: 18, y: 0, z: 15 }, S * 1.2, -Math.PI * 0.75);
+      loadTownAsset('buildings', 'building_stage_B', { x: 24, y: 0, z: 12 }, S * 1.1, -Math.PI * 0.6);
+      loadTownAsset('buildings', 'building_stage_C', { x: 21, y: 0, z: 21 }, S * 1.3, -Math.PI * 0.8);
+      loadTownAsset('buildings', 'building_grain', { x: 15, y: 0, z: 21 }, S * 1.0, -Math.PI * 0.7);
 
       // === CENTRAL PLAZA ===
-      loadTownAsset('buildings', 'building_scaffolding', { x: 0, y: 0, z: 0 }, 1.8, 0);
-      loadTownAsset('props', 'flag_blue', { x: -1.5, y: 0, z: -1.5 }, 1.5);
-      loadTownAsset('props', 'flag_red', { x: 1.5, y: 0, z: -1.5 }, 1.5);
-      loadTownAsset('props', 'flag_green', { x: -1.5, y: 0, z: 1.5 }, 1.5);
-      loadTownAsset('props', 'flag_yellow', { x: 1.5, y: 0, z: 1.5 }, 1.5);
+      loadTownAsset('buildings', 'building_scaffolding', { x: 0, y: 0, z: 0 }, S * 2, 0);
+      loadTownAsset('props', 'flag_blue', { x: -4, y: 0, z: -4 }, S * 1.5);
+      loadTownAsset('props', 'flag_red', { x: 4, y: 0, z: -4 }, S * 1.5);
+      loadTownAsset('props', 'flag_green', { x: -4, y: 0, z: 4 }, S * 1.5);
+      loadTownAsset('props', 'flag_yellow', { x: 4, y: 0, z: 4 }, S * 1.5);
 
       // === WALLS ===
-      for (let i = -4; i <= 4; i++) {
-        loadTownAsset('buildings', 'wall_straight', { x: i * 2.5, y: 0, z: -12 }, 1, 0);
-        loadTownAsset('buildings', 'wall_straight', { x: i * 2.5, y: 0, z: 12 }, 1, Math.PI);
-        loadTownAsset('buildings', 'wall_straight', { x: -12, y: 0, z: i * 2.5 }, 1, -Math.PI/2);
-        loadTownAsset('buildings', 'wall_straight', { x: 12, y: 0, z: i * 2.5 }, 1, Math.PI/2);
+      for (let i = -5; i <= 5; i++) {
+        loadTownAsset('buildings', 'wall_straight', { x: i * 7.5, y: 0, z: -36 }, S, 0);
+        loadTownAsset('buildings', 'wall_straight', { x: i * 7.5, y: 0, z: 36 }, S, Math.PI);
+        loadTownAsset('buildings', 'wall_straight', { x: -36, y: 0, z: i * 7.5 }, S, -Math.PI/2);
+        loadTownAsset('buildings', 'wall_straight', { x: 36, y: 0, z: i * 7.5 }, S, Math.PI/2);
       }
 
       // Corner towers
-      loadTownAsset('buildings', 'wall_corner_A_outside', { x: -12, y: 0, z: -12 }, 1.4, 0);
-      loadTownAsset('buildings', 'wall_corner_A_outside', { x: 12, y: 0, z: -12 }, 1.4, Math.PI/2);
-      loadTownAsset('buildings', 'wall_corner_A_outside', { x: 12, y: 0, z: 12 }, 1.4, Math.PI);
-      loadTownAsset('buildings', 'wall_corner_A_outside', { x: -12, y: 0, z: 12 }, 1.4, -Math.PI/2);
+      loadTownAsset('buildings', 'wall_corner_A_outside', { x: -36, y: 0, z: -36 }, S * 1.4, 0);
+      loadTownAsset('buildings', 'wall_corner_A_outside', { x: 36, y: 0, z: -36 }, S * 1.4, Math.PI/2);
+      loadTownAsset('buildings', 'wall_corner_A_outside', { x: 36, y: 0, z: 36 }, S * 1.4, Math.PI);
+      loadTownAsset('buildings', 'wall_corner_A_outside', { x: -36, y: 0, z: 36 }, S * 1.4, -Math.PI/2);
 
       // Gates
-      loadTownAsset('buildings', 'wall_straight_gate', { x: 0, y: 0, z: -12 }, 1.3, 0);
-      loadTownAsset('buildings', 'wall_straight_gate', { x: 0, y: 0, z: 12 }, 1.3, Math.PI);
-      loadTownAsset('buildings', 'wall_straight_gate', { x: -12, y: 0, z: 0 }, 1.3, -Math.PI/2);
-      loadTownAsset('buildings', 'wall_straight_gate', { x: 12, y: 0, z: 0 }, 1.3, Math.PI/2);
+      loadTownAsset('buildings', 'wall_straight_gate', { x: 0, y: 0, z: -36 }, S * 1.3, 0);
+      loadTownAsset('buildings', 'wall_straight_gate', { x: 0, y: 0, z: 36 }, S * 1.3, Math.PI);
+      loadTownAsset('buildings', 'wall_straight_gate', { x: -36, y: 0, z: 0 }, S * 1.3, -Math.PI/2);
+      loadTownAsset('buildings', 'wall_straight_gate', { x: 36, y: 0, z: 0 }, S * 1.3, Math.PI/2);
 
       // === MARKET PROPS ===
-      loadTownAsset('props', 'barrel', { x: 5.5, y: 0, z: -4.5 }, 1);
-      loadTownAsset('props', 'barrel', { x: 6, y: 0, z: -4.2 }, 1);
-      loadTownAsset('props', 'crate_A_big', { x: 6.5, y: 0, z: -5 }, 1);
-      loadTownAsset('props', 'crate_B_big', { x: 7, y: 0, z: -4.5 }, 1);
-      loadTownAsset('props', 'sack', { x: 5.8, y: 0, z: -5.2 }, 1);
-      loadTownAsset('props', 'sack', { x: 6.2, y: 0, z: -5.5 }, 1);
-      loadTownAsset('props', 'tent', { x: 7.5, y: 0, z: -6 }, 1.2, -Math.PI/4);
+      loadTownAsset('props', 'barrel', { x: 16, y: 0, z: -13 }, S);
+      loadTownAsset('props', 'barrel', { x: 18, y: 0, z: -12 }, S);
+      loadTownAsset('props', 'crate_A_big', { x: 20, y: 0, z: -15 }, S);
+      loadTownAsset('props', 'crate_B_big', { x: 22, y: 0, z: -13 }, S);
+      loadTownAsset('props', 'sack', { x: 17, y: 0, z: -15 }, S);
+      loadTownAsset('props', 'sack', { x: 19, y: 0, z: -16 }, S);
+      loadTownAsset('props', 'tent', { x: 23, y: 0, z: -18 }, S * 1.2, -Math.PI/4);
 
       // === TAVERN PROPS ===
-      loadTownAsset('props', 'barrel', { x: -5.5, y: 0, z: -4.5 }, 1);
-      loadTownAsset('props', 'barrel', { x: -6, y: 0, z: -4.2 }, 1);
-      loadTownAsset('props', 'barrel', { x: -5.2, y: 0, z: -4 }, 1);
-      loadTownAsset('props', 'bucket_water', { x: -6.5, y: 0, z: -5 }, 1);
-      loadTownAsset('props', 'crate_long_A', { x: -7, y: 0, z: -5.5 }, 1);
+      loadTownAsset('props', 'barrel', { x: -16, y: 0, z: -13 }, S);
+      loadTownAsset('props', 'barrel', { x: -18, y: 0, z: -12 }, S);
+      loadTownAsset('props', 'barrel', { x: -15, y: 0, z: -11 }, S);
+      loadTownAsset('props', 'bucket_water', { x: -20, y: 0, z: -15 }, S);
+      loadTownAsset('props', 'crate_long_A', { x: -22, y: 0, z: -16 }, S);
 
       // === RESIDENTIAL PROPS ===
-      loadTownAsset('props', 'wheelbarrow', { x: -6.5, y: 0, z: 4 }, 1, Math.PI/3);
-      loadTownAsset('props', 'bucket_empty', { x: -5.5, y: 0, z: 5.5 }, 1);
-      loadTownAsset('props', 'pallet', { x: -7, y: 0, z: 5 }, 1);
-      loadTownAsset('props', 'resource_lumber', { x: -7, y: 0.1, z: 5 }, 1);
-      loadTownAsset('props', 'ladder', { x: 6.5, y: 0, z: 5.5 }, 1, -Math.PI/4);
-      loadTownAsset('props', 'crate_open', { x: 7, y: 0, z: 4.5 }, 1);
+      loadTownAsset('props', 'wheelbarrow', { x: -20, y: 0, z: 12 }, S, Math.PI/3);
+      loadTownAsset('props', 'bucket_empty', { x: -16, y: 0, z: 16 }, S);
+      loadTownAsset('props', 'pallet', { x: -22, y: 0, z: 15 }, S);
+      loadTownAsset('props', 'resource_lumber', { x: -22, y: 0.1, z: 15 }, S);
+      loadTownAsset('props', 'ladder', { x: 20, y: 0, z: 16 }, S, -Math.PI/4);
+      loadTownAsset('props', 'crate_open', { x: 22, y: 0, z: 13 }, S);
 
       // === TRAINING AREA ===
-      loadTownAsset('props', 'target', { x: 9, y: 0, z: 4 }, 1);
-      loadTownAsset('props', 'target', { x: 9, y: 0, z: 6 }, 1);
-      loadTownAsset('props', 'weaponrack', { x: 8, y: 0, z: 3 }, 1, -Math.PI/2);
-      loadTownAsset('props', 'bucket_arrows', { x: 8.5, y: 0, z: 5 }, 1);
+      loadTownAsset('props', 'target', { x: 28, y: 0, z: 12 }, S);
+      loadTownAsset('props', 'target', { x: 28, y: 0, z: 18 }, S);
+      loadTownAsset('props', 'weaponrack', { x: 25, y: 0, z: 9 }, S, -Math.PI/2);
+      loadTownAsset('props', 'bucket_arrows', { x: 26, y: 0, z: 15 }, S);
 
       // === FENCES ===
-      loadTownAsset('buildings', 'fence_wood_straight', { x: -4, y: 0, z: 3.5 }, 1, Math.PI/2);
-      loadTownAsset('buildings', 'fence_wood_straight_gate', { x: -4, y: 0, z: 5 }, 1, Math.PI/2);
-      loadTownAsset('buildings', 'fence_stone_straight', { x: 4, y: 0, z: -3.5 }, 1, Math.PI/2);
+      loadTownAsset('buildings', 'fence_wood_straight', { x: -12, y: 0, z: 10 }, S, Math.PI/2);
+      loadTownAsset('buildings', 'fence_wood_straight_gate', { x: -12, y: 0, z: 15 }, S, Math.PI/2);
+      loadTownAsset('buildings', 'fence_stone_straight', { x: 12, y: 0, z: -10 }, S, Math.PI/2);
 
       // === NATURE - Inside Town ===
-      loadTownAsset('nature', 'tree_single_A', { x: -3, y: 0, z: -3 }, 1);
-      loadTownAsset('nature', 'tree_single_B', { x: 3, y: 0, z: 3 }, 1);
-      loadTownAsset('nature', 'tree_single_A', { x: -8, y: 0, z: 0 }, 0.9);
-      loadTownAsset('nature', 'tree_single_B', { x: 8, y: 0, z: 0 }, 0.9);
-      loadTownAsset('nature', 'rock_single_A', { x: -9, y: 0, z: -8 }, 0.8);
-      loadTownAsset('nature', 'rock_single_B', { x: 9, y: 0, z: 8 }, 0.8);
+      loadTownAsset('nature', 'tree_single_A', { x: -10, y: 0, z: -10 }, S);
+      loadTownAsset('nature', 'tree_single_B', { x: 10, y: 0, z: 10 }, S);
+      loadTownAsset('nature', 'tree_single_A', { x: -25, y: 0, z: 0 }, S * 0.9);
+      loadTownAsset('nature', 'tree_single_B', { x: 25, y: 0, z: 0 }, S * 0.9);
+      loadTownAsset('nature', 'rock_single_A', { x: -28, y: 0, z: -25 }, S * 0.8);
+      loadTownAsset('nature', 'rock_single_B', { x: 28, y: 0, z: 25 }, S * 0.8);
 
       // === NATURE - Outside Walls ===
-      loadTownAsset('nature', 'trees_A_large', { x: -18, y: 0, z: -10 }, 1.3);
-      loadTownAsset('nature', 'trees_B_large', { x: -18, y: 0, z: 0 }, 1.2);
-      loadTownAsset('nature', 'trees_A_medium', { x: -18, y: 0, z: 10 }, 1.4);
-      loadTownAsset('nature', 'trees_B_large', { x: 18, y: 0, z: -10 }, 1.3);
-      loadTownAsset('nature', 'trees_A_large', { x: 18, y: 0, z: 0 }, 1.2);
-      loadTownAsset('nature', 'trees_B_medium', { x: 18, y: 0, z: 10 }, 1.4);
-      loadTownAsset('nature', 'trees_A_large', { x: 0, y: 0, z: -20 }, 1.5);
-      loadTownAsset('nature', 'trees_B_large', { x: 0, y: 0, z: 20 }, 1.5);
+      loadTownAsset('nature', 'trees_A_large', { x: -50, y: 0, z: -30 }, S * 1.5);
+      loadTownAsset('nature', 'trees_B_large', { x: -50, y: 0, z: 0 }, S * 1.4);
+      loadTownAsset('nature', 'trees_A_medium', { x: -50, y: 0, z: 30 }, S * 1.6);
+      loadTownAsset('nature', 'trees_B_large', { x: 50, y: 0, z: -30 }, S * 1.5);
+      loadTownAsset('nature', 'trees_A_large', { x: 50, y: 0, z: 0 }, S * 1.4);
+      loadTownAsset('nature', 'trees_B_medium', { x: 50, y: 0, z: 30 }, S * 1.6);
+      loadTownAsset('nature', 'trees_A_large', { x: 0, y: 0, z: -55 }, S * 1.7);
+      loadTownAsset('nature', 'trees_B_large', { x: 0, y: 0, z: 55 }, S * 1.7);
 
       // Hills & Mountains
-      loadTownAsset('nature', 'hills_A_trees', { x: -30, y: 0, z: 0 }, 2.5);
-      loadTownAsset('nature', 'hills_B_trees', { x: 30, y: 0, z: 0 }, 2.5);
-      loadTownAsset('nature', 'hills_C_trees', { x: 0, y: 0, z: -30 }, 2.5);
-      loadTownAsset('nature', 'mountain_A_grass_trees', { x: -40, y: 0, z: -25 }, 4);
-      loadTownAsset('nature', 'mountain_B_grass_trees', { x: 40, y: 0, z: -25 }, 4);
-      loadTownAsset('nature', 'mountain_C_grass', { x: 0, y: 0, z: -45 }, 5);
+      loadTownAsset('nature', 'hills_A_trees', { x: -70, y: 0, z: 0 }, S * 3);
+      loadTownAsset('nature', 'hills_B_trees', { x: 70, y: 0, z: 0 }, S * 3);
+      loadTownAsset('nature', 'hills_C_trees', { x: 0, y: 0, z: -70 }, S * 3);
+      loadTownAsset('nature', 'mountain_A_grass_trees', { x: -90, y: 0, z: -60 }, S * 5);
+      loadTownAsset('nature', 'mountain_B_grass_trees', { x: 90, y: 0, z: -60 }, S * 5);
+      loadTownAsset('nature', 'mountain_C_grass', { x: 0, y: 0, z: -100 }, S * 6);
 
       // Clouds
-      loadTownAsset('nature', 'cloud_big', { x: -20, y: 25, z: -15 }, 4);
-      loadTownAsset('nature', 'cloud_small', { x: 15, y: 28, z: 10 }, 3);
-      loadTownAsset('nature', 'cloud_big', { x: 25, y: 22, z: -20 }, 3.5);
-      loadTownAsset('nature', 'cloud_small', { x: -10, y: 30, z: 20 }, 2.5);
+      loadTownAsset('nature', 'cloud_big', { x: -50, y: 40, z: -40 }, S * 4);
+      loadTownAsset('nature', 'cloud_small', { x: 40, y: 45, z: 30 }, S * 3);
+      loadTownAsset('nature', 'cloud_big', { x: 60, y: 35, z: -50 }, S * 3.5);
+      loadTownAsset('nature', 'cloud_small', { x: -30, y: 50, z: 50 }, S * 2.5);
 
       // === CHARACTERS - Walking the roads ===
       // Townspeople on main routes
