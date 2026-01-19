@@ -1,9 +1,16 @@
-import 'dotenv/config';
+// Eliza Town Server - Static files + optional orchestration backend
 import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+// Try to load dotenv, but don't fail if it doesn't exist
+try {
+  await import('dotenv/config');
+} catch (e) {
+  // dotenv not available or no .env file - that's fine in production
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +24,15 @@ const PORT = process.env.PORT || 3000;
 // Track if database is available
 let dbAvailable = false;
 let orchestrationReady = false;
+
+// Global error handlers to prevent crashes
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err.message);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 // Middleware
 app.use(cors());
@@ -53,8 +69,8 @@ app.get('/', (req, res) => {
 });
 
 // Start the server immediately so static files work
-server.listen(PORT, () => {
-  console.log(`Eliza Town server running on http://localhost:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Eliza Town server running on port ${PORT}`);
   console.log('Static file serving is active');
 });
 
