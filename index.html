@@ -166,7 +166,7 @@
       });
     }
 
-    // Character class with movement AI
+    // Character class with natural movement AI
     class Character {
       constructor(model, rig, startPos, wanderRadius = 5) {
         this.model = model;
@@ -175,18 +175,35 @@
         this.homePosition = new THREE.Vector3(startPos.x, startPos.y, startPos.z);
         this.targetPosition = this.homePosition.clone();
         this.wanderRadius = wanderRadius;
-        this.speed = 0.5 + Math.random() * 0.5;
+
+        // Natural movement parameters
+        this.maxSpeed = 1.2 + Math.random() * 0.6;
+        this.currentSpeed = 0;
+        this.acceleration = 2.0;
+        this.deceleration = 3.0;
+        this.turnSpeed = 4.0 + Math.random() * 2;
+        this.targetRotation = model.rotation.y;
+
+        // State management
         this.state = 'idle';
-        this.idleTime = 0;
-        this.maxIdleTime = 2 + Math.random() * 4;
+        this.stateTime = 0;
+        this.idleDuration = 3 + Math.random() * 5;
+        this.turningFirst = false;
+
+        // Subtle idle motion
+        this.bobOffset = Math.random() * Math.PI * 2;
+        this.bobSpeed = 1.5 + Math.random() * 0.5;
+        this.swayAmount = 0.02 + Math.random() * 0.02;
+        this.baseY = startPos.y;
 
         // Apply animations
         const clips = rig === 'large' ? animationClips.large : animationClips.medium;
         if (clips && clips.length > 0) {
-          // Find idle animation (usually first one or one named 'idle')
+          // Find idle animation
           const idleClip = clips.find(c => c.name.toLowerCase().includes('idle')) || clips[0];
           if (idleClip) {
             this.idleAction = this.mixer.clipAction(idleClip);
+            this.idleAction.setEffectiveTimeScale(0.8 + Math.random() * 0.4);
             this.idleAction.play();
           }
 
@@ -194,59 +211,153 @@
           const walkClip = clips.find(c => c.name.toLowerCase().includes('walk'));
           if (walkClip) {
             this.walkAction = this.mixer.clipAction(walkClip);
+            this.walkAction.setEffectiveTimeScale(0.9 + Math.random() * 0.2);
           }
         }
 
         mixers.push(this.mixer);
       }
 
+      // Smooth angle interpolation
+      lerpAngle(from, to, t) {
+        let diff = to - from;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        return from + diff * t;
+      }
+
+      // Ease in-out function for smooth acceleration
+      easeInOut(t) {
+        return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      }
+
       update(delta) {
         this.mixer.update(delta);
+        this.stateTime += delta;
 
+        // Subtle breathing/sway motion when idle
         if (this.state === 'idle') {
-          this.idleTime += delta;
-          if (this.idleTime > this.maxIdleTime) {
-            this.pickNewTarget();
-            this.state = 'walking';
-            this.idleTime = 0;
-            this.maxIdleTime = 2 + Math.random() * 4;
+          const bob = Math.sin(this.stateTime * this.bobSpeed + this.bobOffset) * this.swayAmount;
+          this.model.position.y = this.baseY + Math.abs(bob) * 0.05;
 
-            if (this.walkAction && this.idleAction) {
-              this.idleAction.fadeOut(0.3);
-              this.walkAction.reset().fadeIn(0.3).play();
-            }
+          // Occasional small rotation shifts
+          if (Math.random() < 0.002) {
+            this.targetRotation += (Math.random() - 0.5) * 0.5;
           }
-        } else if (this.state === 'walking') {
-          const direction = new THREE.Vector3()
-            .subVectors(this.targetPosition, this.model.position)
-            .normalize();
 
-          const distance = this.model.position.distanceTo(this.targetPosition);
+          // Smooth rotation even when idle
+          this.model.rotation.y = this.lerpAngle(
+            this.model.rotation.y,
+            this.targetRotation,
+            delta * 2
+          );
+        }
 
-          if (distance > 0.3) {
-            this.model.position.x += direction.x * this.speed * delta;
-            this.model.position.z += direction.z * this.speed * delta;
-
-            // Face movement direction
-            const angle = Math.atan2(direction.x, direction.z);
-            this.model.rotation.y = angle;
-          } else {
-            this.state = 'idle';
-            if (this.idleAction && this.walkAction) {
-              this.walkAction.fadeOut(0.3);
-              this.idleAction.reset().fadeIn(0.3).play();
+        // State machine
+        switch (this.state) {
+          case 'idle':
+            if (this.stateTime > this.idleDuration) {
+              this.pickNewTarget();
+              this.state = 'turning';
+              this.stateTime = 0;
             }
-          }
+            break;
+
+          case 'turning':
+            // Calculate target rotation
+            const dirToTarget = new THREE.Vector3()
+              .subVectors(this.targetPosition, this.model.position);
+            this.targetRotation = Math.atan2(dirToTarget.x, dirToTarget.z);
+
+            // Smoothly turn towards target
+            this.model.rotation.y = this.lerpAngle(
+              this.model.rotation.y,
+              this.targetRotation,
+              delta * this.turnSpeed
+            );
+
+            // Check if we're facing the right direction
+            let angleDiff = Math.abs(this.targetRotation - this.model.rotation.y);
+            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+            angleDiff = Math.abs(angleDiff);
+
+            if (angleDiff < 0.2) {
+              this.state = 'accelerating';
+              this.stateTime = 0;
+
+              // Start walk animation
+              if (this.walkAction && this.idleAction) {
+                this.idleAction.fadeOut(0.4);
+                this.walkAction.reset().fadeIn(0.4).play();
+              }
+            }
+            break;
+
+          case 'accelerating':
+            // Smoothly accelerate
+            this.currentSpeed = Math.min(this.currentSpeed + this.acceleration * delta, this.maxSpeed);
+            this.moveTowardsTarget(delta);
+
+            // Check if at full speed or close to target
+            const distToTarget = this.model.position.distanceTo(this.targetPosition);
+            if (distToTarget < 2) {
+              this.state = 'decelerating';
+              this.stateTime = 0;
+            }
+            break;
+
+          case 'decelerating':
+            // Smoothly decelerate
+            this.currentSpeed = Math.max(this.currentSpeed - this.deceleration * delta, 0);
+            this.moveTowardsTarget(delta);
+
+            if (this.currentSpeed <= 0.05 || this.model.position.distanceTo(this.targetPosition) < 0.2) {
+              this.state = 'idle';
+              this.stateTime = 0;
+              this.currentSpeed = 0;
+              this.idleDuration = 2 + Math.random() * 6;
+
+              // Return to idle animation
+              if (this.idleAction && this.walkAction) {
+                this.walkAction.fadeOut(0.5);
+                this.idleAction.reset().fadeIn(0.5).play();
+              }
+            }
+            break;
         }
       }
 
+      moveTowardsTarget(delta) {
+        const direction = new THREE.Vector3()
+          .subVectors(this.targetPosition, this.model.position)
+          .normalize();
+
+        // Move with current speed
+        this.model.position.x += direction.x * this.currentSpeed * delta;
+        this.model.position.z += direction.z * this.currentSpeed * delta;
+
+        // Smooth rotation while walking
+        const targetAngle = Math.atan2(direction.x, direction.z);
+        this.model.rotation.y = this.lerpAngle(
+          this.model.rotation.y,
+          targetAngle,
+          delta * this.turnSpeed * 0.5
+        );
+
+        // Subtle walking bob
+        const walkBob = Math.sin(this.stateTime * 8) * 0.015 * (this.currentSpeed / this.maxSpeed);
+        this.model.position.y = this.baseY + walkBob;
+      }
+
       pickNewTarget() {
+        // More natural target selection - prefer shorter distances sometimes
+        const distance = Math.pow(Math.random(), 0.7) * this.wanderRadius;
         const angle = Math.random() * Math.PI * 2;
-        const radius = Math.random() * this.wanderRadius;
+
         this.targetPosition.set(
-          this.homePosition.x + Math.cos(angle) * radius,
+          this.homePosition.x + Math.cos(angle) * distance,
           0,
-          this.homePosition.z + Math.sin(angle) * radius
+          this.homePosition.z + Math.sin(angle) * distance
         );
       }
     }
