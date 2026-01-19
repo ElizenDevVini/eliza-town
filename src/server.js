@@ -5,11 +5,6 @@ import { createServer } from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import * as db from './db/index.js';
-import * as ws from './websocket/index.js';
-import * as orchestration from './orchestration/loop.js';
-import apiRoutes from './api/routes.js';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.join(__dirname, '..');
@@ -19,27 +14,65 @@ const server = createServer(app);
 
 const PORT = process.env.PORT || 3000;
 
+// Track if database is available
+let dbAvailable = false;
+let orchestrationReady = false;
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// API routes
-app.use('/api', apiRoutes);
+// Health check (always works)
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    dbAvailable,
+    orchestrationReady,
+    timestamp: Date.now()
+  });
+});
 
-// Static files (serve the 3D town frontend)
-app.use(express.static(rootDir));
+// Static files (serve the 3D town frontend) - this should always work
+app.use(express.static(rootDir, {
+  extensions: ['html', 'js', 'css', 'json', 'png', 'jpg', 'glb', 'gltf', 'bin'],
+  setHeaders: (res, filepath) => {
+    // Set correct MIME types for 3D assets
+    if (filepath.endsWith('.gltf')) {
+      res.setHeader('Content-Type', 'model/gltf+json');
+    } else if (filepath.endsWith('.glb')) {
+      res.setHeader('Content-Type', 'model/gltf-binary');
+    } else if (filepath.endsWith('.bin')) {
+      res.setHeader('Content-Type', 'application/octet-stream');
+    }
+  }
+}));
 
 // Serve index.html for root
 app.get('/', (req, res) => {
   res.sendFile(path.join(rootDir, 'index.html'));
 });
 
-// Initialize and start
-async function start() {
+// Start the server immediately so static files work
+server.listen(PORT, () => {
+  console.log(`Eliza Town server running on http://localhost:${PORT}`);
+  console.log('Static file serving is active');
+});
+
+// Try to initialize database and orchestration (non-blocking)
+async function initializeBackend() {
+  // Check if DATABASE_URL is configured
+  if (!process.env.DATABASE_URL) {
+    console.log('DATABASE_URL not configured - running in static-only mode');
+    console.log('Set DATABASE_URL to enable agent orchestration');
+    return;
+  }
+
   try {
-    // Initialize database
     console.log('Initializing database...');
+    const db = await import('./db/index.js');
     await db.initializeDatabase();
+    dbAvailable = true;
+    console.log('Database connected');
 
     // Seed default agents if none exist
     const agents = await db.getAgents();
@@ -59,36 +92,46 @@ async function start() {
     }
 
     // Initialize WebSocket
+    const ws = await import('./websocket/index.js');
     ws.initialize(server);
+    console.log('WebSocket server initialized');
+
+    // Mount API routes (now that db is available)
+    const { default: apiRoutes } = await import('./api/routes.js');
+    app.use('/api', apiRoutes);
+    console.log('API routes mounted');
 
     // Initialize orchestration
+    const orchestration = await import('./orchestration/loop.js');
     await orchestration.initialize();
+    orchestrationReady = true;
 
-    // Start server
-    server.listen(PORT, () => {
-      console.log(`Eliza Town server running on http://localhost:${PORT}`);
-      console.log(`API available at http://localhost:${PORT}/api`);
-      console.log(`WebSocket available at ws://localhost:${PORT}/ws`);
-    });
-
-    // Auto-start orchestration loop
-    orchestration.start(5000);
-    console.log('Orchestration loop started (5s interval)');
+    // Auto-start orchestration loop (only if ANTHROPIC_API_KEY is set)
+    if (process.env.ANTHROPIC_API_KEY) {
+      orchestration.start(5000);
+      console.log('Orchestration loop started (5s interval)');
+    } else {
+      console.log('ANTHROPIC_API_KEY not set - orchestration loop disabled');
+    }
 
   } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
+    console.error('Backend initialization error:', error.message);
+    console.log('Server will continue serving static files');
   }
 }
 
+// Initialize backend asynchronously
+initializeBackend();
+
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   console.log('Shutting down...');
-  orchestration.stop();
+  if (orchestrationReady) {
+    const orchestration = await import('./orchestration/loop.js');
+    orchestration.stop();
+  }
   server.close(() => {
     console.log('Server closed');
     process.exit(0);
   });
 });
-
-start();

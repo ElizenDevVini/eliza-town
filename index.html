@@ -240,51 +240,138 @@
 
     /* Task Input */
     #task-input-container {
-      padding: 12px;
-      background: rgba(30, 30, 50, 0.9);
-      border-top: 1px solid rgba(100, 100, 150, 0.3);
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(30, 30, 60, 0.95), rgba(20, 20, 45, 0.98));
+      border-top: 1px solid rgba(100, 100, 150, 0.4);
+    }
+
+    .input-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .input-header label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #a5b4fc;
+    }
+
+    .input-header .char-count {
+      font-size: 10px;
+      color: #6b7280;
     }
 
     #task-input {
       width: 100%;
-      background: rgba(50, 50, 80, 0.5);
-      border: 1px solid rgba(100, 100, 150, 0.3);
-      border-radius: 6px;
-      padding: 10px 12px;
+      background: rgba(40, 40, 70, 0.6);
+      border: 2px solid rgba(100, 100, 150, 0.3);
+      border-radius: 10px;
+      padding: 14px 16px;
       color: #e0e0e0;
-      font-size: 13px;
+      font-size: 14px;
       resize: none;
+      line-height: 1.5;
+      transition: all 0.2s ease;
     }
 
     #task-input:focus {
       outline: none;
       border-color: #6366f1;
+      background: rgba(50, 50, 90, 0.7);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
 
     #task-input::placeholder {
       color: #6b7280;
     }
 
-    #submit-task {
-      width: 100%;
-      margin-top: 8px;
-      padding: 10px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
+    .button-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
     }
 
-    #submit-task:hover {
-      opacity: 0.9;
+    #submit-task {
+      flex: 1;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    #submit-task:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    #submit-task:active:not(:disabled) {
+      transform: translateY(0);
     }
 
     #submit-task:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      background: #4b5563;
+    }
+
+    #submit-task.submitting {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    }
+
+    #submit-task.success {
+      background: linear-gradient(135deg, #059669, #10b981);
+    }
+
+    #submit-task.error {
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+    }
+
+    .priority-select {
+      background: rgba(50, 50, 80, 0.6);
+      border: 2px solid rgba(100, 100, 150, 0.3);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #e0e0e0;
+      font-size: 13px;
+      cursor: pointer;
+      min-width: 100px;
+    }
+
+    .priority-select:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+
+    .server-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .server-status .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+
+    .server-status .dot.online {
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
     }
   </style>
 </head>
@@ -335,8 +422,25 @@
     </div>
 
     <div id="task-input-container">
-      <textarea id="task-input" rows="2" placeholder="Enter a task for the agents..."></textarea>
-      <button id="submit-task" disabled>Submit Task</button>
+      <div class="input-header">
+        <label>Assign a Task</label>
+        <span class="char-count"><span id="char-count">0</span>/500</span>
+      </div>
+      <textarea id="task-input" rows="3" placeholder="Describe what you want the agents to work on..." maxlength="500"></textarea>
+      <div class="button-row">
+        <select class="priority-select" id="priority-select">
+          <option value="3">High Priority</option>
+          <option value="5" selected>Normal</option>
+          <option value="7">Low Priority</option>
+        </select>
+        <button id="submit-task" disabled>
+          <span id="submit-text">Submit Task</span>
+        </button>
+      </div>
+      <div class="server-status">
+        <span class="dot" id="server-dot"></span>
+        <span id="server-status-text">Checking server...</span>
+      </div>
     </div>
   </div>
 
@@ -1032,37 +1136,100 @@
       }
     }
 
-    // Submit task
+    // Additional UI elements
+    const charCount = document.getElementById('char-count');
+    const prioritySelect = document.getElementById('priority-select');
+    const submitText = document.getElementById('submit-text');
+    const serverDot = document.getElementById('server-dot');
+    const serverStatusText = document.getElementById('server-status-text');
+
+    let serverOnline = false;
+
+    // Character count
+    taskInput.addEventListener('input', () => {
+      charCount.textContent = taskInput.value.length;
+    });
+
+    // Check server health
+    async function checkServerHealth() {
+      try {
+        const response = await fetch('/api/health');
+        if (response.ok) {
+          const data = await response.json();
+          serverOnline = true;
+          serverDot.classList.add('online');
+          if (data.dbAvailable && data.orchestrationReady) {
+            serverStatusText.textContent = 'Server online - agents ready';
+            submitTask.disabled = false;
+          } else if (data.dbAvailable) {
+            serverStatusText.textContent = 'Server online - waiting for orchestration';
+            submitTask.disabled = false;
+          } else {
+            serverStatusText.textContent = 'Server online - database not configured';
+            submitTask.disabled = true;
+          }
+        }
+      } catch (error) {
+        serverOnline = false;
+        serverDot.classList.remove('online');
+        serverStatusText.textContent = 'Server offline - task submission unavailable';
+        submitTask.disabled = true;
+      }
+    }
+
+    // Check health on load and periodically
+    checkServerHealth();
+    setInterval(checkServerHealth, 10000);
+
+    // Submit task with improved UX
     submitTask.addEventListener('click', async () => {
       const title = taskInput.value.trim();
-      if (!title) return;
+      if (!title || !serverOnline) return;
+
+      const priority = parseInt(prioritySelect.value);
 
       submitTask.disabled = true;
-      submitTask.textContent = 'Submitting...';
+      submitTask.classList.add('submitting');
+      submitText.textContent = 'Submitting...';
 
       try {
         const response = await fetch('/api/tasks', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, priority: 5 })
+          body: JSON.stringify({ title, priority })
         });
 
         if (response.ok) {
           taskInput.value = '';
-          console.log('Task submitted successfully');
+          charCount.textContent = '0';
+          submitTask.classList.remove('submitting');
+          submitTask.classList.add('success');
+          submitText.textContent = 'Task Created!';
+
+          setTimeout(() => {
+            submitTask.classList.remove('success');
+            submitText.textContent = 'Submit Task';
+            submitTask.disabled = false;
+          }, 2000);
         } else {
-          console.error('Failed to submit task');
+          throw new Error('Server returned error');
         }
       } catch (error) {
         console.error('Error submitting task:', error);
-      } finally {
-        submitTask.disabled = false;
-        submitTask.textContent = 'Submit Task';
+        submitTask.classList.remove('submitting');
+        submitTask.classList.add('error');
+        submitText.textContent = 'Failed - Try Again';
+
+        setTimeout(() => {
+          submitTask.classList.remove('error');
+          submitText.textContent = 'Submit Task';
+          submitTask.disabled = false;
+        }, 2000);
       }
     });
 
     taskInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === 'Enter' && !e.shiftKey && !submitTask.disabled) {
         e.preventDefault();
         submitTask.click();
       }
