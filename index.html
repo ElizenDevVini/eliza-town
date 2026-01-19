@@ -6,7 +6,7 @@
   <title>Eliza Town</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { overflow: hidden; background: #1a1a2e; }
+    body { overflow: hidden; background: #1a1a2e; font-family: 'Segoe UI', Arial, sans-serif; }
     canvas { display: block; }
     #loading {
       position: fixed;
@@ -40,6 +40,252 @@
       padding: 10px 15px;
       border-radius: 8px;
     }
+
+    /* Agent Orchestration UI */
+    #ui-container {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 360px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .panel {
+      background: rgba(20, 20, 40, 0.92);
+      border-left: 1px solid rgba(100, 100, 150, 0.3);
+      color: #e0e0e0;
+      pointer-events: auto;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      background: rgba(60, 60, 100, 0.5);
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(100, 100, 150, 0.3);
+    }
+
+    .panel-header .status {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      background: #2a2a4a;
+    }
+
+    .panel-header .status.connected { background: #1a4a2a; color: #4ade80; }
+    .panel-header .status.disconnected { background: #4a1a2a; color: #f87171; }
+
+    .panel-content {
+      padding: 12px;
+      overflow-y: auto;
+    }
+
+    /* Agents Panel */
+    #agents-panel {
+      flex: 0 0 auto;
+      max-height: 35vh;
+    }
+
+    #agents-panel .panel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .agent-card {
+      background: rgba(50, 50, 80, 0.5);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.2s;
+    }
+
+    .agent-card:hover {
+      background: rgba(70, 70, 100, 0.6);
+    }
+
+    .agent-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .agent-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .agent-name {
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+
+    .agent-role {
+      font-size: 11px;
+      color: #9ca3af;
+      text-transform: capitalize;
+    }
+
+    .agent-status {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 8px;
+      text-transform: capitalize;
+    }
+
+    .agent-status.idle { background: #374151; color: #9ca3af; }
+    .agent-status.working { background: #1e3a5f; color: #60a5fa; }
+    .agent-status.traveling { background: #3d2c0f; color: #fbbf24; }
+    .agent-status.chatting { background: #2d1f3d; color: #c084fc; }
+
+    /* Tasks Panel */
+    #tasks-panel {
+      flex: 0 0 auto;
+      max-height: 25vh;
+    }
+
+    .task-item {
+      background: rgba(50, 50, 80, 0.4);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      border-left: 3px solid #6366f1;
+    }
+
+    .task-item.completed { border-left-color: #22c55e; opacity: 0.7; }
+    .task-item.in_progress { border-left-color: #f59e0b; }
+
+    .task-title {
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .task-meta {
+      font-size: 10px;
+      color: #9ca3af;
+    }
+
+    /* Messages Panel */
+    #messages-panel {
+      flex: 1;
+      min-height: 200px;
+    }
+
+    #messages-panel .panel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .message-item {
+      background: rgba(40, 40, 70, 0.5);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .message-agent {
+      font-weight: 600;
+      color: #a5b4fc;
+    }
+
+    .message-time {
+      font-size: 10px;
+      color: #6b7280;
+    }
+
+    .message-content {
+      color: #d1d5db;
+      line-height: 1.4;
+    }
+
+    .message-type {
+      display: inline-block;
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-right: 6px;
+      text-transform: uppercase;
+    }
+
+    .message-type.thought { background: #1e3a5f; color: #60a5fa; }
+    .message-type.chat { background: #2d1f3d; color: #c084fc; }
+    .message-type.status { background: #1a4a2a; color: #4ade80; }
+    .message-type.announcement { background: #4a1a2a; color: #f87171; }
+
+    /* Task Input */
+    #task-input-container {
+      padding: 12px;
+      background: rgba(30, 30, 50, 0.9);
+      border-top: 1px solid rgba(100, 100, 150, 0.3);
+    }
+
+    #task-input {
+      width: 100%;
+      background: rgba(50, 50, 80, 0.5);
+      border: 1px solid rgba(100, 100, 150, 0.3);
+      border-radius: 6px;
+      padding: 10px 12px;
+      color: #e0e0e0;
+      font-size: 13px;
+      resize: none;
+    }
+
+    #task-input:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+
+    #task-input::placeholder {
+      color: #6b7280;
+    }
+
+    #submit-task {
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    #submit-task:hover {
+      opacity: 0.9;
+    }
+
+    #submit-task:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -49,6 +295,49 @@
   </div>
   <div id="info">
     Mouse: Rotate | Scroll: Zoom | Right-click drag: Pan
+  </div>
+
+  <!-- Agent Orchestration UI -->
+  <div id="ui-container">
+    <div id="agents-panel" class="panel">
+      <div class="panel-header">
+        <span>Agents</span>
+        <span id="ws-status" class="status disconnected">Offline</span>
+      </div>
+      <div class="panel-content" id="agents-list">
+        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+          Connecting to server...
+        </div>
+      </div>
+    </div>
+
+    <div id="tasks-panel" class="panel">
+      <div class="panel-header">
+        <span>Active Tasks</span>
+        <span id="task-count" style="font-size: 11px; color: #9ca3af;">0</span>
+      </div>
+      <div class="panel-content" id="tasks-list">
+        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+          No active tasks
+        </div>
+      </div>
+    </div>
+
+    <div id="messages-panel" class="panel">
+      <div class="panel-header">
+        <span>Activity Feed</span>
+      </div>
+      <div class="panel-content" id="messages-list">
+        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+          Waiting for activity...
+        </div>
+      </div>
+    </div>
+
+    <div id="task-input-container">
+      <textarea id="task-input" rows="2" placeholder="Enter a task for the agents..."></textarea>
+      <button id="submit-task" disabled>Submit Task</button>
+    </div>
   </div>
 
   <script type="importmap">
@@ -615,6 +904,172 @@
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
+
+    // ==================== WEBSOCKET & UI ====================
+    const wsStatus = document.getElementById('ws-status');
+    const agentsList = document.getElementById('agents-list');
+    const tasksList = document.getElementById('tasks-list');
+    const taskCount = document.getElementById('task-count');
+    const messagesList = document.getElementById('messages-list');
+    const taskInput = document.getElementById('task-input');
+    const submitTask = document.getElementById('submit-task');
+
+    let ws = null;
+    let serverAgents = [];
+    let serverTasks = [];
+    let serverMessages = [];
+
+    // Agent type colors
+    const typeColors = {
+      planner: '#c084fc',
+      designer: '#f472b6',
+      coder: '#60a5fa',
+      reviewer: '#4ade80'
+    };
+
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        wsStatus.textContent = 'Online';
+        wsStatus.className = 'status connected';
+        submitTask.disabled = false;
+        console.log('WebSocket connected');
+      };
+
+      ws.onclose = () => {
+        wsStatus.textContent = 'Offline';
+        wsStatus.className = 'status disconnected';
+        submitTask.disabled = true;
+        console.log('WebSocket disconnected, reconnecting in 3s...');
+        setTimeout(connectWebSocket, 3000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          handleServerMessage(message);
+        } catch (e) {
+          console.error('Failed to parse message:', e);
+        }
+      };
+    }
+
+    function handleServerMessage(message) {
+      switch (message.type) {
+        case 'connected':
+          console.log('Server welcome:', message.data.message);
+          break;
+        case 'state_update':
+          serverAgents = message.data.agents || [];
+          serverTasks = message.data.tasks || [];
+          serverMessages = message.data.messages || [];
+          updateUI();
+          break;
+        case 'task_created':
+          console.log('New task created:', message.data);
+          break;
+      }
+    }
+
+    function updateUI() {
+      // Update agents list
+      if (serverAgents.length > 0) {
+        agentsList.innerHTML = serverAgents.map(agent => `
+          <div class="agent-card" data-agent-id="${agent.id}">
+            <div class="agent-avatar" style="background: linear-gradient(135deg, ${typeColors[agent.type] || '#667eea'}, #4a5568);">
+              ${agent.name.charAt(0)}
+            </div>
+            <div class="agent-info">
+              <div class="agent-name">${agent.name}</div>
+              <div class="agent-role">${agent.type}</div>
+            </div>
+            <div class="agent-status ${agent.status}">${agent.status}</div>
+          </div>
+        `).join('');
+      }
+
+      // Update tasks list
+      const activeTasks = serverTasks.filter(t => t.status !== 'completed').slice(0, 5);
+      taskCount.textContent = activeTasks.length;
+
+      if (activeTasks.length > 0) {
+        tasksList.innerHTML = activeTasks.map(task => `
+          <div class="task-item ${task.status}">
+            <div class="task-title">${task.title}</div>
+            <div class="task-meta">Priority: ${task.priority} | Status: ${task.status}</div>
+          </div>
+        `).join('');
+      } else {
+        tasksList.innerHTML = '<div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">No active tasks</div>';
+      }
+
+      // Update messages list
+      if (serverMessages.length > 0) {
+        const recentMessages = serverMessages.slice(0, 15);
+        messagesList.innerHTML = recentMessages.map(msg => {
+          const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return `
+            <div class="message-item">
+              <div class="message-header">
+                <span class="message-agent">${msg.agent_name || 'Agent'}</span>
+                <span class="message-time">${time}</span>
+              </div>
+              <div class="message-content">
+                <span class="message-type ${msg.type}">${msg.type}</span>
+                ${msg.content}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Submit task
+    submitTask.addEventListener('click', async () => {
+      const title = taskInput.value.trim();
+      if (!title) return;
+
+      submitTask.disabled = true;
+      submitTask.textContent = 'Submitting...';
+
+      try {
+        const response = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, priority: 5 })
+        });
+
+        if (response.ok) {
+          taskInput.value = '';
+          console.log('Task submitted successfully');
+        } else {
+          console.error('Failed to submit task');
+        }
+      } catch (error) {
+        console.error('Error submitting task:', error);
+      } finally {
+        submitTask.disabled = false;
+        submitTask.textContent = 'Submit Task';
+      }
+    });
+
+    taskInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submitTask.click();
+      }
+    });
+
+    // Initialize WebSocket connection
+    connectWebSocket();
   </script>
 </body>
 </html>
