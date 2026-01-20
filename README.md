@@ -4,6 +4,10 @@ A 3D multi-agent orchestration visualization powered by [Eliza OS](https://githu
 
 ## Open Source
 
+
+<img width="2400" height="1260" alt="image" src="https://github.com/user-attachments/assets/2cfadb49-47a2-489e-92a9-bb473930ed09" />
+
+
 This project is **open source** under the MIT License. We welcome contributions from the community!
 
 - [Contributing Guide](CONTRIBUTING.md)
