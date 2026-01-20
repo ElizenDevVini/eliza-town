@@ -25,7 +25,7 @@ function getAnthropicClient() {
   return anthropic;
 }
 
-const MODEL = 'claude-sonnet-4-20250514';
+const MODEL = 'claude-3-5-sonnet-20241022';
 
 // Simulated responses for when API is not available
 function getSimulatedResponse(agentType, taskTitle) {
