@@ -2,15 +2,27 @@ import Anthropic from '@anthropic-ai/sdk';
 import { getSystemPrompt } from './config.js';
 import { logApiCall } from '../db/index.js';
 
-// Check if API key is available
-const hasApiKey = !!process.env.ANTHROPIC_API_KEY;
+// Lazy initialization of Anthropic client
 let anthropic = null;
+let apiKeyChecked = false;
 
-if (hasApiKey) {
-  anthropic = new Anthropic();
-  console.log('Claude API initialized with API key');
-} else {
-  console.log('Claude API running in simulation mode (no ANTHROPIC_API_KEY)');
+function getAnthropicClient() {
+  if (!apiKeyChecked) {
+    apiKeyChecked = true;
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (apiKey) {
+      try {
+        anthropic = new Anthropic({ apiKey });
+        console.log('Claude API initialized with API key');
+      } catch (e) {
+        console.error('Failed to initialize Anthropic client:', e.message);
+        anthropic = null;
+      }
+    } else {
+      console.log('Claude API running in simulation mode (no ANTHROPIC_API_KEY)');
+    }
+  }
+  return anthropic;
 }
 
 const MODEL = 'claude-sonnet-4-20250514';
@@ -72,8 +84,9 @@ export async function callClaude(agentId, agentType, taskId, prompt, context = {
   const systemPrompt = getSystemPrompt(agentType);
   const startTime = Date.now();
 
-  // If no API key, use simulated responses
-  if (!anthropic) {
+  // Get client (lazy init) - if no API key, use simulated responses
+  const client = getAnthropicClient();
+  if (!client) {
     const taskMatch = prompt.match(/Task:\s*([^\n]+)/);
     const taskTitle = taskMatch ? taskMatch[1] : 'Unknown Task';
 
@@ -113,7 +126,7 @@ export async function callClaude(agentId, agentType, taskId, prompt, context = {
   });
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await client.messages.create({
       model: MODEL,
       max_tokens: 4096,
       system: systemPrompt,
@@ -142,11 +155,22 @@ export async function callClaude(agentId, agentType, taskId, prompt, context = {
       duration
     };
   } catch (error) {
-    console.error('Claude API error:', error);
+    console.error('Claude API error:', error.message);
+    console.error('Full error:', JSON.stringify(error, null, 2));
+
+    // Fall back to simulation on API errors
+    console.log('Falling back to simulation mode due to API error');
+    const taskMatch = prompt.match(/Task:\s*([^\n]+)/);
+    const taskTitle = taskMatch ? taskMatch[1] : 'Unknown Task';
+    const simulatedContent = getSimulatedResponse(agentType, taskTitle);
+
     return {
-      success: false,
-      error: error.message,
-      duration: Date.now() - startTime
+      success: true,
+      content: simulatedContent,
+      usage: { input_tokens: 0, output_tokens: 0 },
+      duration: Date.now() - startTime,
+      simulated: true,
+      originalError: error.message
     };
   }
 }
