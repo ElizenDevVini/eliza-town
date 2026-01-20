@@ -47,58 +47,53 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
     }
 
-    /* Medieval Wooden UI Theme */
+    /* Medieval Wooden UI Theme - Laptop Optimized */
     #ui-container {
       position: fixed;
       top: 10px;
       right: 10px;
-      width: 320px;
+      width: 260px;
       max-height: calc(100vh - 20px);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       z-index: 50;
+    }
+
+    @media (max-height: 800px) {
+      #ui-container { width: 240px; gap: 6px; }
     }
 
     .panel {
       background: linear-gradient(180deg, #4a3728 0%, #3d2d1f 50%, #2e2218 100%);
-      border: 3px solid #8b6914;
-      border-radius: 8px;
+      border: 2px solid #8b6914;
+      border-radius: 6px;
       color: #f4e4c1;
       overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
-    }
-
-    .panel::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
-      pointer-events: none;
-      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
     }
 
     .panel-header {
       background: linear-gradient(180deg, #5c4a32 0%, #4a3728 100%);
-      padding: 10px 14px;
+      padding: 8px 12px;
       font-family: 'Cinzel', serif;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 2px solid #8b6914;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      cursor: pointer;
     }
+
+    .panel-header:hover { background: linear-gradient(180deg, #6c5a42 0%, #5a4738 100%); }
 
     .panel-header .status {
       font-family: 'Crimson Text', serif;
-      font-size: 11px;
-      padding: 3px 10px;
-      border-radius: 12px;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
       border: 1px solid;
     }
 
@@ -115,28 +110,35 @@
     }
 
     .panel-content {
-      padding: 10px;
+      padding: 8px;
       overflow-y: auto;
-      max-height: 200px;
+      max-height: 140px;
     }
+
+    @media (max-height: 800px) {
+      .panel-content { max-height: 100px; padding: 6px; }
+    }
+
+    .panel.collapsed .panel-content { display: none; }
 
     /* Agents Panel */
     #agents-panel { flex: 0 0 auto; }
     #agents-panel .panel-content {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
     }
 
     .agent-card {
       background: linear-gradient(135deg, rgba(90, 70, 50, 0.5), rgba(60, 45, 30, 0.6));
       border: 1px solid #6b5a3e;
-      border-radius: 6px;
-      padding: 8px 10px;
+      border-radius: 4px;
+      padding: 6px 8px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       transition: all 0.2s;
+      cursor: pointer;
     }
 
     .agent-card:hover {
@@ -145,8 +147,8 @@
     }
 
     .agent-avatar {
-      width: 32px;
-      height: 32px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       background: linear-gradient(135deg, #8b6914, #c9a959);
       border: 2px solid #c9a959;
@@ -155,7 +157,7 @@
       justify-content: center;
       font-family: 'Cinzel', serif;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 11px;
       color: #2e1f0f;
       flex-shrink: 0;
     }
@@ -165,21 +167,21 @@
     .agent-name {
       font-family: 'Cinzel', serif;
       font-weight: 600;
-      font-size: 13px;
+      font-size: 11px;
       color: #f4e4c1;
     }
 
     .agent-role {
-      font-size: 11px;
+      font-size: 9px;
       color: #b8a88a;
       text-transform: capitalize;
       font-style: italic;
     }
 
     .agent-status {
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 10px;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 8px;
       text-transform: capitalize;
       border: 1px solid;
     }
@@ -270,32 +272,36 @@
     .message-type.status { background: #2a3a2a; color: #8abc8a; }
     .message-type.announcement { background: #4a2a2a; color: #d48a8a; }
 
-    /* Task Input - Medieval Scroll Style */
+    /* Task Input - Medieval Scroll Style - Compact */
     #task-input-container {
-      padding: 14px;
+      padding: 10px;
       background: linear-gradient(180deg, #5c4a32 0%, #4a3728 50%, #3d2d1f 100%);
-      border: 3px solid #8b6914;
-      border-radius: 8px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+      border: 2px solid #8b6914;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    @media (max-height: 800px) {
+      #task-input-container { padding: 8px; }
     }
 
     .input-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .input-header label {
       font-family: 'Cinzel', serif;
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 600;
       color: #c9a959;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     }
 
     .input-header .char-count {
-      font-size: 10px;
+      font-size: 9px;
       color: #8a7a6a;
     }
 
@@ -304,12 +310,12 @@
       background: linear-gradient(180deg, #2e2218, #3d2d1f);
       border: 2px solid #6b5a3e;
       border-radius: 4px;
-      padding: 12px;
+      padding: 8px 10px;
       color: #f4e4c1;
       font-family: 'Crimson Text', serif;
-      font-size: 14px;
+      font-size: 12px;
       resize: none;
-      line-height: 1.5;
+      line-height: 1.4;
       transition: all 0.2s ease;
     }
 
@@ -326,20 +332,20 @@
 
     .button-row {
       display: flex;
-      gap: 8px;
-      margin-top: 10px;
+      gap: 6px;
+      margin-top: 8px;
     }
 
     #submit-task {
       flex: 1;
-      padding: 10px 16px;
+      padding: 8px 12px;
       background: linear-gradient(180deg, #8b6914 0%, #6b5010 50%, #5a4210 100%);
       border: 2px solid #c9a959;
       border-radius: 4px;
       color: #f4e4c1;
       font-family: 'Cinzel', serif;
       font-weight: 600;
-      font-size: 13px;
+      font-size: 11px;
       cursor: pointer;
       transition: all 0.2s ease;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
@@ -593,14 +599,14 @@
       animation: bubbleFadeOut 0.3s ease-in forwards;
     }
 
-    /* Selected Agent Panel */
+    /* Selected Agent Panel - with character preview */
     #selected-agent-panel {
       position: fixed;
-      bottom: 80px;
-      left: 20px;
-      width: 300px;
+      bottom: 60px;
+      left: 15px;
+      width: 320px;
       background: linear-gradient(180deg, #4a3728 0%, #3d2d1f 50%, #2e2218 100%);
-      border: 3px solid #8b6914;
+      border: 2px solid #8b6914;
       border-radius: 8px;
       color: #f4e4c1;
       box-shadow: 0 6px 20px rgba(0,0,0,0.6);
@@ -608,11 +614,15 @@
       z-index: 60;
     }
 
-    #selected-agent-panel.visible { display: block; }
+    @media (max-height: 800px) {
+      #selected-agent-panel { width: 280px; bottom: 50px; }
+    }
+
+    #selected-agent-panel.visible { display: flex; flex-direction: column; }
 
     #selected-agent-panel .panel-header {
       background: linear-gradient(180deg, #5c4a32 0%, #4a3728 100%);
-      padding: 10px 14px;
+      padding: 8px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -621,7 +631,7 @@
 
     #selected-agent-panel .panel-header h3 {
       font-family: 'Cinzel', serif;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       margin: 0;
     }
@@ -637,31 +647,37 @@
 
     #selected-agent-panel .close-btn:hover { color: #f4e4c1; }
 
-    #selected-agent-panel .agent-details {
-      padding: 14px;
+    #selected-agent-panel .agent-content {
+      display: flex;
+      gap: 12px;
+      padding: 10px;
     }
 
-    #selected-agent-panel .agent-avatar-large {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #8b6914, #c9a959);
-      border: 3px solid #c9a959;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Cinzel', serif;
-      font-weight: 700;
-      font-size: 18px;
-      color: #2e1f0f;
-      margin-bottom: 12px;
+    #selected-agent-panel .character-preview {
+      width: 120px;
+      height: 150px;
+      background: linear-gradient(180deg, #2a1f15, #1a1510);
+      border: 2px solid #5a4a3a;
+      border-radius: 6px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    #selected-agent-panel .character-preview canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    #selected-agent-panel .agent-details {
+      flex: 1;
+      min-width: 0;
     }
 
     #selected-agent-panel .detail-row {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 8px;
-      font-size: 12px;
+      margin-bottom: 6px;
+      font-size: 11px;
     }
 
     #selected-agent-panel .detail-label {
@@ -671,37 +687,42 @@
     #selected-agent-panel .detail-value {
       color: #f4e4c1;
       font-weight: 500;
+      text-align: right;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     #selected-agent-panel .agent-personality {
-      font-size: 11px;
+      font-size: 10px;
       color: #b8a88a;
       font-style: italic;
-      margin-top: 10px;
-      padding-top: 10px;
+      margin-top: 8px;
+      padding-top: 8px;
       border-top: 1px solid #5a4a3a;
       line-height: 1.4;
     }
 
-    /* Powered by Eliza OS branding */
+    /* Powered by Eliza OS branding - compact */
     #branding {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, rgba(60, 40, 25, 0.95), rgba(40, 25, 15, 0.98));
-      border: 2px solid #8b6914;
-      border-radius: 6px;
-      padding: 8px 14px;
+      bottom: 10px;
+      right: 10px;
+      background: linear-gradient(135deg, rgba(60, 40, 25, 0.9), rgba(40, 25, 15, 0.95));
+      border: 1px solid #8b6914;
+      border-radius: 4px;
+      padding: 5px 10px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
       z-index: 50;
     }
 
     #branding .logo {
-      width: 24px;
-      height: 24px;
+      width: 18px;
+      height: 18px;
       background: linear-gradient(135deg, #c9a959, #8b6914);
       border-radius: 50%;
       display: flex;
@@ -709,19 +730,29 @@
       justify-content: center;
       font-family: 'Cinzel', serif;
       font-weight: 700;
-      font-size: 12px;
+      font-size: 10px;
       color: #2e1f0f;
     }
 
     #branding .text {
       font-family: 'Cinzel', serif;
-      font-size: 11px;
+      font-size: 9px;
       color: #f4e4c1;
     }
 
     #branding .text strong {
       color: #c9a959;
       font-weight: 700;
+    }
+
+    /* Info box compact */
+    #info {
+      padding: 8px 12px;
+      font-size: 11px;
+    }
+
+    @media (max-height: 800px) {
+      #info { padding: 6px 10px; font-size: 10px; }
     }
   </style>
 </head>
@@ -746,26 +777,30 @@
       <h3 id="selected-agent-name">Agent Name</h3>
       <button class="close-btn" onclick="closeAgentPanel()">&times;</button>
     </div>
-    <div class="agent-details">
-      <div class="agent-avatar-large" id="selected-agent-avatar">E</div>
-      <div class="detail-row">
-        <span class="detail-label">Role:</span>
-        <span class="detail-value" id="selected-agent-role">Planner</span>
+    <div class="agent-content">
+      <div class="character-preview" id="character-preview-container">
+        <canvas id="character-preview-canvas"></canvas>
       </div>
-      <div class="detail-row">
-        <span class="detail-label">Status:</span>
-        <span class="detail-value" id="selected-agent-status">Idle</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Current Task:</span>
-        <span class="detail-value" id="selected-agent-task">None</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Location:</span>
-        <span class="detail-value" id="selected-agent-location">Town Square</span>
-      </div>
-      <div class="agent-personality" id="selected-agent-personality">
-        Wise and methodical. Sees the big picture.
+      <div class="agent-details">
+        <div class="detail-row">
+          <span class="detail-label">Role:</span>
+          <span class="detail-value" id="selected-agent-role">Planner</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Status:</span>
+          <span class="detail-value" id="selected-agent-status">Idle</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Task:</span>
+          <span class="detail-value" id="selected-agent-task">None</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Location:</span>
+          <span class="detail-value" id="selected-agent-location">Town Square</span>
+        </div>
+        <div class="agent-personality" id="selected-agent-personality">
+          Wise and methodical. Sees the big picture.
+        </div>
       </div>
     </div>
   </div>
@@ -926,12 +961,86 @@
       return false;
     }
 
+    // Preview renderer for character display
+    let previewRenderer = null;
+    let previewScene = null;
+    let previewCamera = null;
+    let previewModel = null;
+    let previewMixer = null;
+    let previewAnimationId = null;
+
+    function initPreviewRenderer() {
+      const canvas = document.getElementById('character-preview-canvas');
+      previewRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      previewRenderer.setSize(120, 150);
+      previewRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      previewScene = new THREE.Scene();
+      previewCamera = new THREE.PerspectiveCamera(35, 120 / 150, 0.1, 100);
+      previewCamera.position.set(0, 1.2, 3);
+      previewCamera.lookAt(0, 0.8, 0);
+
+      // Lighting for preview
+      const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.6);
+      previewScene.add(ambientLight);
+      const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.2);
+      keyLight.position.set(2, 3, 2);
+      previewScene.add(keyLight);
+      const fillLight = new THREE.DirectionalLight(0x8ecae6, 0.4);
+      fillLight.position.set(-2, 1, -1);
+      previewScene.add(fillLight);
+    }
+
+    function renderPreviewCharacter(character) {
+      if (!previewRenderer) initPreviewRenderer();
+
+      // Clear old model
+      if (previewModel) {
+        previewScene.remove(previewModel);
+        previewModel = null;
+      }
+      if (previewAnimationId) {
+        cancelAnimationFrame(previewAnimationId);
+      }
+
+      // Clone the character's model for preview
+      if (character.model) {
+        previewModel = character.model.clone();
+        previewModel.position.set(0, 0, 0);
+        previewModel.rotation.set(0, 0.3, 0);
+        previewModel.scale.copy(character.model.scale);
+        previewScene.add(previewModel);
+
+        // Setup animation mixer for preview
+        const rig = character.rig;
+        const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
+        if (generalClips?.length > 0) {
+          previewMixer = new THREE.AnimationMixer(previewModel);
+          const idleClip = generalClips.find(c => c.name.includes('Idle')) || generalClips[0];
+          if (idleClip) {
+            const action = previewMixer.clipAction(idleClip);
+            action.play();
+          }
+        }
+
+        // Animate preview
+        const previewClock = new THREE.Clock();
+        function animatePreview() {
+          previewAnimationId = requestAnimationFrame(animatePreview);
+          const delta = previewClock.getDelta();
+          if (previewMixer) previewMixer.update(delta);
+          previewModel.rotation.y += delta * 0.3; // Slow rotation
+          previewRenderer.render(previewScene, previewCamera);
+        }
+        animatePreview();
+      }
+    }
+
     function selectAgent(character) {
       selectedAgent = character;
       const panel = document.getElementById('selected-agent-panel');
 
       document.getElementById('selected-agent-name').textContent = character.agentName;
-      document.getElementById('selected-agent-avatar').textContent = character.agentName.charAt(0);
       document.getElementById('selected-agent-role').textContent = character.agentType.charAt(0).toUpperCase() + character.agentType.slice(1);
       document.getElementById('selected-agent-status').textContent = character.status.charAt(0).toUpperCase() + character.status.slice(1);
       document.getElementById('selected-agent-task').textContent = character.doing || 'None';
@@ -945,12 +1054,19 @@
         document.getElementById('selected-agent-personality').textContent = serverAgent.personality;
       }
 
+      // Render character preview
+      renderPreviewCharacter(character);
+
       panel.classList.add('visible');
     }
 
     window.closeAgentPanel = function() {
       document.getElementById('selected-agent-panel').classList.remove('visible');
       selectedAgent = null;
+      if (previewAnimationId) {
+        cancelAnimationFrame(previewAnimationId);
+        previewAnimationId = null;
+      }
     };
 
     // Lighting
