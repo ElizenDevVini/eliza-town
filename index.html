@@ -1363,15 +1363,15 @@
       previewRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
       previewRenderer.setSize(260, 320);
       previewRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      previewRenderer.setClearColor(0x000000, 0);
+      previewRenderer.setClearColor(0x1a1510, 1);
 
       previewScene = new THREE.Scene();
-      previewCamera = new THREE.PerspectiveCamera(30, 260 / 320, 0.1, 100);
-      previewCamera.position.set(0, 1.0, 4);
-      previewCamera.lookAt(0, 0.7, 0);
+      previewCamera = new THREE.PerspectiveCamera(25, 260 / 320, 0.1, 100);
+      previewCamera.position.set(0, 0.9, 5);
+      previewCamera.lookAt(0, 0.8, 0);
 
       // Better lighting for larger preview
-      const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.8);
+      const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.9);
       previewScene.add(ambientLight);
       const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.5);
       keyLight.position.set(3, 4, 3);
@@ -1405,9 +1405,22 @@
       if (character.model) {
         try {
           previewModel = SkeletonUtils.clone(character.model);
-          previewModel.position.set(0, 0, 0);
-          previewModel.rotation.set(0, 0.2, 0);
           previewModel.scale.copy(character.model.scale);
+          previewModel.rotation.set(0, 0.3, 0);
+
+          // Center the model based on bounding box
+          const box = new THREE.Box3().setFromObject(previewModel);
+          const center = box.getCenter(new THREE.Vector3());
+          const size = box.getSize(new THREE.Vector3());
+
+          // Position model so it's centered horizontally and sits at y=0
+          previewModel.position.set(-center.x, -box.min.y, -center.z);
+
+          // Adjust camera based on model height
+          const modelHeight = size.y;
+          previewCamera.position.set(0, modelHeight * 0.5, modelHeight * 2.5);
+          previewCamera.lookAt(0, modelHeight * 0.45, 0);
+
           previewScene.add(previewModel);
 
           // Setup animation mixer for preview with idle animation
