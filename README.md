@@ -153,6 +153,37 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - Mobile and accessibility support
 - Documentation and tutorials
 
+  Bring Your Own Assets
+Drop your 3D models into public/models/:
+
+public/models/
+├── agents/
+│   ├── researcher.glb      # Your custom character
+│   ├── writer.glb
+│   └── analyst.glb
+├── hubs/
+│   ├── library.glb         # Custom building
+│   ├── workshop.glb
+│   └── garden.glb
+└── props/
+    ├── desk.glb
+    ├── computer.glb
+    └── bookshelf.glb
+Supported formats: GLB, GLTF
+
+Recommended sources:
+
+Kay Kit — Free low poly characters (CC0)
+Sketchfab — Search "chibi", "low poly", "stylized"
+Mixamo — Free rigging and animations
+Meshy — AI generated 3D models
+Poly Pizza — Free low poly assets
+Animation requirements: Each character model should include these animation clips:
+
+idle — Breathing/standing
+walk — Walking cycle
+work — Typing/working gesture
+
 ## Part of Eliza OS
 
 Eliza Town is built on [Eliza OS](https://github.com/elizaOS/eliza), an open-source framework for building autonomous AI agent systems. Check out the main project for more tools and examples.
