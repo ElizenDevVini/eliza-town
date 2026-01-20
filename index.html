@@ -429,7 +429,7 @@
 
       fbxLoader.load(fullPath, (model) => {
         console.log('Loaded:', config.name);
-        model.scale.set(0.04, 0.04, 0.04); // FBX models need smaller scale
+        model.scale.set(3, 3, 3); // Scale up FBX models to be visible
         model.traverse(child => {
           if (child.isMesh) {
             child.castShadow = true;
