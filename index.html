@@ -1360,35 +1360,42 @@
 
     function initPreviewRenderer() {
       const canvas = document.getElementById('character-preview-canvas');
+      if (!canvas) {
+        console.error('Character preview canvas not found');
+        return;
+      }
+
       previewRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
       previewRenderer.setSize(260, 320);
       previewRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       previewRenderer.setClearColor(0x1a1510, 1);
 
       previewScene = new THREE.Scene();
-      previewCamera = new THREE.PerspectiveCamera(30, 260 / 320, 0.1, 100);
-      previewCamera.position.set(0, 0.6, 4);
-      previewCamera.lookAt(0, 0.4, 0);
+
+      // Camera positioned to frame a character nicely
+      previewCamera = new THREE.PerspectiveCamera(35, 260 / 320, 0.1, 100);
+      previewCamera.position.set(0, 1.0, 3.5);
+      previewCamera.lookAt(0, 0.8, 0);
 
       // Better lighting for larger preview
-      const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.9);
+      const ambientLight = new THREE.AmbientLight(0xfff5e6, 1.0);
       previewScene.add(ambientLight);
-      const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.5);
+      const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.8);
       keyLight.position.set(3, 4, 3);
       previewScene.add(keyLight);
-      const fillLight = new THREE.DirectionalLight(0x8ecae6, 0.5);
+      const fillLight = new THREE.DirectionalLight(0x8ecae6, 0.6);
       fillLight.position.set(-3, 2, -2);
       previewScene.add(fillLight);
-      const rimLight = new THREE.DirectionalLight(0xffd700, 0.3);
+      const rimLight = new THREE.DirectionalLight(0xffd700, 0.4);
       rimLight.position.set(0, 2, -3);
       previewScene.add(rimLight);
+
+      console.log('Preview renderer initialized');
     }
 
     function renderPreviewCharacter(character) {
-      if (!previewRenderer) initPreviewRenderer();
-
-      // Clear old model
-      if (previewModel) {
+      // Clear old model and animation
+      if (previewModel && previewScene) {
         previewScene.remove(previewModel);
         previewModel = null;
       }
@@ -1401,43 +1408,61 @@
         previewAnimationId = null;
       }
 
-      // Clone the character's model for preview using SkeletonUtils for proper skinned mesh cloning
-      if (character.model) {
-        try {
-          previewModel = SkeletonUtils.clone(character.model);
-          previewModel.scale.copy(character.model.scale);
-          previewModel.position.set(0, -0.5, 0);
-          previewModel.rotation.set(0, 0.3, 0);
-          previewScene.add(previewModel);
+      // Initialize renderer if needed (must happen after modal is visible)
+      if (!previewRenderer) {
+        initPreviewRenderer();
+      }
 
-          // Setup animation mixer for preview with idle animation
-          const rig = character.rig;
-          const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
-          if (generalClips && generalClips.length > 0) {
-            previewMixer = new THREE.AnimationMixer(previewModel);
-            const idleClip = generalClips.find(c => c.name.toLowerCase().includes('idle')) || generalClips[0];
-            if (idleClip) {
-              const action = previewMixer.clipAction(idleClip);
-              action.play();
-            }
+      // Ensure canvas is properly sized
+      const canvas = document.getElementById('character-preview-canvas');
+      if (canvas && previewRenderer) {
+        previewRenderer.setSize(260, 320);
+      }
+
+      if (!character.model) {
+        console.log('No model for character preview');
+        previewRenderer.render(previewScene, previewCamera);
+        return;
+      }
+
+      try {
+        // Clone the character's model for preview using SkeletonUtils for proper skinned mesh cloning
+        previewModel = SkeletonUtils.clone(character.model);
+        previewModel.scale.copy(character.model.scale);
+        previewModel.position.set(0, 0, 0);
+        previewModel.rotation.set(0, 0.4, 0);
+        previewScene.add(previewModel);
+
+        console.log('Preview model added for:', character.agentName);
+
+        // Setup animation mixer for preview with idle animation
+        const rig = character.rig;
+        const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
+        if (generalClips && generalClips.length > 0) {
+          previewMixer = new THREE.AnimationMixer(previewModel);
+          const idleClip = generalClips.find(c => c.name.toLowerCase().includes('idle')) || generalClips[0];
+          if (idleClip) {
+            const action = previewMixer.clipAction(idleClip);
+            action.play();
           }
+        }
 
-          // Animate preview - idle animation only
-          const previewClock = new THREE.Clock();
-          function animatePreview() {
-            previewAnimationId = requestAnimationFrame(animatePreview);
-            const delta = previewClock.getDelta();
-            if (previewMixer) previewMixer.update(delta);
+        // Animate preview - idle animation only
+        const previewClock = new THREE.Clock();
+        function animatePreview() {
+          previewAnimationId = requestAnimationFrame(animatePreview);
+          const delta = previewClock.getDelta();
+          if (previewMixer) previewMixer.update(delta);
+          if (previewRenderer && previewScene && previewCamera) {
             previewRenderer.render(previewScene, previewCamera);
           }
-          animatePreview();
-        } catch (e) {
-          console.error('Error cloning character model:', e);
+        }
+        animatePreview();
+      } catch (e) {
+        console.error('Error cloning character model:', e);
+        if (previewRenderer && previewScene && previewCamera) {
           previewRenderer.render(previewScene, previewCamera);
         }
-      } else {
-        // No model - just render empty scene
-        previewRenderer.render(previewScene, previewCamera);
       }
     }
 
@@ -1496,11 +1521,13 @@
       document.querySelector('#agent-modal .tab[data-tab="info"]').classList.add('active');
       document.getElementById('tab-info').classList.add('active');
 
-      // Render character preview
-      renderPreviewCharacter(character);
-
-      // Show modal
+      // Show modal FIRST so canvas is visible
       backdrop.classList.add('visible');
+
+      // Render character preview AFTER modal is visible (need small delay for DOM update)
+      requestAnimationFrame(() => {
+        renderPreviewCharacter(character);
+      });
     }
 
     window.closeAgentModal = function() {
