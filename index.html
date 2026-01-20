@@ -850,6 +850,10 @@
         this.stateTime = 0;
         this.doing = '';
 
+        // Idle wandering
+        this.idleDuration = 3 + Math.random() * 4;
+        this.isCommandedMove = false; // True if backend commanded this move
+
         // Setup animations
         const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
         const movementClips = rig === 'large' ? animationClips.largeMovement : animationClips.mediumMovement;
@@ -908,7 +912,7 @@
       }
 
       // Command agent to move to a hub
-      moveTo(targetHub, callback) {
+      moveTo(targetHub, callback, isCommanded = true) {
         if (!waypoints[targetHub]) {
           console.warn('Unknown hub:', targetHub);
           return;
@@ -918,6 +922,7 @@
         this.pathIndex = 0;
         this.state = 'traveling';
         this.onArrival = callback;
+        this.isCommandedMove = isCommanded;
 
         // Start walk animation
         if (this.walkAction && this.idleAction) {
@@ -925,7 +930,16 @@
           this.walkAction.reset().fadeIn(0.3).play();
         }
 
-        console.log(`${this.agentName} moving to ${targetHub}, path:`, this.path);
+        if (isCommanded) {
+          console.log(`${this.agentName} moving to ${targetHub}, path:`, this.path);
+        }
+      }
+
+      // Pick a random nearby waypoint to wander to
+      pickWanderTarget() {
+        const nearby = connections[this.currentWaypoint] || [];
+        if (nearby.length === 0) return null;
+        return nearby[Math.floor(Math.random() * nearby.length)];
       }
 
       // Set agent status (idle, working, chatting)
@@ -947,12 +961,24 @@
 
         switch (this.state) {
           case 'idle':
-          case 'working':
-          case 'chatting':
             // Subtle idle animation - slight movement
             if (Math.random() < 0.002) {
               this.model.rotation.y += (Math.random() - 0.5) * 0.2;
             }
+
+            // Wander around when idle (only if not working/commanded)
+            if (this.status === 'idle' && this.stateTime > this.idleDuration) {
+              const wanderTarget = this.pickWanderTarget();
+              if (wanderTarget) {
+                this.moveTo(wanderTarget, null, false);
+              }
+              this.stateTime = 0;
+              this.idleDuration = 2 + Math.random() * 5;
+            }
+            break;
+
+          case 'working':
+          case 'chatting':
             // Working bob
             if (this.state === 'working') {
               this.model.position.y = Math.sin(this.stateTime * 3) * 0.02;
@@ -1245,24 +1271,25 @@
       // === AGENT CHARACTERS ===
       // These are controlled by the backend orchestrator
       // Agent IDs match the database - will be updated when backend connects
+      // Spread them out across different starting positions
 
-      // Planner - Eliza the Witch
-      loadAgentCharacter('Witch', 'agent_planner', 'Eliza', 'planner', 'town_square', 'medium', 1);
+      // Planner - Eliza the Witch - starts at planning room
+      loadAgentCharacter('Witch', 'agent_planner', 'Eliza', 'planner', 'planning_room', 'medium', 1);
 
-      // Designer - Marcus the Black Knight
-      loadAgentCharacter('BlackKnight', 'agent_designer_1', 'Marcus', 'designer', 'town_square', 'medium', 1);
+      // Designer - Marcus the Black Knight - starts at design studio
+      loadAgentCharacter('BlackKnight', 'agent_designer_1', 'Marcus', 'designer', 'design_studio', 'medium', 1);
 
-      // Designer 2 - Felix the Vampire
-      loadAgentCharacter('Vampire', 'agent_designer_2', 'Felix', 'designer', 'design_studio', 'medium', 1);
+      // Designer 2 - Felix the Vampire - starts at town square
+      loadAgentCharacter('Vampire', 'agent_designer_2', 'Felix', 'designer', 'town_square', 'medium', 1);
 
-      // Coder - Ada the Protagonist
-      loadAgentCharacter('Protagonist_A', 'agent_coder_1', 'Ada', 'coder', 'town_square', 'medium', 1);
+      // Coder - Ada the Protagonist - starts at coding desk
+      loadAgentCharacter('Protagonist_A', 'agent_coder_1', 'Ada', 'coder', 'coding_desk', 'medium', 1);
 
-      // Coder 2 - Byron the Hiker
-      loadAgentCharacter('Hiker', 'agent_coder_2', 'Byron', 'coder', 'coding_desk', 'medium', 1);
+      // Coder 2 - Byron the Hiker - starts at south plaza
+      loadAgentCharacter('Hiker', 'agent_coder_2', 'Byron', 'coder', 'southPlaza', 'medium', 1);
 
-      // Reviewer - Clara the Tiefling
-      loadAgentCharacter('Tiefling', 'agent_reviewer', 'Clara', 'reviewer', 'town_square', 'medium', 1);
+      // Reviewer - Clara the Tiefling - starts at review station
+      loadAgentCharacter('Tiefling', 'agent_reviewer', 'Clara', 'reviewer', 'review_station', 'medium', 1);
 
       // === DECORATIVE CHARACTERS ===
       // Gate guards add ambiance
