@@ -119,10 +119,5 @@ CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
 CREATE INDEX IF NOT EXISTS idx_tasks_session ON tasks(session_id);
 
 -- Add session_id column if it doesn't exist (for existing databases)
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
-                   WHERE table_name = 'tasks' AND column_name = 'session_id') THEN
-        ALTER TABLE tasks ADD COLUMN session_id VARCHAR(64);
-    END IF;
-END $$;
+-- Using a separate ALTER statement that will be caught if column exists
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS session_id VARCHAR(64);
