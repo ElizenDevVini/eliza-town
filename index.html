@@ -1382,14 +1382,18 @@
         wsStatus.className = 'status connected';
         submitTask.disabled = false;
         console.log('WebSocket connected');
+        // Stop demo mode when server is online
+        stopDemoMode();
       };
 
       ws.onclose = () => {
-        wsStatus.textContent = 'Offline';
+        wsStatus.textContent = 'Demo Mode';
         wsStatus.className = 'status disconnected';
         submitTask.disabled = true;
-        console.log('WebSocket disconnected, reconnecting in 3s...');
-        setTimeout(connectWebSocket, 3000);
+        console.log('WebSocket disconnected, running in demo mode...');
+        // Restart demo mode
+        if (!demoModeActive) startDemoMode();
+        setTimeout(connectWebSocket, 5000);
       };
 
       ws.onerror = (error) => {
@@ -1743,7 +1747,174 @@
       for (const [, character] of agentCharacters) {
         createAgentLabel(character);
       }
+      // Start demo mode if server is offline
+      startDemoMode();
     }, 3000);
+
+    // ==================== DEMO MODE ====================
+    // Simulates agent activity when server is offline
+    let demoModeActive = false;
+    let demoInterval = null;
+
+    function startDemoMode() {
+      if (demoModeActive) return;
+      demoModeActive = true;
+
+      console.log('Starting demo mode - agents will simulate work');
+
+      // Demo tasks the agents can "work on"
+      const demoTasks = [
+        'Building a landing page',
+        'Creating a REST API',
+        'Designing a dashboard',
+        'Writing unit tests',
+        'Reviewing pull request',
+        'Optimizing database queries',
+        'Setting up CI/CD pipeline',
+        'Implementing authentication',
+      ];
+
+      const plannerQuotes = [
+        "Let me break this down into steps...",
+        "I see three main components here.",
+        "This needs design work first.",
+        "Ada, you're up for the coding!",
+        "Let's coordinate on this one.",
+      ];
+
+      const designerQuotes = [
+        "I'm thinking clean, minimal design.",
+        "The color palette should be warm.",
+        "Let's use a card-based layout.",
+        "This needs better visual hierarchy.",
+        "I'll sketch out the architecture.",
+      ];
+
+      const coderQuotes = [
+        "Writing the main component now...",
+        "This function needs refactoring.",
+        "Adding error handling here.",
+        "Almost done with this feature!",
+        "Let me add some tests.",
+      ];
+
+      const reviewerQuotes = [
+        "Looking good so far!",
+        "Found a small issue here.",
+        "Nice clean code, approved!",
+        "Consider adding more comments.",
+        "This passes all checks.",
+      ];
+
+      // Simulate periodic activity
+      demoInterval = setInterval(() => {
+        if (!demoModeActive) return;
+
+        const agents = [...agentCharacters.values()];
+        if (agents.length === 0) return;
+
+        // Pick a random agent
+        const agent = agents[Math.floor(Math.random() * agents.length)];
+
+        // 40% chance to do something interesting
+        if (Math.random() < 0.4) {
+          simulateAgentActivity(agent, {
+            demoTasks,
+            plannerQuotes,
+            designerQuotes,
+            coderQuotes,
+            reviewerQuotes
+          });
+        }
+      }, 4000);
+
+      // Initial burst of activity
+      setTimeout(() => {
+        const planner = [...agentCharacters.values()].find(a => a.agentType === 'planner');
+        if (planner) {
+          showSpeechBubble(planner, "Welcome to Eliza Town! Submit a task to get us working.", 'saying', 5000);
+        }
+      }, 1000);
+    }
+
+    function simulateAgentActivity(agent, quotes) {
+      const workHub = agentHubs[agent.agentType] || 'town_square';
+
+      // Different behaviors based on agent type
+      switch (agent.agentType) {
+        case 'planner':
+          if (agent.state === 'idle') {
+            // Go to planning room and think
+            agent.moveTo('planning_room', () => {
+              agent.setStatus('working', 'Planning');
+              showSpeechBubble(agent, quotes.plannerQuotes[Math.floor(Math.random() * quotes.plannerQuotes.length)], 'saying', 3000);
+              setTimeout(() => {
+                agent.setStatus('idle');
+                agent.moveTo('town_square', null, false);
+              }, 4000);
+            });
+          }
+          break;
+
+        case 'designer':
+          if (agent.state === 'idle') {
+            agent.moveTo('design_studio', () => {
+              agent.setStatus('working', 'Designing');
+              showSpeechBubble(agent, quotes.designerQuotes[Math.floor(Math.random() * quotes.designerQuotes.length)], 'saying', 3000);
+              setTimeout(() => {
+                agent.setStatus('idle');
+                // Sometimes go chat with coder
+                if (Math.random() < 0.3) {
+                  agent.moveTo('coding_desk', () => {
+                    showSpeechBubble(agent, "Here's the design specs!", 'saying', 2000);
+                    setTimeout(() => agent.moveTo('town_square', null, false), 3000);
+                  });
+                } else {
+                  agent.moveTo('town_square', null, false);
+                }
+              }, 4000);
+            });
+          }
+          break;
+
+        case 'coder':
+          if (agent.state === 'idle') {
+            agent.moveTo('coding_desk', () => {
+              agent.setStatus('working', 'Coding');
+              showSpeechBubble(agent, quotes.coderQuotes[Math.floor(Math.random() * quotes.coderQuotes.length)], 'saying', 3000);
+              setTimeout(() => {
+                showThoughtBubble(agent, 'function render() {...}', 2000);
+              }, 2000);
+              setTimeout(() => {
+                agent.setStatus('idle');
+                agent.moveTo('town_square', null, false);
+              }, 5000);
+            });
+          }
+          break;
+
+        case 'reviewer':
+          if (agent.state === 'idle') {
+            agent.moveTo('review_station', () => {
+              agent.setStatus('working', 'Reviewing');
+              showSpeechBubble(agent, quotes.reviewerQuotes[Math.floor(Math.random() * quotes.reviewerQuotes.length)], 'saying', 3000);
+              setTimeout(() => {
+                agent.setStatus('idle');
+                agent.moveTo('town_square', null, false);
+              }, 4000);
+            });
+          }
+          break;
+      }
+    }
+
+    function stopDemoMode() {
+      demoModeActive = false;
+      if (demoInterval) {
+        clearInterval(demoInterval);
+        demoInterval = null;
+      }
+    }
 
     function updateUI() {
       // Update agents list
