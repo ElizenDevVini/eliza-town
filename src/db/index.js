@@ -24,6 +24,14 @@ export async function initializeDatabase() {
     console.error('Database initialization error:', error);
     throw error;
   }
+
+  // Run migrations separately to ensure they succeed even if main schema has issues
+  try {
+    await pool.query('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS session_id VARCHAR(64)');
+    console.log('Migration: session_id column ensured');
+  } catch (migrationError) {
+    console.log('Migration note:', migrationError.message);
+  }
 }
 
 export async function query(text, params) {
