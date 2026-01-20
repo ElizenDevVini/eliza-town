@@ -436,6 +436,138 @@
     .panel-content::-webkit-scrollbar-thumb:hover {
       background: #8b6914;
     }
+
+    /* Speech Bubble System */
+    #bubble-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 40;
+    }
+
+    .speech-bubble {
+      position: absolute;
+      max-width: 250px;
+      padding: 10px 14px;
+      background: linear-gradient(180deg, #4a3728 0%, #3d2d1f 100%);
+      border: 2px solid #c9a959;
+      border-radius: 12px;
+      color: #f4e4c1;
+      font-family: 'Crimson Text', serif;
+      font-size: 13px;
+      line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      transform: translate(-50%, -100%);
+      animation: bubbleFadeIn 0.3s ease-out;
+      pointer-events: auto;
+    }
+
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 10px 8px 0;
+      border-style: solid;
+      border-color: #3d2d1f transparent transparent;
+    }
+
+    .speech-bubble::before {
+      content: '';
+      position: absolute;
+      bottom: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 12px 10px 0;
+      border-style: solid;
+      border-color: #c9a959 transparent transparent;
+    }
+
+    .speech-bubble .agent-label {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 11px;
+      color: #c9a959;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .speech-bubble .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+    }
+
+    .speech-bubble .status-dot.working { background: #60a5fa; }
+    .speech-bubble .status-dot.traveling { background: #fbbf24; }
+    .speech-bubble .status-dot.chatting { background: #c084fc; }
+
+    /* Thought bubble - smaller, different style */
+    .thought-bubble {
+      position: absolute;
+      max-width: 180px;
+      padding: 8px 12px;
+      background: rgba(40, 30, 20, 0.9);
+      border: 1px solid #6b5a3e;
+      border-radius: 16px;
+      color: #b8a88a;
+      font-family: 'Crimson Text', serif;
+      font-size: 11px;
+      font-style: italic;
+      line-height: 1.3;
+      transform: translate(-50%, -100%);
+      animation: bubbleFadeIn 0.2s ease-out;
+    }
+
+    .thought-bubble .agent-label {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      color: #8a7a6a;
+      margin-bottom: 2px;
+    }
+
+    /* Name label floating above character */
+    .agent-name-label {
+      position: absolute;
+      padding: 2px 8px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 4px;
+      color: #f4e4c1;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      font-weight: 600;
+      transform: translate(-50%, 0);
+      white-space: nowrap;
+    }
+
+    .agent-name-label .status-text {
+      font-family: 'Crimson Text', serif;
+      font-size: 9px;
+      color: #b8a88a;
+      margin-left: 4px;
+      font-weight: 400;
+    }
+
+    @keyframes bubbleFadeIn {
+      from { opacity: 0; transform: translate(-50%, -90%) scale(0.9); }
+      to { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+    }
+
+    @keyframes bubbleFadeOut {
+      from { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+      to { opacity: 0; transform: translate(-50%, -110%) scale(0.9); }
+    }
+
+    .bubble-fading {
+      animation: bubbleFadeOut 0.3s ease-in forwards;
+    }
   </style>
 </head>
 <body>
@@ -446,6 +578,12 @@
   <div id="info">
     Mouse: Rotate | Scroll: Zoom | Right-click drag: Pan
   </div>
+
+  <!-- Speech & Thought Bubbles Container -->
+  <div id="bubble-container"></div>
+
+  <!-- Agent Name Labels Container -->
+  <div id="labels-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 35;"></div>
 
   <!-- Agent Orchestration UI -->
   <div id="ui-container">
@@ -595,72 +733,64 @@
       }
     }
 
-    // ==================== ROAD NETWORK ====================
-    // Define waypoints for roads - characters will walk between these (scaled 3x)
-    const waypoints = {
-      // Main street (north-south)
-      northGate: { x: 0, z: -30 },
-      northPlaza: { x: 0, z: -15 },
-      center: { x: 0, z: 0 },
-      southPlaza: { x: 0, z: 15 },
-      southGate: { x: 0, z: 30 },
+    // ==================== HUB SYSTEM ====================
+    // Hubs are physical locations where agents go to work
+    const hubs = {
+      town_square: { x: 0, z: 0, name: 'Town Square', description: 'Center of town, where agents meet' },
+      planning_room: { x: -18, z: -15, name: 'Planning Room', description: 'Planner works here' },
+      design_studio: { x: 18, z: -15, name: 'Design Studio', description: 'Designer works here' },
+      coding_desk: { x: -18, z: 15, name: 'Coding Desk', description: 'Coder works here' },
+      review_station: { x: 18, z: 15, name: 'Review Station', description: 'Reviewer works here' },
+      deploy_station: { x: 0, z: -25, name: 'Deploy Station', description: 'Where finished work ships' },
+    };
 
-      // Cross street (east-west)
-      westGate: { x: -30, z: 0 },
+    // Map agent types to their default hub
+    const agentHubs = {
+      planner: 'planning_room',
+      designer: 'design_studio',
+      coder: 'coding_desk',
+      reviewer: 'review_station'
+    };
+
+    // Road network waypoints for pathfinding
+    const waypoints = {
+      // Main hubs (agents go here to work)
+      town_square: { x: 0, z: 0 },
+      planning_room: { x: -18, z: -15 },
+      design_studio: { x: 18, z: -15 },
+      coding_desk: { x: -18, z: 15 },
+      review_station: { x: 18, z: 15 },
+      deploy_station: { x: 0, z: -25 },
+
+      // Road intersections for pathfinding
+      northPlaza: { x: 0, z: -15 },
+      southPlaza: { x: 0, z: 15 },
       westPlaza: { x: -15, z: 0 },
       eastPlaza: { x: 15, z: 0 },
-      eastGate: { x: 30, z: 0 },
-
-      // Tavern district (northwest)
-      tavernFront: { x: -15, z: -12 },
-      tavernBack: { x: -21, z: -18 },
-
-      // Market district (northeast)
-      marketFront: { x: 15, z: -12 },
-      marketBack: { x: 21, z: -18 },
-
-      // Residential west (southwest)
-      houseWest1: { x: -18, z: 12 },
-      houseWest2: { x: -21, z: 18 },
-
-      // Residential east (southeast)
-      houseEast1: { x: 18, z: 12 },
-      houseEast2: { x: 21, z: 18 },
-
-      // Side streets
       nwCorner: { x: -15, z: -15 },
       neCorner: { x: 15, z: -15 },
       swCorner: { x: -15, z: 15 },
       seCorner: { x: 15, z: 15 },
     };
 
-    // Define connected routes (which waypoints connect to which)
+    // Define connected routes for pathfinding
     const connections = {
-      northGate: ['northPlaza'],
-      northPlaza: ['northGate', 'center', 'nwCorner', 'neCorner'],
-      center: ['northPlaza', 'southPlaza', 'westPlaza', 'eastPlaza'],
-      southPlaza: ['center', 'southGate', 'swCorner', 'seCorner'],
-      southGate: ['southPlaza'],
+      town_square: ['northPlaza', 'southPlaza', 'westPlaza', 'eastPlaza'],
+      planning_room: ['nwCorner'],
+      design_studio: ['neCorner'],
+      coding_desk: ['swCorner'],
+      review_station: ['seCorner'],
+      deploy_station: ['northPlaza'],
 
-      westGate: ['westPlaza'],
-      westPlaza: ['westGate', 'center', 'nwCorner', 'swCorner'],
-      eastPlaza: ['center', 'eastGate', 'neCorner', 'seCorner'],
-      eastGate: ['eastPlaza'],
+      northPlaza: ['town_square', 'deploy_station', 'nwCorner', 'neCorner'],
+      southPlaza: ['town_square', 'swCorner', 'seCorner'],
+      westPlaza: ['town_square', 'nwCorner', 'swCorner'],
+      eastPlaza: ['town_square', 'neCorner', 'seCorner'],
 
-      nwCorner: ['northPlaza', 'westPlaza', 'tavernFront'],
-      neCorner: ['northPlaza', 'eastPlaza', 'marketFront'],
-      swCorner: ['southPlaza', 'westPlaza', 'houseWest1'],
-      seCorner: ['southPlaza', 'eastPlaza', 'houseEast1'],
-
-      tavernFront: ['nwCorner', 'tavernBack'],
-      tavernBack: ['tavernFront'],
-      marketFront: ['neCorner', 'marketBack'],
-      marketBack: ['marketFront'],
-
-      houseWest1: ['swCorner', 'houseWest2'],
-      houseWest2: ['houseWest1'],
-      houseEast1: ['seCorner', 'houseEast2'],
-      houseEast2: ['houseEast1'],
+      nwCorner: ['northPlaza', 'westPlaza', 'planning_room'],
+      neCorner: ['northPlaza', 'eastPlaza', 'design_studio'],
+      swCorner: ['southPlaza', 'westPlaza', 'coding_desk'],
+      seCorner: ['southPlaza', 'eastPlaza', 'review_station'],
     };
 
     // ==================== ANIMATIONS ====================
@@ -688,30 +818,37 @@
       });
     }
 
-    // ==================== CHARACTER CLASS ====================
-    class Character {
-      constructor(model, rig, startWaypoint) {
+    // ==================== AGENT CHARACTER CLASS ====================
+    // Agent characters are controlled by the backend orchestrator
+    class AgentCharacter {
+      constructor(model, rig, agentId, agentName, agentType, startHub) {
         this.model = model;
         this.rig = rig;
+        this.agentId = agentId;
+        this.agentName = agentName;
+        this.agentType = agentType;
         this.mixer = new THREE.AnimationMixer(model);
 
-        // Pathfinding
-        this.currentWaypoint = startWaypoint;
-        this.targetWaypoint = null;
+        // Current location
+        this.currentHub = startHub;
+        this.currentWaypoint = startHub;
+
+        // Path to follow (calculated by findPath)
         this.path = [];
+        this.pathIndex = 0;
 
         // Movement
-        this.maxSpeed = 1.5 + Math.random() * 0.8;
+        this.maxSpeed = 4;
         this.currentSpeed = 0;
-        this.acceleration = 2.5;
-        this.deceleration = 3.5;
-        this.turnSpeed = 5.0;
+        this.acceleration = 3;
+        this.deceleration = 4;
+        this.turnSpeed = 6;
 
-        // State
+        // State: 'idle', 'working', 'traveling', 'chatting'
         this.state = 'idle';
+        this.status = 'idle';
         this.stateTime = 0;
-        this.idleDuration = 2 + Math.random() * 4;
-        this.waitTime = 0;
+        this.doing = '';
 
         // Setup animations
         const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
@@ -730,9 +867,12 @@
           const walkClip = walkOptions[Math.floor(Math.random() * walkOptions.length)];
           if (walkClip) {
             this.walkAction = this.mixer.clipAction(walkClip);
-            this.walkAction.setEffectiveTimeScale(1.0 + Math.random() * 0.2);
+            this.walkAction.setEffectiveTimeScale(1.2);
           }
         }
+
+        // Arrival callback
+        this.onArrival = null;
       }
 
       lerpAngle(from, to, t) {
@@ -742,15 +882,63 @@
         return from + diff * Math.min(t, 1);
       }
 
-      pickNextWaypoint() {
-        const possibleNext = connections[this.currentWaypoint];
-        if (!possibleNext || possibleNext.length === 0) return null;
+      // BFS pathfinding to find route between waypoints
+      findPath(from, to) {
+        if (from === to) return [to];
 
-        // Prefer waypoints we haven't just come from
-        let choices = possibleNext.filter(w => w !== this.lastWaypoint);
-        if (choices.length === 0) choices = possibleNext;
+        const queue = [[from]];
+        const visited = new Set([from]);
 
-        return choices[Math.floor(Math.random() * choices.length)];
+        while (queue.length > 0) {
+          const path = queue.shift();
+          const current = path[path.length - 1];
+
+          const neighbors = connections[current] || [];
+          for (const neighbor of neighbors) {
+            if (neighbor === to) {
+              return [...path, neighbor];
+            }
+            if (!visited.has(neighbor)) {
+              visited.add(neighbor);
+              queue.push([...path, neighbor]);
+            }
+          }
+        }
+        return [to]; // Direct if no path found
+      }
+
+      // Command agent to move to a hub
+      moveTo(targetHub, callback) {
+        if (!waypoints[targetHub]) {
+          console.warn('Unknown hub:', targetHub);
+          return;
+        }
+
+        this.path = this.findPath(this.currentWaypoint, targetHub);
+        this.pathIndex = 0;
+        this.state = 'traveling';
+        this.onArrival = callback;
+
+        // Start walk animation
+        if (this.walkAction && this.idleAction) {
+          this.idleAction.fadeOut(0.3);
+          this.walkAction.reset().fadeIn(0.3).play();
+        }
+
+        console.log(`${this.agentName} moving to ${targetHub}, path:`, this.path);
+      }
+
+      // Set agent status (idle, working, chatting)
+      setStatus(status, doing = '') {
+        this.status = status;
+        this.doing = doing;
+        if (status === 'idle' && this.state !== 'traveling') {
+          this.state = 'idle';
+        } else if (status === 'working') {
+          this.state = 'working';
+        } else if (status === 'chatting') {
+          this.state = 'chatting';
+        }
       }
 
       update(delta) {
@@ -759,93 +947,113 @@
 
         switch (this.state) {
           case 'idle':
-            // Small idle movements
-            if (Math.random() < 0.003) {
-              this.model.rotation.y += (Math.random() - 0.5) * 0.3;
+          case 'working':
+          case 'chatting':
+            // Subtle idle animation - slight movement
+            if (Math.random() < 0.002) {
+              this.model.rotation.y += (Math.random() - 0.5) * 0.2;
             }
-
-            if (this.stateTime > this.idleDuration) {
-              this.targetWaypoint = this.pickNextWaypoint();
-              if (this.targetWaypoint) {
-                this.state = 'turning';
-                this.stateTime = 0;
-              }
+            // Working bob
+            if (this.state === 'working') {
+              this.model.position.y = Math.sin(this.stateTime * 3) * 0.02;
             }
             break;
 
-          case 'turning':
-            const target = waypoints[this.targetWaypoint];
-            const dx = target.x - this.model.position.x;
-            const dz = target.z - this.model.position.z;
-            const targetAngle = Math.atan2(dx, dz);
-
-            this.model.rotation.y = this.lerpAngle(this.model.rotation.y, targetAngle, delta * this.turnSpeed);
-
-            let angleDiff = Math.abs(targetAngle - this.model.rotation.y);
-            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-
-            if (Math.abs(angleDiff) < 0.15) {
-              this.state = 'walking';
-              this.stateTime = 0;
-              if (this.walkAction && this.idleAction) {
-                this.idleAction.fadeOut(0.3);
-                this.walkAction.reset().fadeIn(0.3).play();
-              }
-            }
-            break;
-
-          case 'walking':
-            const dest = waypoints[this.targetWaypoint];
-            const dirX = dest.x - this.model.position.x;
-            const dirZ = dest.z - this.model.position.z;
-            const dist = Math.sqrt(dirX * dirX + dirZ * dirZ);
-
-            // Accelerate/decelerate based on distance
-            if (dist > 2) {
-              this.currentSpeed = Math.min(this.currentSpeed + this.acceleration * delta, this.maxSpeed);
-            } else {
-              this.currentSpeed = Math.max(this.currentSpeed - this.deceleration * delta, 0.3);
-            }
-
-            if (dist > 0.3) {
-              const moveX = (dirX / dist) * this.currentSpeed * delta;
-              const moveZ = (dirZ / dist) * this.currentSpeed * delta;
-              this.model.position.x += moveX;
-              this.model.position.z += moveZ;
-
-              // Face movement direction smoothly
-              const moveAngle = Math.atan2(dirX, dirZ);
-              this.model.rotation.y = this.lerpAngle(this.model.rotation.y, moveAngle, delta * this.turnSpeed * 0.5);
-
-              // Walking bob
-              const bob = Math.sin(this.stateTime * 10) * 0.01 * (this.currentSpeed / this.maxSpeed);
-              this.model.position.y = bob;
-            } else {
-              // Arrived at waypoint
-              this.lastWaypoint = this.currentWaypoint;
-              this.currentWaypoint = this.targetWaypoint;
-              this.targetWaypoint = null;
+          case 'traveling':
+            if (this.pathIndex >= this.path.length) {
+              // Arrived at final destination
+              this.state = 'idle';
+              this.currentHub = this.path[this.path.length - 1];
               this.currentSpeed = 0;
               this.model.position.y = 0;
-
-              this.state = 'idle';
-              this.stateTime = 0;
-              this.idleDuration = 1 + Math.random() * 3;
 
               if (this.idleAction && this.walkAction) {
                 this.walkAction.fadeOut(0.4);
                 this.idleAction.reset().fadeIn(0.4).play();
               }
+
+              if (this.onArrival) {
+                this.onArrival();
+                this.onArrival = null;
+              }
+              break;
+            }
+
+            const targetWp = this.path[this.pathIndex];
+            const target = waypoints[targetWp];
+            const dx = target.x - this.model.position.x;
+            const dz = target.z - this.model.position.z;
+            const dist = Math.sqrt(dx * dx + dz * dz);
+
+            // Turn toward target
+            const targetAngle = Math.atan2(dx, dz);
+            this.model.rotation.y = this.lerpAngle(this.model.rotation.y, targetAngle, delta * this.turnSpeed);
+
+            // Accelerate/decelerate
+            if (dist > 2) {
+              this.currentSpeed = Math.min(this.currentSpeed + this.acceleration * delta, this.maxSpeed);
+            } else {
+              this.currentSpeed = Math.max(this.currentSpeed - this.deceleration * delta, 0.5);
+            }
+
+            if (dist > 0.5) {
+              const moveX = (dx / dist) * this.currentSpeed * delta;
+              const moveZ = (dz / dist) * this.currentSpeed * delta;
+              this.model.position.x += moveX;
+              this.model.position.z += moveZ;
+
+              // Walking bob
+              const bob = Math.sin(this.stateTime * 10) * 0.015;
+              this.model.position.y = bob;
+            } else {
+              // Reached waypoint, move to next in path
+              this.currentWaypoint = targetWp;
+              this.pathIndex++;
             }
             break;
         }
       }
+
+      // Get 3D position for speech bubble placement
+      getPosition() {
+        return this.model.position.clone();
+      }
     }
 
+    // Agent registry - maps agentId to AgentCharacter
+    const agentCharacters = new Map();
+
     // ==================== LOADERS ====================
-    function loadCharacter(name, startWaypoint, rig = 'medium', scale = 1) {
+    // Load an agent character controlled by the backend
+    function loadAgentCharacter(modelName, agentId, agentName, agentType, startHub, rig = 'medium', scale = 1) {
       totalToLoad++;
-      const pos = waypoints[startWaypoint];
+      const pos = waypoints[startHub] || { x: 0, z: 0 };
+      gltfLoader.load(`assets/models/${modelName}.glb`, (gltf) => {
+        const model = gltf.scene;
+        model.position.set(pos.x, 0, pos.z);
+        model.scale.set(scale, scale, scale);
+        model.rotation.y = Math.random() * Math.PI * 2;
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        scene.add(model);
+
+        const agent = new AgentCharacter(model, rig, agentId, agentName, agentType, startHub);
+        agentCharacters.set(agentId, agent);
+        characters.push(agent);
+        updateLoading();
+
+        console.log(`Loaded agent: ${agentName} (${agentType}) at ${startHub}`);
+      }, undefined, () => updateLoading());
+    }
+
+    // Load a decorative character (for ambiance)
+    function loadDecorativeCharacter(name, startWaypoint, rig = 'medium', scale = 1) {
+      totalToLoad++;
+      const pos = waypoints[startWaypoint] || { x: 0, z: 0 };
       gltfLoader.load(`assets/models/${name}.glb`, (gltf) => {
         const model = gltf.scene;
         model.position.set(pos.x, 0, pos.z);
@@ -858,7 +1066,6 @@
           }
         });
         scene.add(model);
-        characters.push(new Character(model, rig, startWaypoint));
         updateLoading();
       }, undefined, () => updateLoading());
     }
@@ -1026,30 +1233,69 @@
       loadTownAsset('nature', 'cloud_big', { x: 60, y: 35, z: -50 }, S * 3.5);
       loadTownAsset('nature', 'cloud_small', { x: -30, y: 50, z: 50 }, S * 2.5);
 
-      // === CHARACTERS - Walking the roads ===
-      // Townspeople on main routes
-      loadCharacter('BlackKnight', 'center', 'medium', 1);
-      loadCharacter('Witch', 'northPlaza', 'medium', 1);
-      loadCharacter('Vampire', 'southPlaza', 'medium', 1);
-      loadCharacter('Hiker', 'westPlaza', 'medium', 1);
-      loadCharacter('Tiefling', 'eastPlaza', 'medium', 1);
+      // === HUB MARKERS ===
+      // Add visual markers for each hub
+      createHubMarker('town_square', 0xc9a959, 'Town Square');
+      createHubMarker('planning_room', 0xc084fc, 'Planning');
+      createHubMarker('design_studio', 0xf472b6, 'Design');
+      createHubMarker('coding_desk', 0x60a5fa, 'Coding');
+      createHubMarker('review_station', 0x4ade80, 'Review');
+      createHubMarker('deploy_station', 0xfbbf24, 'Deploy');
 
-      // Tavern district regulars
-      loadCharacter('Caveman', 'tavernFront', 'medium', 1);
-      loadCharacter('Helper_A', 'tavernBack', 'medium', 1);
+      // === AGENT CHARACTERS ===
+      // These are controlled by the backend orchestrator
+      // Agent IDs match the database - will be updated when backend connects
 
-      // Market shoppers
-      loadCharacter('Helper_B', 'marketFront', 'medium', 1);
-      loadCharacter('Protagonist_A', 'marketBack', 'medium', 1);
+      // Planner - Eliza the Witch
+      loadAgentCharacter('Witch', 'agent_planner', 'Eliza', 'planner', 'town_square', 'medium', 1);
 
-      // Residential wanderers
-      loadCharacter('Superhero', 'houseWest1', 'medium', 1);
-      loadCharacter('Protagonist_B', 'houseEast1', 'medium', 1);
+      // Designer - Marcus the Black Knight
+      loadAgentCharacter('BlackKnight', 'agent_designer_1', 'Marcus', 'designer', 'town_square', 'medium', 1);
 
-      // Gate guards (larger, slower)
-      loadCharacter('FrostGolem', 'northGate', 'large', 1.2);
-      loadCharacter('CombatMech', 'southGate', 'large', 1.2);
-      loadCharacter('Clanker', 'westGate', 'large', 1.2);
+      // Designer 2 - Felix the Vampire
+      loadAgentCharacter('Vampire', 'agent_designer_2', 'Felix', 'designer', 'design_studio', 'medium', 1);
+
+      // Coder - Ada the Protagonist
+      loadAgentCharacter('Protagonist_A', 'agent_coder_1', 'Ada', 'coder', 'town_square', 'medium', 1);
+
+      // Coder 2 - Byron the Hiker
+      loadAgentCharacter('Hiker', 'agent_coder_2', 'Byron', 'coder', 'coding_desk', 'medium', 1);
+
+      // Reviewer - Clara the Tiefling
+      loadAgentCharacter('Tiefling', 'agent_reviewer', 'Clara', 'reviewer', 'town_square', 'medium', 1);
+
+      // === DECORATIVE CHARACTERS ===
+      // Gate guards add ambiance
+      loadDecorativeCharacter('FrostGolem', 'deploy_station', 'large', 1.2);
+    }
+
+    // Create a glowing marker for a hub location
+    function createHubMarker(hubName, color, label) {
+      const hub = hubs[hubName];
+      if (!hub) return;
+
+      // Ground circle
+      const circleGeom = new THREE.CircleGeometry(2.5, 32);
+      const circleMat = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.3,
+        side: THREE.DoubleSide
+      });
+      const circle = new THREE.Mesh(circleGeom, circleMat);
+      circle.rotation.x = -Math.PI / 2;
+      circle.position.set(hub.x, 0.02, hub.z);
+      scene.add(circle);
+
+      // Glowing pillar
+      const pillarGeom = new THREE.CylinderGeometry(0.1, 0.1, 0.5, 8);
+      const pillarMat = new THREE.MeshBasicMaterial({ color: color });
+      const pillar = new THREE.Mesh(pillarGeom, pillarMat);
+      pillar.position.set(hub.x, 0.25, hub.z);
+      scene.add(pillar);
+
+      // Store reference for potential animations
+      hub.marker = { circle, pillar };
     }
 
     // Start
@@ -1062,6 +1308,10 @@
       for (const char of characters) char.update(delta);
       controls.update();
       renderer.render(scene, camera);
+
+      // Update speech bubble and label positions
+      updateAllBubblePositions();
+      updateAgentLabels();
     }
     animate();
 
@@ -1134,17 +1384,339 @@
         case 'connected':
           console.log('Server welcome:', message.data.message);
           break;
+
         case 'state_update':
           serverAgents = message.data.agents || [];
           serverTasks = message.data.tasks || [];
           serverMessages = message.data.messages || [];
           updateUI();
+          syncAgentCharacters(serverAgents);
           break;
+
         case 'task_created':
           console.log('New task created:', message.data);
           break;
+
+        // === ORCHESTRATION EVENTS ===
+        case 'agent_move':
+          handleAgentMove(message.data);
+          break;
+
+        case 'agent_arrived':
+          handleAgentArrived(message.data);
+          break;
+
+        case 'agent_status':
+          handleAgentStatus(message.data);
+          break;
+
+        case 'agent_speak':
+          handleAgentSpeak(message.data);
+          break;
+
+        case 'agent_think':
+          handleAgentThink(message.data);
+          break;
+
+        case 'file_created':
+          handleFileCreated(message.data);
+          break;
+
+        case 'task_complete':
+          handleTaskComplete(message.data);
+          break;
       }
     }
+
+    // ==================== ORCHESTRATION EVENT HANDLERS ====================
+
+    // Sync agent characters with server state
+    function syncAgentCharacters(serverAgentList) {
+      for (const serverAgent of serverAgentList) {
+        // Try to find matching character by name or create mapping
+        let character = null;
+        for (const [id, char] of agentCharacters) {
+          if (char.agentName.toLowerCase() === serverAgent.name.toLowerCase() ||
+              char.agentType === serverAgent.type) {
+            character = char;
+            // Update the ID mapping
+            if (id !== serverAgent.id) {
+              agentCharacters.delete(id);
+              agentCharacters.set(serverAgent.id, char);
+              char.agentId = serverAgent.id;
+            }
+            break;
+          }
+        }
+
+        if (character) {
+          character.setStatus(serverAgent.status || 'idle');
+        }
+      }
+    }
+
+    // Agent starts moving to a hub
+    function handleAgentMove(data) {
+      const { agent, agentId, to, hub } = data;
+      const id = agentId || agent;
+
+      // Find character by ID or name
+      let character = agentCharacters.get(id);
+      if (!character) {
+        for (const [, char] of agentCharacters) {
+          if (char.agentName.toLowerCase() === (agent || '').toLowerCase()) {
+            character = char;
+            break;
+          }
+        }
+      }
+
+      if (character) {
+        const targetHub = hub || to;
+        character.moveTo(targetHub, () => {
+          console.log(`${character.agentName} arrived at ${targetHub}`);
+        });
+        showSpeechBubble(character, `Walking to ${hubs[targetHub]?.name || targetHub}...`, 'status', 2000);
+      }
+    }
+
+    // Agent arrived at destination
+    function handleAgentArrived(data) {
+      const { agent, agentId, hub } = data;
+      const id = agentId || agent;
+
+      let character = agentCharacters.get(id);
+      if (!character) {
+        for (const [, char] of agentCharacters) {
+          if (char.agentName.toLowerCase() === (agent || '').toLowerCase()) {
+            character = char;
+            break;
+          }
+        }
+      }
+
+      if (character) {
+        character.currentHub = hub;
+        character.state = 'idle';
+      }
+    }
+
+    // Agent status changed
+    function handleAgentStatus(data) {
+      const { agent, agentId, status, doing } = data;
+      const id = agentId || agent;
+
+      let character = agentCharacters.get(id);
+      if (!character) {
+        for (const [, char] of agentCharacters) {
+          if (char.agentName.toLowerCase() === (agent || '').toLowerCase()) {
+            character = char;
+            break;
+          }
+        }
+      }
+
+      if (character) {
+        character.setStatus(status, doing);
+        if (doing) {
+          showThoughtBubble(character, doing, 3000);
+        }
+      }
+    }
+
+    // Agent says something (speech bubble)
+    function handleAgentSpeak(data) {
+      const { agent, agentId, text, type, toAgent } = data;
+      const id = agentId || agent;
+
+      let character = agentCharacters.get(id);
+      if (!character) {
+        for (const [, char] of agentCharacters) {
+          if (char.agentName.toLowerCase() === (agent || '').toLowerCase()) {
+            character = char;
+            break;
+          }
+        }
+      }
+
+      if (character) {
+        const duration = Math.max(3000, text.length * 50); // Longer text = longer display
+        showSpeechBubble(character, text, type || 'saying', duration, toAgent);
+      }
+    }
+
+    // Agent thinks something (thought bubble)
+    function handleAgentThink(data) {
+      const { agent, agentId, text } = data;
+      const id = agentId || agent;
+
+      let character = agentCharacters.get(id);
+      if (!character) {
+        for (const [, char] of agentCharacters) {
+          if (char.agentName.toLowerCase() === (agent || '').toLowerCase()) {
+            character = char;
+            break;
+          }
+        }
+      }
+
+      if (character) {
+        showThoughtBubble(character, text, 2500);
+      }
+    }
+
+    // File was created
+    function handleFileCreated(data) {
+      const { taskId, filename, size } = data;
+      console.log(`File created: ${filename} (${size} bytes) for task ${taskId}`);
+
+      // Show announcement
+      const coder = [...agentCharacters.values()].find(c => c.agentType === 'coder');
+      if (coder) {
+        showSpeechBubble(coder, `Created ${filename}`, 'status', 2000);
+      }
+    }
+
+    // Task completed
+    function handleTaskComplete(data) {
+      const { taskId, result } = data;
+      console.log('Task complete:', taskId, result);
+
+      // All agents celebrate in town square
+      for (const [, character] of agentCharacters) {
+        character.moveTo('town_square', () => {
+          setTimeout(() => {
+            if (character.agentType === 'coder') {
+              showSpeechBubble(character, 'Shipped! 🚀', 'saying', 4000);
+            } else if (character.agentType === 'designer') {
+              showSpeechBubble(character, 'Looks great!', 'saying', 4000);
+            } else if (character.agentType === 'reviewer') {
+              showSpeechBubble(character, 'Approved!', 'saying', 4000);
+            }
+          }, 500);
+        });
+      }
+    }
+
+    // ==================== SPEECH BUBBLE SYSTEM ====================
+    const bubbleContainer = document.getElementById('bubble-container');
+    const labelsContainer = document.getElementById('labels-container');
+    const activeBubbles = new Map(); // agentId -> bubble element
+
+    function showSpeechBubble(character, text, type = 'saying', duration = 4000, toAgent = null) {
+      // Remove existing bubble for this agent
+      const existing = activeBubbles.get(character.agentId);
+      if (existing) {
+        existing.remove();
+      }
+
+      const bubble = document.createElement('div');
+      bubble.className = 'speech-bubble';
+      bubble.innerHTML = `
+        <div class="agent-label">
+          <span class="status-dot ${character.status}"></span>
+          ${character.agentName}${toAgent ? ` → ${toAgent}` : ''}
+        </div>
+        <div class="bubble-text">${text}</div>
+      `;
+      bubbleContainer.appendChild(bubble);
+      activeBubbles.set(character.agentId, bubble);
+
+      // Update position
+      updateBubblePosition(character, bubble, 4);
+
+      // Auto-remove after duration
+      setTimeout(() => {
+        bubble.classList.add('bubble-fading');
+        setTimeout(() => {
+          bubble.remove();
+          if (activeBubbles.get(character.agentId) === bubble) {
+            activeBubbles.delete(character.agentId);
+          }
+        }, 300);
+      }, duration);
+    }
+
+    function showThoughtBubble(character, text, duration = 2500) {
+      const bubble = document.createElement('div');
+      bubble.className = 'thought-bubble';
+      bubble.innerHTML = `
+        <div class="agent-label">${character.agentName} thinks...</div>
+        <div class="bubble-text">${text}</div>
+      `;
+      bubbleContainer.appendChild(bubble);
+
+      updateBubblePosition(character, bubble, 3.5);
+
+      setTimeout(() => {
+        bubble.classList.add('bubble-fading');
+        setTimeout(() => bubble.remove(), 300);
+      }, duration);
+    }
+
+    function updateBubblePosition(character, bubble, heightOffset) {
+      const pos = character.getPosition();
+      pos.y += heightOffset;
+
+      // Project 3D position to 2D screen coordinates
+      const vector = pos.clone().project(camera);
+      const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+      const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+
+      bubble.style.left = `${x}px`;
+      bubble.style.top = `${y}px`;
+    }
+
+    // Update all bubble positions in animation loop
+    function updateAllBubblePositions() {
+      for (const [agentId, bubble] of activeBubbles) {
+        const character = agentCharacters.get(agentId);
+        if (character) {
+          updateBubblePosition(character, bubble, 4);
+        }
+      }
+    }
+
+    // ==================== AGENT NAME LABELS ====================
+    const agentLabels = new Map();
+
+    function createAgentLabel(character) {
+      const label = document.createElement('div');
+      label.className = 'agent-name-label';
+      label.innerHTML = `${character.agentName}<span class="status-text">${character.agentType}</span>`;
+      labelsContainer.appendChild(label);
+      agentLabels.set(character.agentId, label);
+    }
+
+    function updateAgentLabels() {
+      for (const [agentId, label] of agentLabels) {
+        const character = agentCharacters.get(agentId);
+        if (character) {
+          const pos = character.getPosition();
+          pos.y += 2.5;
+
+          const vector = pos.clone().project(camera);
+          const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+          const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+
+          label.style.left = `${x}px`;
+          label.style.top = `${y}px`;
+
+          // Update status text
+          const statusText = label.querySelector('.status-text');
+          if (statusText) {
+            statusText.textContent = character.doing || character.status || character.agentType;
+          }
+        }
+      }
+    }
+
+    // Create labels for all agents after they load
+    setTimeout(() => {
+      for (const [, character] of agentCharacters) {
+        createAgentLabel(character);
+      }
+    }, 3000);
 
     function updateUI() {
       // Update agents list

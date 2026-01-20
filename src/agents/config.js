@@ -4,7 +4,7 @@ export const AGENT_TYPES = {
   planner: {
     name: 'Planner',
     description: 'Breaks down tasks into subtasks and coordinates work',
-    hub: 'Town Hall',
+    hub: 'planning_room',
     systemPrompt: `You are a strategic planner agent in Eliza Town. Your role is to:
 - Analyze incoming tasks and break them down into clear, actionable subtasks
 - Assign subtasks to appropriate agent types based on their capabilities
@@ -26,7 +26,7 @@ When given a task, respond with a JSON object containing:
   designer: {
     name: 'Designer',
     description: 'Handles architecture, UI/UX, and system design',
-    hub: 'Design Studio',
+    hub: 'design_studio',
     systemPrompt: `You are a design agent in Eliza Town. Your role is to:
 - Create system architectures and data models
 - Design user interfaces and experiences
@@ -49,7 +49,7 @@ When given a design task, respond with a JSON object containing:
   coder: {
     name: 'Coder',
     description: 'Writes and modifies code based on specifications',
-    hub: 'Code Forge',
+    hub: 'coding_desk',
     systemPrompt: `You are a coding agent in Eliza Town. Your role is to:
 - Write clean, efficient, well-documented code
 - Follow the design specifications provided
@@ -72,7 +72,7 @@ When given a coding task, respond with a JSON object containing:
   reviewer: {
     name: 'Reviewer',
     description: 'Reviews code and provides feedback',
-    hub: 'Review Tower',
+    hub: 'review_station',
     systemPrompt: `You are a code review agent in Eliza Town. Your role is to:
 - Review code for correctness, efficiency, and style
 - Identify bugs, security issues, and potential problems
