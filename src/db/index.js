@@ -99,6 +99,45 @@ export async function createAgent(name, type, modelId, personality, capabilities
   return result.rows[0];
 }
 
+export async function updateAgent(id, updates) {
+  const fields = [];
+  const params = [id];
+  let paramIndex = 2;
+
+  if (updates.name !== undefined) {
+    fields.push(`name = $${paramIndex++}`);
+    params.push(updates.name);
+  }
+  if (updates.type !== undefined) {
+    fields.push(`type = $${paramIndex++}`);
+    params.push(updates.type);
+  }
+  if (updates.model_id !== undefined) {
+    fields.push(`model_id = $${paramIndex++}`);
+    params.push(updates.model_id);
+  }
+  if (updates.personality !== undefined) {
+    fields.push(`personality = $${paramIndex++}`);
+    params.push(updates.personality);
+  }
+  if (updates.capabilities !== undefined) {
+    fields.push(`capabilities = $${paramIndex++}`);
+    params.push(updates.capabilities);
+  }
+
+  if (fields.length === 0) {
+    return getAgent(id);
+  }
+
+  fields.push('updated_at = CURRENT_TIMESTAMP');
+
+  const result = await query(
+    `UPDATE agents SET ${fields.join(', ')} WHERE id = $1 RETURNING *`,
+    params
+  );
+  return result.rows[0];
+}
+
 // Hub queries
 export async function getHubs() {
   const result = await query('SELECT * FROM hubs ORDER BY id');

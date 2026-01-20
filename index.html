@@ -599,109 +599,333 @@
       animation: bubbleFadeOut 0.3s ease-in forwards;
     }
 
-    /* Selected Agent Panel - with character preview */
-    #selected-agent-panel {
+    /* Agent Modal - Full Screen Centered */
+    #agent-modal-backdrop {
       position: fixed;
-      bottom: 60px;
-      left: 15px;
-      width: 320px;
-      background: linear-gradient(180deg, #4a3728 0%, #3d2d1f 50%, #2e2218 100%);
-      border: 2px solid #8b6914;
-      border-radius: 8px;
-      color: #f4e4c1;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 100;
       display: none;
-      z-index: 60;
-    }
-
-    @media (max-height: 800px) {
-      #selected-agent-panel { width: 280px; bottom: 50px; }
-    }
-
-    #selected-agent-panel.visible { display: flex; flex-direction: column; }
-
-    #selected-agent-panel .panel-header {
-      background: linear-gradient(180deg, #5c4a32 0%, #4a3728 100%);
-      padding: 8px 12px;
-      display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      border-bottom: 2px solid #8b6914;
     }
 
-    #selected-agent-panel .panel-header h3 {
-      font-family: 'Cinzel', serif;
-      font-size: 13px;
-      font-weight: 600;
-      margin: 0;
-    }
-
-    #selected-agent-panel .close-btn {
-      background: none;
-      border: none;
-      color: #b8a88a;
-      font-size: 18px;
-      cursor: pointer;
-      padding: 0 5px;
-    }
-
-    #selected-agent-panel .close-btn:hover { color: #f4e4c1; }
-
-    #selected-agent-panel .agent-content {
+    #agent-modal-backdrop.visible {
       display: flex;
-      gap: 12px;
-      padding: 10px;
     }
 
-    #selected-agent-panel .character-preview {
-      width: 120px;
-      height: 150px;
-      background: linear-gradient(180deg, #2a1f15, #1a1510);
-      border: 2px solid #5a4a3a;
-      border-radius: 6px;
-      flex-shrink: 0;
+    #agent-modal {
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      background: linear-gradient(180deg, #4a3728 0%, #3d2d1f 50%, #2e2218 100%);
+      border: 3px solid #8b6914;
+      border-radius: 12px;
+      color: #f4e4c1;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
     }
 
-    #selected-agent-panel .character-preview canvas {
+    #agent-modal .modal-header {
+      background: linear-gradient(180deg, #5c4a32 0%, #4a3728 100%);
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #8b6914;
+    }
+
+    #agent-modal .modal-header h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0;
+      color: #c9a959;
+    }
+
+    #agent-modal .modal-close {
+      background: none;
+      border: none;
+      color: #b8a88a;
+      font-size: 28px;
+      cursor: pointer;
+      padding: 0 8px;
+      line-height: 1;
+    }
+
+    #agent-modal .modal-close:hover { color: #f4e4c1; }
+
+    #agent-modal .modal-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    #agent-modal .character-section {
+      width: 300px;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, #2a1f15, #1a1510);
+      border-right: 2px solid #5a4a3a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    #agent-modal .character-preview-large {
+      width: 260px;
+      height: 320px;
+      background: radial-gradient(ellipse at center, #3a2a1a 0%, #1a1510 100%);
+      border: 2px solid #5a4a3a;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #agent-modal .character-preview-large canvas {
       width: 100%;
       height: 100%;
     }
 
-    #selected-agent-panel .agent-details {
-      flex: 1;
-      min-width: 0;
+    #agent-modal .character-name-badge {
+      margin-top: 15px;
+      padding: 8px 20px;
+      background: linear-gradient(180deg, #5c4a32, #4a3728);
+      border: 2px solid #8b6914;
+      border-radius: 20px;
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #c9a959;
     }
 
-    #selected-agent-panel .detail-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 11px;
-    }
-
-    #selected-agent-panel .detail-label {
+    #agent-modal .character-role {
+      margin-top: 8px;
+      font-size: 13px;
       color: #8a7a6a;
+      text-transform: uppercase;
+      letter-spacing: 2px;
     }
 
-    #selected-agent-panel .detail-value {
+    #agent-modal .details-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #agent-modal .tabs {
+      display: flex;
+      border-bottom: 2px solid #5a4a3a;
+      background: rgba(0,0,0,0.2);
+    }
+
+    #agent-modal .tab {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      color: #8a7a6a;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    #agent-modal .tab:hover { color: #b8a88a; }
+    #agent-modal .tab.active {
+      color: #c9a959;
+      border-bottom-color: #c9a959;
+      background: rgba(139, 105, 20, 0.1);
+    }
+
+    #agent-modal .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    #agent-modal .tab-panel { display: none; }
+    #agent-modal .tab-panel.active { display: block; }
+
+    /* Info Tab */
+    #agent-modal .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    #agent-modal .info-item {
+      background: rgba(0,0,0,0.2);
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #5a4a3a;
+    }
+
+    #agent-modal .info-label {
+      font-size: 11px;
+      color: #8a7a6a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    #agent-modal .info-value {
+      font-size: 14px;
       color: #f4e4c1;
       font-weight: 500;
-      text-align: right;
-      max-width: 100px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
-    #selected-agent-panel .agent-personality {
-      font-size: 10px;
-      color: #b8a88a;
+    #agent-modal .personality-box {
+      grid-column: 1 / -1;
+      margin-top: 10px;
+    }
+
+    #agent-modal .personality-box .info-value {
       font-style: italic;
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid #5a4a3a;
-      line-height: 1.4;
+      line-height: 1.5;
+    }
+
+    #agent-modal .capabilities-list {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 5px;
+    }
+
+    #agent-modal .capability-tag {
+      background: linear-gradient(180deg, #5c4a32, #4a3728);
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 11px;
+      border: 1px solid #8b6914;
+      color: #c9a959;
+    }
+
+    /* Customize Tab */
+    #agent-modal .form-group {
+      margin-bottom: 20px;
+    }
+
+    #agent-modal .form-label {
+      display: block;
+      font-size: 12px;
+      color: #8a7a6a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    #agent-modal .form-input,
+    #agent-modal .form-select,
+    #agent-modal .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.3);
+      border: 2px solid #5a4a3a;
+      border-radius: 6px;
+      color: #f4e4c1;
+      font-family: 'Crimson Text', serif;
+      font-size: 14px;
+    }
+
+    #agent-modal .form-input:focus,
+    #agent-modal .form-select:focus,
+    #agent-modal .form-textarea:focus {
+      outline: none;
+      border-color: #8b6914;
+    }
+
+    #agent-modal .form-select {
+      cursor: pointer;
+    }
+
+    #agent-modal .form-select option {
+      background: #3d2d1f;
+      color: #f4e4c1;
+    }
+
+    #agent-modal .form-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    #agent-modal .save-btn {
+      background: linear-gradient(180deg, #6b8e23, #556b2f);
+      border: 2px solid #8fbc8f;
+      padding: 12px 30px;
+      border-radius: 6px;
+      color: #f4e4c1;
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    #agent-modal .save-btn:hover {
+      background: linear-gradient(180deg, #7ba428, #607d3b);
+    }
+
+    /* JSON Tab */
+    #agent-modal .json-editor {
+      width: 100%;
+      min-height: 300px;
+      background: #1a1510;
+      border: 2px solid #5a4a3a;
+      border-radius: 6px;
+      color: #a0d911;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 12px;
+      padding: 15px;
+      resize: vertical;
+    }
+
+    #agent-modal .json-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    #agent-modal .json-btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      cursor: pointer;
+      border: 2px solid;
+    }
+
+    #agent-modal .json-btn.copy {
+      background: linear-gradient(180deg, #4a5568, #2d3748);
+      border-color: #718096;
+      color: #f4e4c1;
+    }
+
+    #agent-modal .json-btn.apply {
+      background: linear-gradient(180deg, #6b8e23, #556b2f);
+      border-color: #8fbc8f;
+      color: #f4e4c1;
+    }
+
+    @media (max-width: 700px) {
+      #agent-modal .modal-body { flex-direction: column; }
+      #agent-modal .character-section {
+        width: 100%;
+        border-right: none;
+        border-bottom: 2px solid #5a4a3a;
+        padding: 15px;
+      }
+      #agent-modal .character-preview-large {
+        width: 200px;
+        height: 250px;
+      }
     }
 
     /* Powered by Eliza OS branding - compact */
@@ -771,35 +995,106 @@
     <div class="text">Powered by <strong>Eliza OS</strong></div>
   </div>
 
-  <!-- Selected Agent Info Panel -->
-  <div id="selected-agent-panel">
-    <div class="panel-header">
-      <h3 id="selected-agent-name">Agent Name</h3>
-      <button class="close-btn" onclick="closeAgentPanel()">&times;</button>
-    </div>
-    <div class="agent-content">
-      <div class="character-preview" id="character-preview-container">
-        <canvas id="character-preview-canvas"></canvas>
+  <!-- Agent Modal - Full Screen -->
+  <div id="agent-modal-backdrop">
+    <div id="agent-modal">
+      <div class="modal-header">
+        <h2 id="modal-agent-name">Agent Name</h2>
+        <button class="modal-close" onclick="closeAgentModal()">&times;</button>
       </div>
-      <div class="agent-details">
-        <div class="detail-row">
-          <span class="detail-label">Role:</span>
-          <span class="detail-value" id="selected-agent-role">Planner</span>
+      <div class="modal-body">
+        <div class="character-section">
+          <div class="character-preview-large">
+            <canvas id="character-preview-canvas"></canvas>
+          </div>
+          <div class="character-name-badge" id="modal-agent-badge">Agent</div>
+          <div class="character-role" id="modal-agent-role">Planner</div>
         </div>
-        <div class="detail-row">
-          <span class="detail-label">Status:</span>
-          <span class="detail-value" id="selected-agent-status">Idle</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Task:</span>
-          <span class="detail-value" id="selected-agent-task">None</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Location:</span>
-          <span class="detail-value" id="selected-agent-location">Town Square</span>
-        </div>
-        <div class="agent-personality" id="selected-agent-personality">
-          Wise and methodical. Sees the big picture.
+        <div class="details-section">
+          <div class="tabs">
+            <button class="tab active" data-tab="info">Info</button>
+            <button class="tab" data-tab="customize">Customize</button>
+            <button class="tab" data-tab="json">JSON</button>
+          </div>
+          <div class="tab-content">
+            <!-- Info Tab -->
+            <div class="tab-panel active" id="tab-info">
+              <div class="info-grid">
+                <div class="info-item">
+                  <div class="info-label">Status</div>
+                  <div class="info-value" id="modal-agent-status">Idle</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Location</div>
+                  <div class="info-value" id="modal-agent-location">Town Square</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Current Task</div>
+                  <div class="info-value" id="modal-agent-task">None</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Model</div>
+                  <div class="info-value" id="modal-agent-model">claude-3-5-sonnet</div>
+                </div>
+                <div class="info-item personality-box">
+                  <div class="info-label">Personality</div>
+                  <div class="info-value" id="modal-agent-personality">Wise and methodical.</div>
+                </div>
+                <div class="info-item" style="grid-column: 1 / -1;">
+                  <div class="info-label">Capabilities</div>
+                  <div class="capabilities-list" id="modal-agent-capabilities">
+                    <span class="capability-tag">planning</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customize Tab -->
+            <div class="tab-panel" id="tab-customize">
+              <div class="form-group">
+                <label class="form-label">Agent Name</label>
+                <input type="text" class="form-input" id="edit-agent-name" placeholder="Agent name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">LLM Model</label>
+                <select class="form-select" id="edit-agent-llm">
+                  <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet (Recommended)</option>
+                  <option value="claude-3-opus-20240229">Claude 3 Opus (Most Capable)</option>
+                  <option value="claude-3-haiku-20240307">Claude 3 Haiku (Fastest)</option>
+                  <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                  <option value="gpt-4o">GPT-4o</option>
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Role Type</label>
+                <select class="form-select" id="edit-agent-type">
+                  <option value="planner">Planner - Breaks down tasks</option>
+                  <option value="designer">Designer - Architecture & UI</option>
+                  <option value="coder">Coder - Writes code</option>
+                  <option value="reviewer">Reviewer - Reviews code</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Personality</label>
+                <textarea class="form-textarea" id="edit-agent-personality" placeholder="Describe the agent's personality..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Capabilities (comma-separated)</label>
+                <input type="text" class="form-input" id="edit-agent-capabilities" placeholder="e.g., javascript, python, architecture">
+              </div>
+              <button class="save-btn" onclick="saveAgentChanges()">Save Changes</button>
+            </div>
+
+            <!-- JSON Tab -->
+            <div class="tab-panel" id="tab-json">
+              <textarea class="json-editor" id="agent-json-editor" spellcheck="false"></textarea>
+              <div class="json-actions">
+                <button class="json-btn copy" onclick="copyAgentJson()">Copy JSON</button>
+                <button class="json-btn apply" onclick="applyAgentJson()">Apply Changes</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -972,23 +1267,27 @@
     function initPreviewRenderer() {
       const canvas = document.getElementById('character-preview-canvas');
       previewRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-      previewRenderer.setSize(120, 150);
+      previewRenderer.setSize(260, 320);
       previewRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      previewRenderer.setClearColor(0x000000, 0);
 
       previewScene = new THREE.Scene();
-      previewCamera = new THREE.PerspectiveCamera(35, 120 / 150, 0.1, 100);
-      previewCamera.position.set(0, 1.2, 3);
-      previewCamera.lookAt(0, 0.8, 0);
+      previewCamera = new THREE.PerspectiveCamera(30, 260 / 320, 0.1, 100);
+      previewCamera.position.set(0, 1.0, 4);
+      previewCamera.lookAt(0, 0.7, 0);
 
-      // Lighting for preview
-      const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.6);
+      // Better lighting for larger preview
+      const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.8);
       previewScene.add(ambientLight);
-      const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.2);
-      keyLight.position.set(2, 3, 2);
+      const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.5);
+      keyLight.position.set(3, 4, 3);
       previewScene.add(keyLight);
-      const fillLight = new THREE.DirectionalLight(0x8ecae6, 0.4);
-      fillLight.position.set(-2, 1, -1);
+      const fillLight = new THREE.DirectionalLight(0x8ecae6, 0.5);
+      fillLight.position.set(-3, 2, -2);
       previewScene.add(fillLight);
+      const rimLight = new THREE.DirectionalLight(0xffd700, 0.3);
+      rimLight.position.set(0, 2, -3);
+      previewScene.add(rimLight);
     }
 
     function renderPreviewCharacter(character) {
@@ -999,31 +1298,36 @@
         previewScene.remove(previewModel);
         previewModel = null;
       }
+      if (previewMixer) {
+        previewMixer.stopAllAction();
+        previewMixer = null;
+      }
       if (previewAnimationId) {
         cancelAnimationFrame(previewAnimationId);
+        previewAnimationId = null;
       }
 
       // Clone the character's model for preview
       if (character.model) {
         previewModel = character.model.clone();
         previewModel.position.set(0, 0, 0);
-        previewModel.rotation.set(0, 0.3, 0);
+        previewModel.rotation.set(0, 0.2, 0);
         previewModel.scale.copy(character.model.scale);
         previewScene.add(previewModel);
 
-        // Setup animation mixer for preview
+        // Setup animation mixer for preview with idle animation
         const rig = character.rig;
         const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
-        if (generalClips?.length > 0) {
+        if (generalClips && generalClips.length > 0) {
           previewMixer = new THREE.AnimationMixer(previewModel);
-          const idleClip = generalClips.find(c => c.name.includes('Idle')) || generalClips[0];
+          const idleClip = generalClips.find(c => c.name.toLowerCase().includes('idle')) || generalClips[0];
           if (idleClip) {
             const action = previewMixer.clipAction(idleClip);
             action.play();
           }
         }
 
-        // Animate preview - idle animation only, no rotation
+        // Animate preview - idle animation only
         const previewClock = new THREE.Clock();
         function animatePreview() {
           previewAnimationId = requestAnimationFrame(animatePreview);
@@ -1032,39 +1336,160 @@
           previewRenderer.render(previewScene, previewCamera);
         }
         animatePreview();
+      } else {
+        // No model - just render empty scene
+        previewRenderer.render(previewScene, previewCamera);
       }
     }
 
+    // Current agent being edited
+    let currentEditAgent = null;
+
     function selectAgent(character) {
       selectedAgent = character;
-      const panel = document.getElementById('selected-agent-panel');
+      currentEditAgent = character;
 
-      document.getElementById('selected-agent-name').textContent = character.agentName;
-      document.getElementById('selected-agent-role').textContent = character.agentType.charAt(0).toUpperCase() + character.agentType.slice(1);
-      document.getElementById('selected-agent-status').textContent = character.status.charAt(0).toUpperCase() + character.status.slice(1);
-      document.getElementById('selected-agent-task').textContent = character.doing || 'None';
+      const backdrop = document.getElementById('agent-modal-backdrop');
 
-      const hubName = hubs[character.currentHub]?.name || 'Unknown';
-      document.getElementById('selected-agent-location').textContent = hubName;
+      // Get server data for this agent
+      const serverAgent = serverAgents.find(a => a.id === character.agentId) || {};
+      const capabilities = serverAgent.capabilities || [];
 
-      // Get personality from server data if available
-      const serverAgent = serverAgents.find(a => a.id === character.agentId);
-      if (serverAgent?.personality) {
-        document.getElementById('selected-agent-personality').textContent = serverAgent.personality;
-      }
+      // Update Info tab
+      document.getElementById('modal-agent-name').textContent = character.agentName;
+      document.getElementById('modal-agent-badge').textContent = character.agentName;
+      document.getElementById('modal-agent-role').textContent = character.agentType.charAt(0).toUpperCase() + character.agentType.slice(1);
+      document.getElementById('modal-agent-status').textContent = character.status.charAt(0).toUpperCase() + character.status.slice(1);
+      document.getElementById('modal-agent-task').textContent = character.doing || 'None';
+      document.getElementById('modal-agent-location').textContent = hubs[character.currentHub]?.name || 'Town Square';
+      document.getElementById('modal-agent-model').textContent = serverAgent.model_id || 'claude-3-5-sonnet';
+      document.getElementById('modal-agent-personality').textContent = serverAgent.personality || 'No personality set';
+
+      // Update capabilities
+      const capabilitiesEl = document.getElementById('modal-agent-capabilities');
+      capabilitiesEl.innerHTML = capabilities.map(cap =>
+        `<span class="capability-tag">${cap}</span>`
+      ).join('') || '<span style="color: #8a7a6a;">No capabilities set</span>';
+
+      // Update Customize tab
+      document.getElementById('edit-agent-name').value = character.agentName;
+      document.getElementById('edit-agent-type').value = character.agentType;
+      document.getElementById('edit-agent-personality').value = serverAgent.personality || '';
+      document.getElementById('edit-agent-capabilities').value = capabilities.join(', ');
+
+      // Update JSON tab
+      const agentJson = {
+        id: character.agentId,
+        name: character.agentName,
+        type: character.agentType,
+        model_id: serverAgent.model_id || 'witch',
+        status: character.status,
+        personality: serverAgent.personality || '',
+        capabilities: capabilities,
+        currentHub: character.currentHub,
+        position: { x: character.position?.x || 0, z: character.position?.z || 0 }
+      };
+      document.getElementById('agent-json-editor').value = JSON.stringify(agentJson, null, 2);
+
+      // Reset to Info tab
+      document.querySelectorAll('#agent-modal .tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#agent-modal .tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelector('#agent-modal .tab[data-tab="info"]').classList.add('active');
+      document.getElementById('tab-info').classList.add('active');
 
       // Render character preview
       renderPreviewCharacter(character);
 
-      panel.classList.add('visible');
+      // Show modal
+      backdrop.classList.add('visible');
     }
 
-    window.closeAgentPanel = function() {
-      document.getElementById('selected-agent-panel').classList.remove('visible');
+    window.closeAgentModal = function() {
+      document.getElementById('agent-modal-backdrop').classList.remove('visible');
       selectedAgent = null;
+      currentEditAgent = null;
       if (previewAnimationId) {
         cancelAnimationFrame(previewAnimationId);
         previewAnimationId = null;
+      }
+    };
+
+    // Close modal on backdrop click
+    document.getElementById('agent-modal-backdrop').addEventListener('click', function(e) {
+      if (e.target === this) closeAgentModal();
+    });
+
+    // Tab switching
+    document.querySelectorAll('#agent-modal .tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        const tabName = this.dataset.tab;
+        document.querySelectorAll('#agent-modal .tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#agent-modal .tab-panel').forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+      });
+    });
+
+    // Save agent changes
+    window.saveAgentChanges = async function() {
+      if (!currentEditAgent) return;
+
+      const updates = {
+        name: document.getElementById('edit-agent-name').value,
+        type: document.getElementById('edit-agent-type').value,
+        model: document.getElementById('edit-agent-llm').value,
+        personality: document.getElementById('edit-agent-personality').value,
+        capabilities: document.getElementById('edit-agent-capabilities').value.split(',').map(c => c.trim()).filter(c => c)
+      };
+
+      try {
+        const response = await fetch(`/api/agents/${currentEditAgent.agentId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        });
+
+        if (response.ok) {
+          alert('Agent updated successfully!');
+          // Refresh agent data
+          const updatedAgent = await response.json();
+          // Update local data
+          const idx = serverAgents.findIndex(a => a.id === currentEditAgent.agentId);
+          if (idx >= 0) serverAgents[idx] = { ...serverAgents[idx], ...updatedAgent };
+        } else {
+          alert('Failed to update agent');
+        }
+      } catch (e) {
+        console.error('Error saving agent:', e);
+        alert('Error saving agent: ' + e.message);
+      }
+    };
+
+    // Copy JSON to clipboard
+    window.copyAgentJson = function() {
+      const json = document.getElementById('agent-json-editor').value;
+      navigator.clipboard.writeText(json).then(() => {
+        alert('JSON copied to clipboard!');
+      });
+    };
+
+    // Apply JSON changes
+    window.applyAgentJson = async function() {
+      try {
+        const json = JSON.parse(document.getElementById('agent-json-editor').value);
+        const response = await fetch(`/api/agents/${json.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(json)
+        });
+
+        if (response.ok) {
+          alert('Agent updated from JSON!');
+        } else {
+          alert('Failed to apply JSON changes');
+        }
+      } catch (e) {
+        alert('Invalid JSON: ' + e.message);
       }
     };
 

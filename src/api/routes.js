@@ -51,6 +51,26 @@ router.post('/agents/:id/move', async (req, res) => {
   }
 });
 
+// Update agent properties
+router.patch('/agents/:id', async (req, res) => {
+  try {
+    const { name, type, model, personality, capabilities } = req.body;
+    const agent = await db.updateAgent(parseInt(req.params.id), {
+      name,
+      type,
+      model_id: model,
+      personality,
+      capabilities
+    });
+    if (!agent) {
+      return res.status(404).json({ error: 'Agent not found' });
+    }
+    res.json(agent);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // === Hubs ===
 
 router.get('/hubs', async (req, res) => {
