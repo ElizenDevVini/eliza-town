@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eliza Town</title>
+  <title>Eliza City</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital@0;1&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:ital@0;1&display=swap');
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { overflow: hidden; background: #1a1a2e; font-family: 'Crimson Text', Georgia, serif; }
+    body { overflow: hidden; background: #1a1a2e; font-family: 'Nunito', sans-serif; }
     canvas { display: block; }
 
     #loading {
@@ -16,8 +16,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      color: #f4e4c1;
-      font-family: 'Cinzel', serif;
+      color: #ffd1dc;
+      font-family: 'Quicksand', sans-serif;
       font-size: 24px;
       text-align: center;
       z-index: 100;
@@ -25,8 +25,8 @@
     #loading .spinner {
       width: 50px;
       height: 50px;
-      border: 4px solid #5c4a32;
-      border-top-color: #c9a959;
+      border: 4px solid #ff69b4;
+      border-top-color: #fff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin: 20px auto;
@@ -37,17 +37,17 @@
       position: fixed;
       bottom: 20px;
       left: 20px;
-      color: #f4e4c1;
-      font-family: 'Crimson Text', serif;
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
       font-size: 14px;
-      background: linear-gradient(135deg, rgba(60, 40, 25, 0.9), rgba(40, 25, 15, 0.95));
+      background: linear-gradient(135deg, rgba(255, 105, 180, 0.8), rgba(148, 0, 211, 0.8));
       padding: 12px 18px;
-      border-radius: 4px;
-      border: 2px solid #8b6914;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+      border-radius: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
     }
 
-    /* Medieval Wooden UI Theme */
+    /* Cute Anime UI Theme */
     #ui-container {
       position: fixed;
       top: 10px;
@@ -61,57 +61,43 @@
     }
 
     .panel {
-      background: linear-gradient(180deg, #4a3728 0%, #3d2d1f 50%, #2e2218 100%);
-      border: 3px solid #8b6914;
-      border-radius: 8px;
-      color: #f4e4c1;
+      background: linear-gradient(180deg, rgba(255, 182, 193, 0.95), rgba(255, 218, 233, 0.9));
+      border: 3px solid #ff69b4;
+      border-radius: 20px;
+      color: #4a154b;
       overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
-    }
-
-    .panel::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
-      pointer-events: none;
-      border-radius: 6px;
+      box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
 
     .panel-header {
-      background: linear-gradient(180deg, #5c4a32 0%, #4a3728 100%);
+      background: linear-gradient(180deg, #ff69b4, #ff1493);
       padding: 10px 14px;
-      font-family: 'Cinzel', serif;
-      font-weight: 600;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
       font-size: 14px;
+      color: white;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid #8b6914;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
 
     .panel-header .status {
-      font-family: 'Crimson Text', serif;
+      font-family: 'Nunito', sans-serif;
       font-size: 11px;
       padding: 3px 10px;
       border-radius: 12px;
-      border: 1px solid;
+      border: 1px solid rgba(255,255,255,0.5);
     }
 
     .panel-header .status.connected {
-      background: rgba(34, 85, 34, 0.6);
-      border-color: #4a7c4a;
-      color: #8fbc8f;
+      background: rgba(144, 238, 144, 0.8);
+      color: #006400;
     }
 
     .panel-header .status.disconnected {
-      background: rgba(85, 34, 34, 0.6);
-      border-color: #7c4a4a;
-      color: #cd9b9b;
+      background: rgba(255, 99, 71, 0.8);
+      color: #8b0000;
     }
 
     .panel-content {
@@ -120,7 +106,6 @@
       max-height: 200px;
     }
 
-    /* Agents Panel */
     #agents-panel { flex: 0 0 auto; }
     #agents-panel .panel-content {
       display: flex;
@@ -129,9 +114,9 @@
     }
 
     .agent-card {
-      background: linear-gradient(135deg, rgba(90, 70, 50, 0.5), rgba(60, 45, 30, 0.6));
-      border: 1px solid #6b5a3e;
-      border-radius: 6px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 240, 245, 0.8));
+      border: 2px solid #ffb6c1;
+      border-radius: 15px;
       padding: 8px 10px;
       display: flex;
       align-items: center;
@@ -140,83 +125,82 @@
     }
 
     .agent-card:hover {
-      background: linear-gradient(135deg, rgba(110, 85, 60, 0.6), rgba(80, 60, 40, 0.7));
-      border-color: #8b6914;
+      transform: scale(1.02);
+      border-color: #ff69b4;
+      box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
     }
 
     .agent-avatar {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #8b6914, #c9a959);
-      border: 2px solid #c9a959;
+      background: linear-gradient(135deg, #ff69b4, #da70d6);
+      border: 2px solid white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Cinzel', serif;
+      font-family: 'Quicksand', sans-serif;
       font-weight: 700;
-      font-size: 13px;
-      color: #2e1f0f;
+      font-size: 14px;
+      color: white;
       flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(255, 105, 180, 0.4);
     }
 
     .agent-info { flex: 1; min-width: 0; }
 
     .agent-name {
-      font-family: 'Cinzel', serif;
-      font-weight: 600;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
       font-size: 13px;
-      color: #f4e4c1;
+      color: #4a154b;
     }
 
     .agent-role {
       font-size: 11px;
-      color: #b8a88a;
+      color: #9b59b6;
       text-transform: capitalize;
-      font-style: italic;
     }
 
     .agent-status {
       font-size: 10px;
-      padding: 2px 8px;
+      padding: 3px 10px;
       border-radius: 10px;
       text-transform: capitalize;
-      border: 1px solid;
+      font-weight: 600;
     }
 
-    .agent-status.idle { background: rgba(80, 70, 60, 0.6); border-color: #6b5a3e; color: #b8a88a; }
-    .agent-status.working { background: rgba(40, 60, 80, 0.6); border-color: #4a6a8a; color: #8ab4d4; }
-    .agent-status.traveling { background: rgba(80, 60, 30, 0.6); border-color: #8a6a3a; color: #d4b48a; }
-    .agent-status.chatting { background: rgba(70, 50, 80, 0.6); border-color: #6a4a7a; color: #b48ad4; }
+    .agent-status.idle { background: #e8daef; color: #8e44ad; }
+    .agent-status.working { background: #d5f5e3; color: #27ae60; }
+    .agent-status.traveling { background: #fdebd0; color: #e67e22; }
+    .agent-status.chatting { background: #fadbd8; color: #e74c3c; }
 
-    /* Tasks Panel */
     #tasks-panel { flex: 0 0 auto; }
 
     .task-item {
-      background: linear-gradient(135deg, rgba(70, 55, 40, 0.5), rgba(50, 40, 30, 0.6));
-      border: 1px solid #5a4a3a;
-      border-left: 3px solid #c9a959;
-      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 2px solid #dda0dd;
+      border-left: 4px solid #ff69b4;
+      border-radius: 10px;
       padding: 8px 10px;
       margin-bottom: 6px;
     }
 
-    .task-item.completed { border-left-color: #4a7c4a; opacity: 0.7; }
-    .task-item.in_progress { border-left-color: #c9a959; }
+    .task-item.completed { border-left-color: #90ee90; opacity: 0.7; }
+    .task-item.in_progress { border-left-color: #ffa500; }
 
     .task-title {
       font-size: 12px;
-      font-weight: 500;
-      color: #f4e4c1;
+      font-weight: 600;
+      color: #4a154b;
     }
 
     .task-meta {
       font-size: 10px;
-      color: #a89878;
+      color: #9b59b6;
       margin-top: 3px;
     }
 
-    /* Messages Panel */
     #messages-panel { flex: 1; min-height: 150px; }
     #messages-panel .panel-content {
       display: flex;
@@ -225,9 +209,9 @@
     }
 
     .message-item {
-      background: rgba(50, 40, 30, 0.5);
-      border: 1px solid #4a3a2a;
-      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid #ffb6c1;
+      border-radius: 10px;
       padding: 6px 8px;
       font-size: 11px;
     }
@@ -239,44 +223,43 @@
     }
 
     .message-agent {
-      font-family: 'Cinzel', serif;
-      font-weight: 600;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
       font-size: 11px;
-      color: #c9a959;
+      color: #ff69b4;
     }
 
     .message-time {
       font-size: 9px;
-      color: #8a7a6a;
+      color: #9b59b6;
     }
 
     .message-content {
-      color: #d4c4a4;
+      color: #4a154b;
       line-height: 1.4;
     }
 
     .message-type {
       display: inline-block;
       font-size: 8px;
-      padding: 1px 5px;
-      border-radius: 3px;
+      padding: 2px 6px;
+      border-radius: 8px;
       margin-right: 5px;
       text-transform: uppercase;
-      font-weight: 600;
+      font-weight: 700;
     }
 
-    .message-type.thought { background: #2a3a4a; color: #8ab4d4; }
-    .message-type.chat { background: #3a2a4a; color: #b48ad4; }
-    .message-type.status { background: #2a3a2a; color: #8abc8a; }
-    .message-type.announcement { background: #4a2a2a; color: #d48a8a; }
+    .message-type.thought { background: #e8daef; color: #8e44ad; }
+    .message-type.chat { background: #fadbd8; color: #e74c3c; }
+    .message-type.status { background: #d5f5e3; color: #27ae60; }
+    .message-type.announcement { background: #fdebd0; color: #e67e22; }
 
-    /* Task Input - Medieval Scroll Style */
     #task-input-container {
       padding: 14px;
-      background: linear-gradient(180deg, #5c4a32 0%, #4a3728 50%, #3d2d1f 100%);
-      border: 3px solid #8b6914;
-      border-radius: 8px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(255, 182, 193, 0.95), rgba(255, 218, 233, 0.9));
+      border: 3px solid #ff69b4;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3);
     }
 
     .input-header {
@@ -287,26 +270,25 @@
     }
 
     .input-header label {
-      font-family: 'Cinzel', serif;
+      font-family: 'Quicksand', sans-serif;
       font-size: 13px;
-      font-weight: 600;
-      color: #c9a959;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      font-weight: 700;
+      color: #ff1493;
     }
 
     .input-header .char-count {
       font-size: 10px;
-      color: #8a7a6a;
+      color: #9b59b6;
     }
 
     #task-input {
       width: 100%;
-      background: linear-gradient(180deg, #2e2218, #3d2d1f);
-      border: 2px solid #6b5a3e;
-      border-radius: 4px;
+      background: white;
+      border: 2px solid #ffb6c1;
+      border-radius: 12px;
       padding: 12px;
-      color: #f4e4c1;
-      font-family: 'Crimson Text', serif;
+      color: #4a154b;
+      font-family: 'Nunito', sans-serif;
       font-size: 14px;
       resize: none;
       line-height: 1.5;
@@ -315,13 +297,12 @@
 
     #task-input:focus {
       outline: none;
-      border-color: #c9a959;
-      box-shadow: 0 0 0 2px rgba(201, 169, 89, 0.2), inset 0 2px 4px rgba(0,0,0,0.3);
+      border-color: #ff69b4;
+      box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.2);
     }
 
     #task-input::placeholder {
-      color: #7a6a5a;
-      font-style: italic;
+      color: #dda0dd;
     }
 
     .button-row {
@@ -333,69 +314,46 @@
     #submit-task {
       flex: 1;
       padding: 10px 16px;
-      background: linear-gradient(180deg, #8b6914 0%, #6b5010 50%, #5a4210 100%);
-      border: 2px solid #c9a959;
-      border-radius: 4px;
-      color: #f4e4c1;
-      font-family: 'Cinzel', serif;
-      font-weight: 600;
+      background: linear-gradient(180deg, #ff69b4, #ff1493);
+      border: 2px solid white;
+      border-radius: 12px;
+      color: white;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
       font-size: 13px;
       cursor: pointer;
       transition: all 0.2s ease;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
     }
 
     #submit-task:hover:not(:disabled) {
-      background: linear-gradient(180deg, #a07818 0%, #8b6914 50%, #6b5010 100%);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-
-    #submit-task:active:not(:disabled) {
-      transform: translateY(1px);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 105, 180, 0.5);
     }
 
     #submit-task:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-      background: #4a3a2a;
-      border-color: #5a4a3a;
-    }
-
-    #submit-task.submitting {
-      background: linear-gradient(180deg, #6b5a3a 0%, #5a4a2a 100%);
+      background: #ddd;
     }
 
     #submit-task.success {
-      background: linear-gradient(180deg, #4a6a3a 0%, #3a5a2a 100%);
-      border-color: #6a9a5a;
+      background: linear-gradient(180deg, #90ee90, #32cd32);
     }
 
     #submit-task.error {
-      background: linear-gradient(180deg, #6a3a3a 0%, #5a2a2a 100%);
-      border-color: #9a5a5a;
+      background: linear-gradient(180deg, #ff6b6b, #ee5a5a);
     }
 
     .priority-select {
-      background: linear-gradient(180deg, #3d2d1f, #2e2218);
-      border: 2px solid #6b5a3e;
-      border-radius: 4px;
+      background: white;
+      border: 2px solid #ffb6c1;
+      border-radius: 12px;
       padding: 10px 12px;
-      color: #f4e4c1;
-      font-family: 'Crimson Text', serif;
+      color: #4a154b;
+      font-family: 'Nunito', sans-serif;
       font-size: 13px;
       cursor: pointer;
-    }
-
-    .priority-select:focus {
-      outline: none;
-      border-color: #c9a959;
-    }
-
-    .priority-select option {
-      background: #3d2d1f;
-      color: #f4e4c1;
     }
 
     .server-status {
@@ -404,50 +362,35 @@
       gap: 6px;
       margin-top: 8px;
       font-size: 10px;
-      color: #8a7a6a;
+      color: #9b59b6;
     }
 
     .server-status .dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #7a3a3a;
-      border: 1px solid #9a5a5a;
+      background: #ff6b6b;
     }
 
     .server-status .dot.online {
-      background: #3a6a3a;
-      border-color: #5a9a5a;
-      box-shadow: 0 0 6px #5a9a5a;
+      background: #90ee90;
+      box-shadow: 0 0 8px #90ee90;
     }
 
-    /* Scrollbar styling */
-    .panel-content::-webkit-scrollbar {
-      width: 8px;
-    }
-    .panel-content::-webkit-scrollbar-track {
-      background: #2e2218;
-      border-radius: 4px;
-    }
-    .panel-content::-webkit-scrollbar-thumb {
-      background: #6b5a3e;
-      border-radius: 4px;
-    }
-    .panel-content::-webkit-scrollbar-thumb:hover {
-      background: #8b6914;
-    }
+    .panel-content::-webkit-scrollbar { width: 8px; }
+    .panel-content::-webkit-scrollbar-track { background: #fce4ec; border-radius: 4px; }
+    .panel-content::-webkit-scrollbar-thumb { background: #ff69b4; border-radius: 4px; }
   </style>
 </head>
 <body>
   <div id="loading">
     <div class="spinner"></div>
-    <div>Loading Eliza Town...</div>
+    <div>Loading Eliza City...</div>
   </div>
   <div id="info">
-    Mouse: Rotate | Scroll: Zoom | Right-click drag: Pan
+    Mouse: Rotate | Scroll: Zoom | Right-click: Pan
   </div>
 
-  <!-- Agent Orchestration UI -->
   <div id="ui-container">
     <div id="agents-panel" class="panel">
       <div class="panel-header">
@@ -455,7 +398,7 @@
         <span id="ws-status" class="status disconnected">Offline</span>
       </div>
       <div class="panel-content" id="agents-list">
-        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+        <div style="color: #9b59b6; font-size: 12px; text-align: center; padding: 20px;">
           Connecting to server...
         </div>
       </div>
@@ -464,10 +407,10 @@
     <div id="tasks-panel" class="panel">
       <div class="panel-header">
         <span>Active Tasks</span>
-        <span id="task-count" style="font-size: 11px; color: #9ca3af;">0</span>
+        <span id="task-count" style="font-size: 11px; color: rgba(255,255,255,0.8);">0</span>
       </div>
       <div class="panel-content" id="tasks-list">
-        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+        <div style="color: #9b59b6; font-size: 12px; text-align: center; padding: 20px;">
           No active tasks
         </div>
       </div>
@@ -478,7 +421,7 @@
         <span>Activity Feed</span>
       </div>
       <div class="panel-content" id="messages-list">
-        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+        <div style="color: #9b59b6; font-size: 12px; text-align: center; padding: 20px;">
           Waiting for activity...
         </div>
       </div>
@@ -489,15 +432,15 @@
         <label>Assign a Task</label>
         <span class="char-count"><span id="char-count">0</span>/500</span>
       </div>
-      <textarea id="task-input" rows="3" placeholder="Describe what you want the agents to work on..." maxlength="500"></textarea>
+      <textarea id="task-input" rows="3" placeholder="What should the girls work on?" maxlength="500"></textarea>
       <div class="button-row">
         <select class="priority-select" id="priority-select">
-          <option value="3">High Priority</option>
+          <option value="3">Urgent!</option>
           <option value="5" selected>Normal</option>
-          <option value="7">Low Priority</option>
+          <option value="7">Whenever~</option>
         </select>
         <button id="submit-task" disabled>
-          <span id="submit-text">Submit Task</span>
+          <span id="submit-text">Send Task</span>
         </button>
       </div>
       <div class="server-status">
@@ -519,220 +462,254 @@
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-    // Scene setup
+    // Scene setup - Anime City vibes
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x7EC8E3);
-    scene.fog = new THREE.FogExp2(0x7EC8E3, 0.012);
+    scene.background = new THREE.Color(0x87CEEB);
+    scene.fog = new THREE.FogExp2(0x87CEEB, 0.008);
 
-    // Camera
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
-    camera.position.set(60, 45, 60);
+    camera.position.set(80, 60, 80);
 
-    // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.3;
     document.body.appendChild(renderer.domElement);
 
-    // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.maxPolarAngle = Math.PI / 2.1;
-    controls.minDistance = 5;
-    controls.maxDistance = 200;
+    controls.minDistance = 10;
+    controls.maxDistance = 250;
     controls.target.set(0, 0, 0);
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.5);
+    // Soft anime-style lighting
+    const ambientLight = new THREE.AmbientLight(0xffeef5, 0.6);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfffaf0, 1.5);
-    sunLight.position.set(30, 40, 20);
+    const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
+    sunLight.position.set(50, 80, 30);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 4096;
     sunLight.shadow.mapSize.height = 4096;
     sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 300;
-    sunLight.shadow.camera.left = -100;
-    sunLight.shadow.camera.right = 100;
-    sunLight.shadow.camera.top = 100;
-    sunLight.shadow.camera.bottom = -100;
-    sunLight.shadow.bias = -0.0001;
+    sunLight.shadow.camera.far = 400;
+    sunLight.shadow.camera.left = -150;
+    sunLight.shadow.camera.right = 150;
+    sunLight.shadow.camera.top = 150;
+    sunLight.shadow.camera.bottom = -150;
     scene.add(sunLight);
 
-    const fillLight = new THREE.DirectionalLight(0x8ecae6, 0.3);
-    fillLight.position.set(-20, 10, -20);
-    scene.add(fillLight);
+    // Pink rim light for anime feel
+    const rimLight = new THREE.DirectionalLight(0xffb6c1, 0.4);
+    rimLight.position.set(-30, 20, -30);
+    scene.add(rimLight);
 
-    // Ground
-    const groundGeometry = new THREE.PlaneGeometry(500, 500, 100, 100);
-    const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x4a7c4e, roughness: 0.9 });
-    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    // Ground - City streets
+    const groundGeo = new THREE.PlaneGeometry(400, 400);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.8 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
     ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -0.05;
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // Loaders & State
-    const gltfLoader = new GLTFLoader();
     const clock = new THREE.Clock();
-    let loadedCount = 0;
-    let totalToLoad = 0;
     const characters = [];
-    const animationClips = {};
 
-    function updateLoading() {
-      loadedCount++;
-      if (loadedCount >= totalToLoad) {
-        document.getElementById('loading').style.display = 'none';
-      }
-    }
-
-    // ==================== ROAD NETWORK ====================
-    // Define waypoints for roads - characters will walk between these (scaled 3x)
+    // City waypoints
     const waypoints = {
-      // Main street (north-south)
-      northGate: { x: 0, z: -30 },
-      northPlaza: { x: 0, z: -15 },
       center: { x: 0, z: 0 },
-      southPlaza: { x: 0, z: 15 },
-      southGate: { x: 0, z: 30 },
-
-      // Cross street (east-west)
-      westGate: { x: -30, z: 0 },
-      westPlaza: { x: -15, z: 0 },
-      eastPlaza: { x: 15, z: 0 },
-      eastGate: { x: 30, z: 0 },
-
-      // Tavern district (northwest)
-      tavernFront: { x: -15, z: -12 },
-      tavernBack: { x: -21, z: -18 },
-
-      // Market district (northeast)
-      marketFront: { x: 15, z: -12 },
-      marketBack: { x: 21, z: -18 },
-
-      // Residential west (southwest)
-      houseWest1: { x: -18, z: 12 },
-      houseWest2: { x: -21, z: 18 },
-
-      // Residential east (southeast)
-      houseEast1: { x: 18, z: 12 },
-      houseEast2: { x: 21, z: 18 },
-
-      // Side streets
-      nwCorner: { x: -15, z: -15 },
-      neCorner: { x: 15, z: -15 },
-      swCorner: { x: -15, z: 15 },
-      seCorner: { x: 15, z: 15 },
+      north: { x: 0, z: -40 },
+      south: { x: 0, z: 40 },
+      east: { x: 40, z: 0 },
+      west: { x: -40, z: 0 },
+      ne: { x: 30, z: -30 },
+      nw: { x: -30, z: -30 },
+      se: { x: 30, z: 30 },
+      sw: { x: -30, z: 30 },
+      cafe: { x: -20, z: -15 },
+      shop: { x: 20, z: -15 },
+      park: { x: 0, z: 25 },
+      station: { x: -35, z: 10 },
+      school: { x: 35, z: -25 },
     };
 
-    // Define connected routes (which waypoints connect to which)
     const connections = {
-      northGate: ['northPlaza'],
-      northPlaza: ['northGate', 'center', 'nwCorner', 'neCorner'],
-      center: ['northPlaza', 'southPlaza', 'westPlaza', 'eastPlaza'],
-      southPlaza: ['center', 'southGate', 'swCorner', 'seCorner'],
-      southGate: ['southPlaza'],
-
-      westGate: ['westPlaza'],
-      westPlaza: ['westGate', 'center', 'nwCorner', 'swCorner'],
-      eastPlaza: ['center', 'eastGate', 'neCorner', 'seCorner'],
-      eastGate: ['eastPlaza'],
-
-      nwCorner: ['northPlaza', 'westPlaza', 'tavernFront'],
-      neCorner: ['northPlaza', 'eastPlaza', 'marketFront'],
-      swCorner: ['southPlaza', 'westPlaza', 'houseWest1'],
-      seCorner: ['southPlaza', 'eastPlaza', 'houseEast1'],
-
-      tavernFront: ['nwCorner', 'tavernBack'],
-      tavernBack: ['tavernFront'],
-      marketFront: ['neCorner', 'marketBack'],
-      marketBack: ['marketFront'],
-
-      houseWest1: ['swCorner', 'houseWest2'],
-      houseWest2: ['houseWest1'],
-      houseEast1: ['seCorner', 'houseEast2'],
-      houseEast2: ['houseEast1'],
+      center: ['north', 'south', 'east', 'west', 'cafe', 'shop', 'park'],
+      north: ['center', 'ne', 'nw'],
+      south: ['center', 'se', 'sw', 'park'],
+      east: ['center', 'ne', 'se', 'shop', 'school'],
+      west: ['center', 'nw', 'sw', 'cafe', 'station'],
+      ne: ['north', 'east', 'school'],
+      nw: ['north', 'west', 'cafe'],
+      se: ['south', 'east'],
+      sw: ['south', 'west', 'station'],
+      cafe: ['center', 'west', 'nw'],
+      shop: ['center', 'east'],
+      park: ['center', 'south'],
+      station: ['west', 'sw'],
+      school: ['east', 'ne'],
     };
 
-    // ==================== ANIMATIONS ====================
-    async function loadAnimations() {
-      return new Promise((resolve) => {
-        let loaded = 0;
-        const needed = 4;
+    // Anime girl character colors
+    const animeGirls = [
+      { name: 'Sakura', hair: 0xffb7c5, dress: 0xff69b4, skin: 0xffe4c4 },
+      { name: 'Yuki', hair: 0xe6e6fa, dress: 0x9370db, skin: 0xffefd5 },
+      { name: 'Hana', hair: 0xffd700, dress: 0x32cd32, skin: 0xffe4c4 },
+      { name: 'Miku', hair: 0x00ced1, dress: 0x4169e1, skin: 0xffefd5 },
+      { name: 'Rei', hair: 0x1e90ff, dress: 0xffffff, skin: 0xffe4c4 },
+      { name: 'Akari', hair: 0xff4500, dress: 0xffa500, skin: 0xffefd5 },
+      { name: 'Luna', hair: 0x9932cc, dress: 0x000080, skin: 0xffe4c4 },
+      { name: 'Sora', hair: 0x87ceeb, dress: 0xffc0cb, skin: 0xffefd5 },
+    ];
 
-        gltfLoader.load('assets/animations/rig_medium/General.glb', (gltf) => {
-          animationClips.mediumGeneral = gltf.animations;
-          if (++loaded === needed) resolve();
-        });
-        gltfLoader.load('assets/animations/rig_medium/MovementBasic.glb', (gltf) => {
-          animationClips.mediumMovement = gltf.animations;
-          if (++loaded === needed) resolve();
-        });
-        gltfLoader.load('assets/animations/rig_large/General.glb', (gltf) => {
-          animationClips.largeGeneral = gltf.animations;
-          if (++loaded === needed) resolve();
-        });
-        gltfLoader.load('assets/animations/rig_large/MovementBasic.glb', (gltf) => {
-          animationClips.largeMovement = gltf.animations;
-          if (++loaded === needed) resolve();
-        });
-      });
+    // Create anime girl character
+    function createAnimeGirl(config) {
+      const group = new THREE.Group();
+
+      // Body/Dress
+      const bodyGeo = new THREE.CylinderGeometry(0.3, 0.5, 1.2, 8);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: config.dress });
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      body.position.y = 0.8;
+      body.castShadow = true;
+      group.add(body);
+
+      // Head
+      const headGeo = new THREE.SphereGeometry(0.35, 16, 16);
+      const headMat = new THREE.MeshStandardMaterial({ color: config.skin });
+      const head = new THREE.Mesh(headGeo, headMat);
+      head.position.y = 1.7;
+      head.castShadow = true;
+      group.add(head);
+
+      // Hair (big anime hair!)
+      const hairGeo = new THREE.SphereGeometry(0.42, 16, 16);
+      const hairMat = new THREE.MeshStandardMaterial({ color: config.hair });
+      const hair = new THREE.Mesh(hairGeo, hairMat);
+      hair.position.y = 1.75;
+      hair.position.z = -0.05;
+      hair.scale.set(1, 1.1, 1);
+      hair.castShadow = true;
+      group.add(hair);
+
+      // Bangs
+      const bangsGeo = new THREE.BoxGeometry(0.5, 0.15, 0.2);
+      const bangs = new THREE.Mesh(bangsGeo, hairMat);
+      bangs.position.set(0, 1.9, 0.25);
+      group.add(bangs);
+
+      // Side hair
+      const sideHairGeo = new THREE.CylinderGeometry(0.08, 0.04, 0.6, 8);
+      const leftHair = new THREE.Mesh(sideHairGeo, hairMat);
+      leftHair.position.set(-0.35, 1.5, 0.1);
+      leftHair.rotation.z = 0.2;
+      group.add(leftHair);
+      const rightHair = new THREE.Mesh(sideHairGeo, hairMat);
+      rightHair.position.set(0.35, 1.5, 0.1);
+      rightHair.rotation.z = -0.2;
+      group.add(rightHair);
+
+      // Eyes (big anime eyes!)
+      const eyeGeo = new THREE.SphereGeometry(0.08, 8, 8);
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+      const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+      leftEye.position.set(-0.12, 1.72, 0.28);
+      leftEye.scale.set(1, 1.3, 0.5);
+      group.add(leftEye);
+      const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+      rightEye.position.set(0.12, 1.72, 0.28);
+      rightEye.scale.set(1, 1.3, 0.5);
+      group.add(rightEye);
+
+      // Eye highlights
+      const highlightGeo = new THREE.SphereGeometry(0.03, 8, 8);
+      const highlightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const leftHighlight = new THREE.Mesh(highlightGeo, highlightMat);
+      leftHighlight.position.set(-0.1, 1.74, 0.32);
+      group.add(leftHighlight);
+      const rightHighlight = new THREE.Mesh(highlightGeo, highlightMat);
+      rightHighlight.position.set(0.14, 1.74, 0.32);
+      group.add(rightHighlight);
+
+      // Legs
+      const legGeo = new THREE.CylinderGeometry(0.08, 0.06, 0.5, 8);
+      const legMat = new THREE.MeshStandardMaterial({ color: config.skin });
+      const leftLeg = new THREE.Mesh(legGeo, legMat);
+      leftLeg.position.set(-0.15, 0.25, 0);
+      leftLeg.castShadow = true;
+      group.add(leftLeg);
+      const rightLeg = new THREE.Mesh(legGeo, legMat);
+      rightLeg.position.set(0.15, 0.25, 0);
+      rightLeg.castShadow = true;
+      group.add(rightLeg);
+
+      group.scale.set(1.5, 1.5, 1.5);
+      return group;
     }
 
-    // ==================== CHARACTER CLASS ====================
-    class Character {
-      constructor(model, rig, startWaypoint) {
-        this.model = model;
-        this.rig = rig;
-        this.mixer = new THREE.AnimationMixer(model);
+    // Create city building
+    function createBuilding(width, height, depth, color, windows = true) {
+      const group = new THREE.Group();
 
-        // Pathfinding
-        this.currentWaypoint = startWaypoint;
-        this.targetWaypoint = null;
-        this.path = [];
+      const buildingGeo = new THREE.BoxGeometry(width, height, depth);
+      const buildingMat = new THREE.MeshStandardMaterial({ color });
+      const building = new THREE.Mesh(buildingGeo, buildingMat);
+      building.position.y = height / 2;
+      building.castShadow = true;
+      building.receiveShadow = true;
+      group.add(building);
 
-        // Movement
-        this.maxSpeed = 1.5 + Math.random() * 0.8;
-        this.currentSpeed = 0;
-        this.acceleration = 2.5;
-        this.deceleration = 3.5;
-        this.turnSpeed = 5.0;
+      if (windows) {
+        const windowMat = new THREE.MeshBasicMaterial({ color: 0x87ceeb });
+        const windowSize = 0.8;
+        const rows = Math.floor(height / 3);
+        const cols = Math.floor(width / 3);
 
-        // State
-        this.state = 'idle';
-        this.stateTime = 0;
-        this.idleDuration = 2 + Math.random() * 4;
-        this.waitTime = 0;
+        for (let row = 0; row < rows; row++) {
+          for (let col = 0; col < cols; col++) {
+            const windowGeo = new THREE.PlaneGeometry(windowSize, windowSize * 1.2);
+            const windowMesh = new THREE.Mesh(windowGeo, windowMat);
+            windowMesh.position.set(
+              -width / 2 + 1.5 + col * 3,
+              2 + row * 3,
+              depth / 2 + 0.01
+            );
+            group.add(windowMesh);
 
-        // Setup animations
-        const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
-        const movementClips = rig === 'large' ? animationClips.largeMovement : animationClips.mediumMovement;
-
-        if (generalClips?.length > 0) {
-          const idleOptions = generalClips.filter(c => c.name.includes('Idle'));
-          const idleClip = idleOptions[Math.floor(Math.random() * idleOptions.length)] || generalClips[0];
-          this.idleAction = this.mixer.clipAction(idleClip);
-          this.idleAction.setEffectiveTimeScale(0.8 + Math.random() * 0.4);
-          this.idleAction.play();
-        }
-
-        if (movementClips?.length > 0) {
-          const walkOptions = movementClips.filter(c => c.name.includes('Walking'));
-          const walkClip = walkOptions[Math.floor(Math.random() * walkOptions.length)];
-          if (walkClip) {
-            this.walkAction = this.mixer.clipAction(walkClip);
-            this.walkAction.setEffectiveTimeScale(1.0 + Math.random() * 0.2);
+            const backWindow = windowMesh.clone();
+            backWindow.position.z = -depth / 2 - 0.01;
+            backWindow.rotation.y = Math.PI;
+            group.add(backWindow);
           }
         }
+      }
+
+      return group;
+    }
+
+    // Character class
+    class AnimeCharacter {
+      constructor(model, startWaypoint, config) {
+        this.model = model;
+        this.config = config;
+        this.currentWaypoint = startWaypoint;
+        this.targetWaypoint = null;
+        this.lastWaypoint = null;
+
+        this.maxSpeed = 2 + Math.random() * 1;
+        this.currentSpeed = 0;
+        this.turnSpeed = 4;
+
+        this.state = 'idle';
+        this.stateTime = 0;
+        this.idleDuration = 2 + Math.random() * 3;
+        this.bouncePhase = Math.random() * Math.PI * 2;
       }
 
       lerpAngle(from, to, t) {
@@ -744,316 +721,224 @@
 
       pickNextWaypoint() {
         const possibleNext = connections[this.currentWaypoint];
-        if (!possibleNext || possibleNext.length === 0) return null;
-
-        // Prefer waypoints we haven't just come from
+        if (!possibleNext) return null;
         let choices = possibleNext.filter(w => w !== this.lastWaypoint);
         if (choices.length === 0) choices = possibleNext;
-
         return choices[Math.floor(Math.random() * choices.length)];
       }
 
       update(delta) {
-        this.mixer.update(delta);
         this.stateTime += delta;
+        this.bouncePhase += delta * 8;
 
         switch (this.state) {
           case 'idle':
-            // Small idle movements
-            if (Math.random() < 0.003) {
-              this.model.rotation.y += (Math.random() - 0.5) * 0.3;
-            }
+            // Cute idle animation
+            this.model.position.y = Math.sin(this.bouncePhase * 0.5) * 0.05;
+            this.model.rotation.y += Math.sin(this.stateTime * 2) * 0.002;
 
             if (this.stateTime > this.idleDuration) {
               this.targetWaypoint = this.pickNextWaypoint();
               if (this.targetWaypoint) {
-                this.state = 'turning';
+                this.state = 'walking';
                 this.stateTime = 0;
               }
             }
             break;
 
-          case 'turning':
+          case 'walking':
             const target = waypoints[this.targetWaypoint];
             const dx = target.x - this.model.position.x;
             const dz = target.z - this.model.position.z;
+            const dist = Math.sqrt(dx * dx + dz * dz);
             const targetAngle = Math.atan2(dx, dz);
 
             this.model.rotation.y = this.lerpAngle(this.model.rotation.y, targetAngle, delta * this.turnSpeed);
+            this.currentSpeed = Math.min(this.currentSpeed + 4 * delta, this.maxSpeed);
 
-            let angleDiff = Math.abs(targetAngle - this.model.rotation.y);
-            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+            // Cute bouncy walk
+            this.model.position.y = Math.abs(Math.sin(this.bouncePhase)) * 0.15;
 
-            if (Math.abs(angleDiff) < 0.15) {
-              this.state = 'walking';
-              this.stateTime = 0;
-              if (this.walkAction && this.idleAction) {
-                this.idleAction.fadeOut(0.3);
-                this.walkAction.reset().fadeIn(0.3).play();
-              }
-            }
-            break;
-
-          case 'walking':
-            const dest = waypoints[this.targetWaypoint];
-            const dirX = dest.x - this.model.position.x;
-            const dirZ = dest.z - this.model.position.z;
-            const dist = Math.sqrt(dirX * dirX + dirZ * dirZ);
-
-            // Accelerate/decelerate based on distance
-            if (dist > 2) {
-              this.currentSpeed = Math.min(this.currentSpeed + this.acceleration * delta, this.maxSpeed);
+            if (dist > 0.5) {
+              this.model.position.x += (dx / dist) * this.currentSpeed * delta;
+              this.model.position.z += (dz / dist) * this.currentSpeed * delta;
             } else {
-              this.currentSpeed = Math.max(this.currentSpeed - this.deceleration * delta, 0.3);
-            }
-
-            if (dist > 0.3) {
-              const moveX = (dirX / dist) * this.currentSpeed * delta;
-              const moveZ = (dirZ / dist) * this.currentSpeed * delta;
-              this.model.position.x += moveX;
-              this.model.position.z += moveZ;
-
-              // Face movement direction smoothly
-              const moveAngle = Math.atan2(dirX, dirZ);
-              this.model.rotation.y = this.lerpAngle(this.model.rotation.y, moveAngle, delta * this.turnSpeed * 0.5);
-
-              // Walking bob
-              const bob = Math.sin(this.stateTime * 10) * 0.01 * (this.currentSpeed / this.maxSpeed);
-              this.model.position.y = bob;
-            } else {
-              // Arrived at waypoint
               this.lastWaypoint = this.currentWaypoint;
               this.currentWaypoint = this.targetWaypoint;
               this.targetWaypoint = null;
               this.currentSpeed = 0;
-              this.model.position.y = 0;
-
               this.state = 'idle';
               this.stateTime = 0;
-              this.idleDuration = 1 + Math.random() * 3;
-
-              if (this.idleAction && this.walkAction) {
-                this.walkAction.fadeOut(0.4);
-                this.idleAction.reset().fadeIn(0.4).play();
-              }
+              this.idleDuration = 1.5 + Math.random() * 3;
+              this.model.position.y = 0;
             }
             break;
         }
       }
     }
 
-    // ==================== LOADERS ====================
-    function loadCharacter(name, startWaypoint, rig = 'medium', scale = 1) {
-      totalToLoad++;
-      const pos = waypoints[startWaypoint];
-      gltfLoader.load(`assets/models/${name}.glb`, (gltf) => {
-        const model = gltf.scene;
+    // Build the city
+    function buildCity() {
+      // Streets (darker pavement)
+      const streetMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+      const mainStreetNS = new THREE.Mesh(new THREE.PlaneGeometry(12, 200), streetMat);
+      mainStreetNS.rotation.x = -Math.PI / 2;
+      mainStreetNS.position.y = 0.01;
+      scene.add(mainStreetNS);
+
+      const mainStreetEW = new THREE.Mesh(new THREE.PlaneGeometry(200, 12), streetMat);
+      mainStreetEW.rotation.x = -Math.PI / 2;
+      mainStreetEW.position.y = 0.01;
+      scene.add(mainStreetEW);
+
+      // Crosswalk stripes
+      const stripeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      for (let i = -4; i <= 4; i++) {
+        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(1, 5), stripeMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(i * 1.5, 0.02, 0);
+        scene.add(stripe);
+      }
+
+      // Buildings - City blocks
+      const buildingColors = [0xf5deb3, 0xdda0dd, 0xb0c4de, 0xf0e68c, 0xe6e6fa, 0xffc0cb];
+
+      // Northwest block - Offices
+      const b1 = createBuilding(15, 30, 15, 0xb0c4de);
+      b1.position.set(-35, 0, -35);
+      scene.add(b1);
+
+      const b2 = createBuilding(12, 20, 12, 0xf5deb3);
+      b2.position.set(-20, 0, -40);
+      scene.add(b2);
+
+      // Northeast block - Shopping
+      const b3 = createBuilding(18, 12, 15, 0xffc0cb);
+      b3.position.set(30, 0, -35);
+      scene.add(b3);
+
+      const b4 = createBuilding(10, 25, 10, 0xe6e6fa);
+      b4.position.set(45, 0, -40);
+      scene.add(b4);
+
+      // Southwest block - Residential
+      const b5 = createBuilding(12, 15, 12, 0xdda0dd);
+      b5.position.set(-35, 0, 35);
+      scene.add(b5);
+
+      const b6 = createBuilding(10, 18, 10, 0xf0e68c);
+      b6.position.set(-45, 0, 25);
+      scene.add(b6);
+
+      // Southeast block - More shops
+      const b7 = createBuilding(14, 10, 14, 0xffc0cb);
+      b7.position.set(35, 0, 35);
+      scene.add(b7);
+
+      const b8 = createBuilding(16, 22, 12, 0xb0c4de);
+      b8.position.set(45, 0, 20);
+      scene.add(b8);
+
+      // Cafe (cute small building)
+      const cafe = createBuilding(8, 6, 8, 0xff69b4, false);
+      cafe.position.set(-22, 0, -15);
+      scene.add(cafe);
+
+      // School building
+      const school = createBuilding(20, 12, 15, 0xfffacd);
+      school.position.set(40, 0, -25);
+      scene.add(school);
+
+      // Train station
+      const station = createBuilding(15, 8, 25, 0x778899);
+      station.position.set(-40, 0, 10);
+      scene.add(station);
+
+      // Park with trees
+      const parkGround = new THREE.Mesh(
+        new THREE.CircleGeometry(15, 32),
+        new THREE.MeshStandardMaterial({ color: 0x90ee90 })
+      );
+      parkGround.rotation.x = -Math.PI / 2;
+      parkGround.position.set(0, 0.02, 28);
+      scene.add(parkGround);
+
+      // Cherry blossom trees in park
+      for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2;
+        const tree = createTree();
+        tree.position.set(
+          Math.cos(angle) * 10,
+          0,
+          28 + Math.sin(angle) * 10
+        );
+        scene.add(tree);
+      }
+
+      // Street lamps
+      for (let x = -60; x <= 60; x += 20) {
+        const lamp = createStreetLamp();
+        lamp.position.set(x, 0, 8);
+        scene.add(lamp);
+        const lamp2 = lamp.clone();
+        lamp2.position.set(x, 0, -8);
+        scene.add(lamp2);
+      }
+
+      // Add anime girl characters
+      const startPoints = ['center', 'cafe', 'shop', 'park', 'station', 'school', 'ne', 'sw'];
+      animeGirls.forEach((config, i) => {
+        const model = createAnimeGirl(config);
+        const start = startPoints[i % startPoints.length];
+        const pos = waypoints[start];
         model.position.set(pos.x, 0, pos.z);
-        model.scale.set(scale, scale, scale);
         model.rotation.y = Math.random() * Math.PI * 2;
-        model.traverse((child) => {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
         scene.add(model);
-        characters.push(new Character(model, rig, startWaypoint));
-        updateLoading();
-      }, undefined, () => updateLoading());
+        characters.push(new AnimeCharacter(model, start, config));
+      });
+
+      document.getElementById('loading').style.display = 'none';
     }
 
-    function loadTownAsset(category, name, position, scale = 1, rotation = 0) {
-      totalToLoad++;
-      gltfLoader.load(`assets/town/${category}/${name}.gltf`, (gltf) => {
-        const model = gltf.scene;
-        model.position.set(position.x, position.y, position.z);
-        model.scale.set(scale, scale, scale);
-        model.rotation.y = rotation;
-        model.traverse((child) => {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
-        scene.add(model);
-        updateLoading();
-      }, undefined, () => updateLoading());
+    function createTree() {
+      const group = new THREE.Group();
+
+      // Trunk
+      const trunkGeo = new THREE.CylinderGeometry(0.3, 0.4, 3, 8);
+      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+      const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+      trunk.position.y = 1.5;
+      trunk.castShadow = true;
+      group.add(trunk);
+
+      // Cherry blossom foliage (pink!)
+      const foliageGeo = new THREE.SphereGeometry(2.5, 16, 16);
+      const foliageMat = new THREE.MeshStandardMaterial({ color: 0xffb7c5 });
+      const foliage = new THREE.Mesh(foliageGeo, foliageMat);
+      foliage.position.y = 4.5;
+      foliage.castShadow = true;
+      group.add(foliage);
+
+      return group;
     }
 
-    // ==================== BUILD TOWN ====================
-    async function buildTown() {
-      await loadAnimations();
+    function createStreetLamp() {
+      const group = new THREE.Group();
 
-      // Scale factor for all structures (3x bigger)
-      const S = 3;
+      const poleMat = new THREE.MeshStandardMaterial({ color: 0x2f2f2f });
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 5, 8), poleMat);
+      pole.position.y = 2.5;
+      group.add(pole);
 
-      // === GROUND TILES ===
-      const hexW = 1.73 * S, hexH = 1.5 * S;
-      for (let x = -8; x <= 8; x++) {
-        for (let z = -8; z <= 8; z++) {
-          const offX = z % 2 === 0 ? 0 : hexW / 2;
-          const px = x * hexW + offX, pz = z * hexH;
+      const lampMat = new THREE.MeshBasicMaterial({ color: 0xfffacd });
+      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 8), lampMat);
+      lamp.position.y = 5.2;
+      group.add(lamp);
 
-          // Road pattern - main cross + side streets
-          const isMainRoad = (Math.abs(x) <= 1 && Math.abs(z) <= 8) || (Math.abs(z) <= 1 && Math.abs(x) <= 8);
-          const isSideStreet = (Math.abs(x) >= 2 && Math.abs(x) <= 4 && Math.abs(z) === 4) ||
-                               (Math.abs(z) >= 2 && Math.abs(z) <= 4 && Math.abs(x) === 4);
-
-          if (isMainRoad || isSideStreet) {
-            loadTownAsset('tiles', 'hex_road_A', { x: px, y: 0.01, z: pz }, S);
-          } else {
-            loadTownAsset('tiles', 'hex_grass', { x: px, y: 0, z: pz }, S);
-          }
-        }
-      }
-
-      // === HOUSES - Northwest District (Tavern Area) ===
-      loadTownAsset('buildings', 'building_stage_A', { x: -18, y: 0, z: -15 }, S * 1.3, Math.PI/4);
-      loadTownAsset('buildings', 'building_stage_B', { x: -24, y: 0, z: -12 }, S * 1.2, Math.PI/3);
-      loadTownAsset('buildings', 'building_stage_C', { x: -21, y: 0, z: -21 }, S * 1.1, Math.PI/5);
-      loadTownAsset('buildings', 'building_grain', { x: -15, y: 0, z: -21 }, S * 1.0, Math.PI/6);
-
-      // === HOUSES - Northeast District (Market Area) ===
-      loadTownAsset('buildings', 'building_stage_A', { x: 18, y: 0, z: -15 }, S * 1.3, -Math.PI/4);
-      loadTownAsset('buildings', 'building_stage_B', { x: 24, y: 0, z: -12 }, S * 1.2, -Math.PI/3);
-      loadTownAsset('buildings', 'building_stage_C', { x: 21, y: 0, z: -21 }, S * 1.1, -Math.PI/5);
-      loadTownAsset('buildings', 'building_grain', { x: 15, y: 0, z: -21 }, S * 1.0, -Math.PI/6);
-
-      // === HOUSES - Southwest District (Residential) ===
-      loadTownAsset('buildings', 'building_stage_A', { x: -18, y: 0, z: 15 }, S * 1.2, Math.PI * 0.75);
-      loadTownAsset('buildings', 'building_stage_B', { x: -24, y: 0, z: 12 }, S * 1.1, Math.PI * 0.6);
-      loadTownAsset('buildings', 'building_stage_C', { x: -21, y: 0, z: 21 }, S * 1.3, Math.PI * 0.8);
-      loadTownAsset('buildings', 'building_dirt', { x: -15, y: 0, z: 21 }, S * 1.0, Math.PI * 0.7);
-
-      // === HOUSES - Southeast District (Residential) ===
-      loadTownAsset('buildings', 'building_stage_A', { x: 18, y: 0, z: 15 }, S * 1.2, -Math.PI * 0.75);
-      loadTownAsset('buildings', 'building_stage_B', { x: 24, y: 0, z: 12 }, S * 1.1, -Math.PI * 0.6);
-      loadTownAsset('buildings', 'building_stage_C', { x: 21, y: 0, z: 21 }, S * 1.3, -Math.PI * 0.8);
-      loadTownAsset('buildings', 'building_grain', { x: 15, y: 0, z: 21 }, S * 1.0, -Math.PI * 0.7);
-
-      // === CENTRAL PLAZA ===
-      loadTownAsset('buildings', 'building_scaffolding', { x: 0, y: 0, z: 0 }, S * 2, 0);
-      loadTownAsset('props', 'flag_blue', { x: -4, y: 0, z: -4 }, S * 1.5);
-      loadTownAsset('props', 'flag_red', { x: 4, y: 0, z: -4 }, S * 1.5);
-      loadTownAsset('props', 'flag_green', { x: -4, y: 0, z: 4 }, S * 1.5);
-      loadTownAsset('props', 'flag_yellow', { x: 4, y: 0, z: 4 }, S * 1.5);
-
-      // === WALLS ===
-      for (let i = -5; i <= 5; i++) {
-        loadTownAsset('buildings', 'wall_straight', { x: i * 7.5, y: 0, z: -36 }, S, 0);
-        loadTownAsset('buildings', 'wall_straight', { x: i * 7.5, y: 0, z: 36 }, S, Math.PI);
-        loadTownAsset('buildings', 'wall_straight', { x: -36, y: 0, z: i * 7.5 }, S, -Math.PI/2);
-        loadTownAsset('buildings', 'wall_straight', { x: 36, y: 0, z: i * 7.5 }, S, Math.PI/2);
-      }
-
-      // Corner towers
-      loadTownAsset('buildings', 'wall_corner_A_outside', { x: -36, y: 0, z: -36 }, S * 1.4, 0);
-      loadTownAsset('buildings', 'wall_corner_A_outside', { x: 36, y: 0, z: -36 }, S * 1.4, Math.PI/2);
-      loadTownAsset('buildings', 'wall_corner_A_outside', { x: 36, y: 0, z: 36 }, S * 1.4, Math.PI);
-      loadTownAsset('buildings', 'wall_corner_A_outside', { x: -36, y: 0, z: 36 }, S * 1.4, -Math.PI/2);
-
-      // Gates
-      loadTownAsset('buildings', 'wall_straight_gate', { x: 0, y: 0, z: -36 }, S * 1.3, 0);
-      loadTownAsset('buildings', 'wall_straight_gate', { x: 0, y: 0, z: 36 }, S * 1.3, Math.PI);
-      loadTownAsset('buildings', 'wall_straight_gate', { x: -36, y: 0, z: 0 }, S * 1.3, -Math.PI/2);
-      loadTownAsset('buildings', 'wall_straight_gate', { x: 36, y: 0, z: 0 }, S * 1.3, Math.PI/2);
-
-      // === MARKET PROPS ===
-      loadTownAsset('props', 'barrel', { x: 16, y: 0, z: -13 }, S);
-      loadTownAsset('props', 'barrel', { x: 18, y: 0, z: -12 }, S);
-      loadTownAsset('props', 'crate_A_big', { x: 20, y: 0, z: -15 }, S);
-      loadTownAsset('props', 'crate_B_big', { x: 22, y: 0, z: -13 }, S);
-      loadTownAsset('props', 'sack', { x: 17, y: 0, z: -15 }, S);
-      loadTownAsset('props', 'sack', { x: 19, y: 0, z: -16 }, S);
-      loadTownAsset('props', 'tent', { x: 23, y: 0, z: -18 }, S * 1.2, -Math.PI/4);
-
-      // === TAVERN PROPS ===
-      loadTownAsset('props', 'barrel', { x: -16, y: 0, z: -13 }, S);
-      loadTownAsset('props', 'barrel', { x: -18, y: 0, z: -12 }, S);
-      loadTownAsset('props', 'barrel', { x: -15, y: 0, z: -11 }, S);
-      loadTownAsset('props', 'bucket_water', { x: -20, y: 0, z: -15 }, S);
-      loadTownAsset('props', 'crate_long_A', { x: -22, y: 0, z: -16 }, S);
-
-      // === RESIDENTIAL PROPS ===
-      loadTownAsset('props', 'wheelbarrow', { x: -20, y: 0, z: 12 }, S, Math.PI/3);
-      loadTownAsset('props', 'bucket_empty', { x: -16, y: 0, z: 16 }, S);
-      loadTownAsset('props', 'pallet', { x: -22, y: 0, z: 15 }, S);
-      loadTownAsset('props', 'resource_lumber', { x: -22, y: 0.1, z: 15 }, S);
-      loadTownAsset('props', 'ladder', { x: 20, y: 0, z: 16 }, S, -Math.PI/4);
-      loadTownAsset('props', 'crate_open', { x: 22, y: 0, z: 13 }, S);
-
-      // === TRAINING AREA ===
-      loadTownAsset('props', 'target', { x: 28, y: 0, z: 12 }, S);
-      loadTownAsset('props', 'target', { x: 28, y: 0, z: 18 }, S);
-      loadTownAsset('props', 'weaponrack', { x: 25, y: 0, z: 9 }, S, -Math.PI/2);
-      loadTownAsset('props', 'bucket_arrows', { x: 26, y: 0, z: 15 }, S);
-
-      // === FENCES ===
-      loadTownAsset('buildings', 'fence_wood_straight', { x: -12, y: 0, z: 10 }, S, Math.PI/2);
-      loadTownAsset('buildings', 'fence_wood_straight_gate', { x: -12, y: 0, z: 15 }, S, Math.PI/2);
-      loadTownAsset('buildings', 'fence_stone_straight', { x: 12, y: 0, z: -10 }, S, Math.PI/2);
-
-      // === NATURE - Inside Town ===
-      loadTownAsset('nature', 'tree_single_A', { x: -10, y: 0, z: -10 }, S);
-      loadTownAsset('nature', 'tree_single_B', { x: 10, y: 0, z: 10 }, S);
-      loadTownAsset('nature', 'tree_single_A', { x: -25, y: 0, z: 0 }, S * 0.9);
-      loadTownAsset('nature', 'tree_single_B', { x: 25, y: 0, z: 0 }, S * 0.9);
-      loadTownAsset('nature', 'rock_single_A', { x: -28, y: 0, z: -25 }, S * 0.8);
-      loadTownAsset('nature', 'rock_single_B', { x: 28, y: 0, z: 25 }, S * 0.8);
-
-      // === NATURE - Outside Walls ===
-      loadTownAsset('nature', 'trees_A_large', { x: -50, y: 0, z: -30 }, S * 1.5);
-      loadTownAsset('nature', 'trees_B_large', { x: -50, y: 0, z: 0 }, S * 1.4);
-      loadTownAsset('nature', 'trees_A_medium', { x: -50, y: 0, z: 30 }, S * 1.6);
-      loadTownAsset('nature', 'trees_B_large', { x: 50, y: 0, z: -30 }, S * 1.5);
-      loadTownAsset('nature', 'trees_A_large', { x: 50, y: 0, z: 0 }, S * 1.4);
-      loadTownAsset('nature', 'trees_B_medium', { x: 50, y: 0, z: 30 }, S * 1.6);
-      loadTownAsset('nature', 'trees_A_large', { x: 0, y: 0, z: -55 }, S * 1.7);
-      loadTownAsset('nature', 'trees_B_large', { x: 0, y: 0, z: 55 }, S * 1.7);
-
-      // Hills & Mountains
-      loadTownAsset('nature', 'hills_A_trees', { x: -70, y: 0, z: 0 }, S * 3);
-      loadTownAsset('nature', 'hills_B_trees', { x: 70, y: 0, z: 0 }, S * 3);
-      loadTownAsset('nature', 'hills_C_trees', { x: 0, y: 0, z: -70 }, S * 3);
-      loadTownAsset('nature', 'mountain_A_grass_trees', { x: -90, y: 0, z: -60 }, S * 5);
-      loadTownAsset('nature', 'mountain_B_grass_trees', { x: 90, y: 0, z: -60 }, S * 5);
-      loadTownAsset('nature', 'mountain_C_grass', { x: 0, y: 0, z: -100 }, S * 6);
-
-      // Clouds
-      loadTownAsset('nature', 'cloud_big', { x: -50, y: 40, z: -40 }, S * 4);
-      loadTownAsset('nature', 'cloud_small', { x: 40, y: 45, z: 30 }, S * 3);
-      loadTownAsset('nature', 'cloud_big', { x: 60, y: 35, z: -50 }, S * 3.5);
-      loadTownAsset('nature', 'cloud_small', { x: -30, y: 50, z: 50 }, S * 2.5);
-
-      // === CHARACTERS - Walking the roads ===
-      // Townspeople on main routes
-      loadCharacter('BlackKnight', 'center', 'medium', 1);
-      loadCharacter('Witch', 'northPlaza', 'medium', 1);
-      loadCharacter('Vampire', 'southPlaza', 'medium', 1);
-      loadCharacter('Hiker', 'westPlaza', 'medium', 1);
-      loadCharacter('Tiefling', 'eastPlaza', 'medium', 1);
-
-      // Tavern district regulars
-      loadCharacter('Caveman', 'tavernFront', 'medium', 1);
-      loadCharacter('Helper_A', 'tavernBack', 'medium', 1);
-
-      // Market shoppers
-      loadCharacter('Helper_B', 'marketFront', 'medium', 1);
-      loadCharacter('Protagonist_A', 'marketBack', 'medium', 1);
-
-      // Residential wanderers
-      loadCharacter('Superhero', 'houseWest1', 'medium', 1);
-      loadCharacter('Protagonist_B', 'houseEast1', 'medium', 1);
-
-      // Gate guards (larger, slower)
-      loadCharacter('FrostGolem', 'northGate', 'large', 1.2);
-      loadCharacter('CombatMech', 'southGate', 'large', 1.2);
-      loadCharacter('Clanker', 'westGate', 'large', 1.2);
+      return group;
     }
 
-    // Start
-    buildTown();
+    buildCity();
 
     // Animation loop
     function animate() {
@@ -1065,14 +950,13 @@
     }
     animate();
 
-    // Resize
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // ==================== WEBSOCKET & UI ====================
+    // WebSocket & UI code
     const wsStatus = document.getElementById('ws-status');
     const agentsList = document.getElementById('agents-list');
     const tasksList = document.getElementById('tasks-list');
@@ -1080,212 +964,139 @@
     const messagesList = document.getElementById('messages-list');
     const taskInput = document.getElementById('task-input');
     const submitTask = document.getElementById('submit-task');
-
-    let ws = null;
-    let serverAgents = [];
-    let serverTasks = [];
-    let serverMessages = [];
-
-    // Agent type colors
-    const typeColors = {
-      planner: '#c084fc',
-      designer: '#f472b6',
-      coder: '#60a5fa',
-      reviewer: '#4ade80'
-    };
-
-    function connectWebSocket() {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/ws`;
-
-      ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => {
-        wsStatus.textContent = 'Online';
-        wsStatus.className = 'status connected';
-        submitTask.disabled = false;
-        console.log('WebSocket connected');
-      };
-
-      ws.onclose = () => {
-        wsStatus.textContent = 'Offline';
-        wsStatus.className = 'status disconnected';
-        submitTask.disabled = true;
-        console.log('WebSocket disconnected, reconnecting in 3s...');
-        setTimeout(connectWebSocket, 3000);
-      };
-
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-          handleServerMessage(message);
-        } catch (e) {
-          console.error('Failed to parse message:', e);
-        }
-      };
-    }
-
-    function handleServerMessage(message) {
-      switch (message.type) {
-        case 'connected':
-          console.log('Server welcome:', message.data.message);
-          break;
-        case 'state_update':
-          serverAgents = message.data.agents || [];
-          serverTasks = message.data.tasks || [];
-          serverMessages = message.data.messages || [];
-          updateUI();
-          break;
-        case 'task_created':
-          console.log('New task created:', message.data);
-          break;
-      }
-    }
-
-    function updateUI() {
-      // Update agents list
-      if (serverAgents.length > 0) {
-        agentsList.innerHTML = serverAgents.map(agent => `
-          <div class="agent-card" data-agent-id="${agent.id}">
-            <div class="agent-avatar" style="background: linear-gradient(135deg, ${typeColors[agent.type] || '#667eea'}, #4a5568);">
-              ${agent.name.charAt(0)}
-            </div>
-            <div class="agent-info">
-              <div class="agent-name">${agent.name}</div>
-              <div class="agent-role">${agent.type}</div>
-            </div>
-            <div class="agent-status ${agent.status}">${agent.status}</div>
-          </div>
-        `).join('');
-      }
-
-      // Update tasks list
-      const activeTasks = serverTasks.filter(t => t.status !== 'completed').slice(0, 5);
-      taskCount.textContent = activeTasks.length;
-
-      if (activeTasks.length > 0) {
-        tasksList.innerHTML = activeTasks.map(task => `
-          <div class="task-item ${task.status}">
-            <div class="task-title">${task.title}</div>
-            <div class="task-meta">Priority: ${task.priority} | Status: ${task.status}</div>
-          </div>
-        `).join('');
-      } else {
-        tasksList.innerHTML = '<div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">No active tasks</div>';
-      }
-
-      // Update messages list
-      if (serverMessages.length > 0) {
-        const recentMessages = serverMessages.slice(0, 15);
-        messagesList.innerHTML = recentMessages.map(msg => {
-          const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          return `
-            <div class="message-item">
-              <div class="message-header">
-                <span class="message-agent">${msg.agent_name || 'Agent'}</span>
-                <span class="message-time">${time}</span>
-              </div>
-              <div class="message-content">
-                <span class="message-type ${msg.type}">${msg.type}</span>
-                ${msg.content}
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-    }
-
-    // Additional UI elements
     const charCount = document.getElementById('char-count');
     const prioritySelect = document.getElementById('priority-select');
     const submitText = document.getElementById('submit-text');
     const serverDot = document.getElementById('server-dot');
     const serverStatusText = document.getElementById('server-status-text');
 
+    let ws = null;
     let serverOnline = false;
 
-    // Character count
     taskInput.addEventListener('input', () => {
       charCount.textContent = taskInput.value.length;
     });
 
-    // Check server health
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+
+      ws.onopen = () => {
+        wsStatus.textContent = 'Online';
+        wsStatus.className = 'status connected';
+        submitTask.disabled = false;
+      };
+
+      ws.onclose = () => {
+        wsStatus.textContent = 'Offline';
+        wsStatus.className = 'status disconnected';
+        submitTask.disabled = true;
+        setTimeout(connectWebSocket, 3000);
+      };
+
+      ws.onerror = () => {};
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'state_update') {
+            updateUI(msg.data);
+          }
+        } catch (e) {}
+      };
+    }
+
+    function updateUI(data) {
+      if (data.agents?.length > 0) {
+        agentsList.innerHTML = data.agents.map(a => `
+          <div class="agent-card">
+            <div class="agent-avatar">${a.name.charAt(0)}</div>
+            <div class="agent-info">
+              <div class="agent-name">${a.name}</div>
+              <div class="agent-role">${a.type}</div>
+            </div>
+            <div class="agent-status ${a.status}">${a.status}</div>
+          </div>
+        `).join('');
+      }
+
+      const active = (data.tasks || []).filter(t => t.status !== 'completed').slice(0, 5);
+      taskCount.textContent = active.length;
+      if (active.length > 0) {
+        tasksList.innerHTML = active.map(t => `
+          <div class="task-item ${t.status}">
+            <div class="task-title">${t.title}</div>
+            <div class="task-meta">Priority: ${t.priority}</div>
+          </div>
+        `).join('');
+      }
+
+      if (data.messages?.length > 0) {
+        messagesList.innerHTML = data.messages.slice(0, 10).map(m => `
+          <div class="message-item">
+            <div class="message-header">
+              <span class="message-agent">${m.agent_name || 'Agent'}</span>
+            </div>
+            <div class="message-content">
+              <span class="message-type ${m.type}">${m.type}</span>
+              ${m.content}
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
     async function checkServerHealth() {
       try {
-        const response = await fetch('/api/health');
-        if (response.ok) {
-          const data = await response.json();
+        const res = await fetch('/api/health');
+        if (res.ok) {
+          const data = await res.json();
           serverOnline = true;
           serverDot.classList.add('online');
-          if (data.dbAvailable && data.orchestrationReady) {
-            serverStatusText.textContent = 'Server online - agents ready';
-            submitTask.disabled = false;
-          } else if (data.dbAvailable) {
-            serverStatusText.textContent = 'Server online - waiting for orchestration';
-            submitTask.disabled = false;
-          } else {
-            serverStatusText.textContent = 'Server online - database not configured';
-            submitTask.disabled = true;
-          }
+          serverStatusText.textContent = data.dbAvailable ? 'Server online - agents ready!' : 'Server online';
+          submitTask.disabled = !data.dbAvailable;
         }
-      } catch (error) {
+      } catch {
         serverOnline = false;
         serverDot.classList.remove('online');
-        serverStatusText.textContent = 'Server offline - task submission unavailable';
+        serverStatusText.textContent = 'Server offline';
         submitTask.disabled = true;
       }
     }
 
-    // Check health on load and periodically
     checkServerHealth();
     setInterval(checkServerHealth, 10000);
 
-    // Submit task with improved UX
     submitTask.addEventListener('click', async () => {
       const title = taskInput.value.trim();
       if (!title || !serverOnline) return;
 
-      const priority = parseInt(prioritySelect.value);
-
       submitTask.disabled = true;
-      submitTask.classList.add('submitting');
-      submitText.textContent = 'Submitting...';
+      submitText.textContent = 'Sending...';
 
       try {
-        const response = await fetch('/api/tasks', {
+        const res = await fetch('/api/tasks', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, priority })
+          body: JSON.stringify({ title, priority: parseInt(prioritySelect.value) })
         });
-
-        if (response.ok) {
+        if (res.ok) {
           taskInput.value = '';
           charCount.textContent = '0';
-          submitTask.classList.remove('submitting');
           submitTask.classList.add('success');
-          submitText.textContent = 'Task Created!';
-
+          submitText.textContent = 'Sent!';
           setTimeout(() => {
             submitTask.classList.remove('success');
-            submitText.textContent = 'Submit Task';
+            submitText.textContent = 'Send Task';
             submitTask.disabled = false;
           }, 2000);
-        } else {
-          throw new Error('Server returned error');
         }
-      } catch (error) {
-        console.error('Error submitting task:', error);
-        submitTask.classList.remove('submitting');
+      } catch {
         submitTask.classList.add('error');
-        submitText.textContent = 'Failed - Try Again';
-
+        submitText.textContent = 'Failed';
         setTimeout(() => {
           submitTask.classList.remove('error');
-          submitText.textContent = 'Submit Task';
+          submitText.textContent = 'Send Task';
           submitTask.disabled = false;
         }, 2000);
       }
@@ -1298,7 +1109,6 @@
       }
     });
 
-    // Initialize WebSocket connection
     connectWebSocket();
   </script>
 </body>
