@@ -218,6 +218,87 @@
       margin-top: 3px;
     }
 
+    /* Results Panel */
+    #results-panel { flex: 0 0 auto; max-height: 200px; }
+    #results-panel .panel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .result-item {
+      background: linear-gradient(135deg, rgba(60, 80, 60, 0.5), rgba(40, 60, 40, 0.6));
+      border: 1px solid #4a6a4a;
+      border-left: 3px solid #6b8e23;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 6px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .result-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #c9d9a9;
+    }
+
+    .result-status {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #4a6a4a;
+      color: #a9d9a9;
+    }
+
+    .result-files {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .result-file {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid #5a6a5a;
+      border-radius: 4px;
+      font-size: 10px;
+      color: #b8c8a8;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .result-file:hover {
+      background: rgba(107, 142, 35, 0.3);
+      border-color: #6b8e23;
+    }
+
+    .result-file-icon {
+      font-size: 12px;
+    }
+
+    .result-preview {
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 10px;
+      color: #a0d911;
+      max-height: 80px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
     /* Messages Panel */
     #messages-panel { flex: 1; min-height: 150px; }
     #messages-panel .panel-content {
@@ -1132,6 +1213,18 @@
       </div>
     </div>
 
+    <div id="results-panel" class="panel">
+      <div class="panel-header">
+        <span>Results</span>
+        <span id="results-count" style="font-size: 11px; color: #9ca3af;">0</span>
+      </div>
+      <div class="panel-content" id="results-list">
+        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+          Completed task results will appear here
+        </div>
+      </div>
+    </div>
+
     <div id="messages-panel" class="panel">
       <div class="panel-header">
         <span>Activity Feed</span>
@@ -1179,6 +1272,7 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
     // Scene setup
     const scene = new THREE.Scene();
@@ -1307,35 +1401,40 @@
         previewAnimationId = null;
       }
 
-      // Clone the character's model for preview
+      // Clone the character's model for preview using SkeletonUtils for proper skinned mesh cloning
       if (character.model) {
-        previewModel = character.model.clone();
-        previewModel.position.set(0, 0, 0);
-        previewModel.rotation.set(0, 0.2, 0);
-        previewModel.scale.copy(character.model.scale);
-        previewScene.add(previewModel);
+        try {
+          previewModel = SkeletonUtils.clone(character.model);
+          previewModel.position.set(0, 0, 0);
+          previewModel.rotation.set(0, 0.2, 0);
+          previewModel.scale.copy(character.model.scale);
+          previewScene.add(previewModel);
 
-        // Setup animation mixer for preview with idle animation
-        const rig = character.rig;
-        const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
-        if (generalClips && generalClips.length > 0) {
-          previewMixer = new THREE.AnimationMixer(previewModel);
-          const idleClip = generalClips.find(c => c.name.toLowerCase().includes('idle')) || generalClips[0];
-          if (idleClip) {
-            const action = previewMixer.clipAction(idleClip);
-            action.play();
+          // Setup animation mixer for preview with idle animation
+          const rig = character.rig;
+          const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
+          if (generalClips && generalClips.length > 0) {
+            previewMixer = new THREE.AnimationMixer(previewModel);
+            const idleClip = generalClips.find(c => c.name.toLowerCase().includes('idle')) || generalClips[0];
+            if (idleClip) {
+              const action = previewMixer.clipAction(idleClip);
+              action.play();
+            }
           }
-        }
 
-        // Animate preview - idle animation only
-        const previewClock = new THREE.Clock();
-        function animatePreview() {
-          previewAnimationId = requestAnimationFrame(animatePreview);
-          const delta = previewClock.getDelta();
-          if (previewMixer) previewMixer.update(delta);
+          // Animate preview - idle animation only
+          const previewClock = new THREE.Clock();
+          function animatePreview() {
+            previewAnimationId = requestAnimationFrame(animatePreview);
+            const delta = previewClock.getDelta();
+            if (previewMixer) previewMixer.update(delta);
+            previewRenderer.render(previewScene, previewCamera);
+          }
+          animatePreview();
+        } catch (e) {
+          console.error('Error cloning character model:', e);
           previewRenderer.render(previewScene, previewCamera);
         }
-        animatePreview();
       } else {
         // No model - just render empty scene
         previewRenderer.render(previewScene, previewCamera);
@@ -2215,6 +2314,8 @@
     let ws = null;
     let serverAgents = [];
     let serverTasks = [];
+    let completedResults = [];
+    let taskFiles = new Map(); // taskId -> [files]
     let serverMessages = [];
 
     // Agent type colors
@@ -2455,11 +2556,20 @@
       const { taskId, filename, size } = data;
       console.log(`File created: ${filename} (${size} bytes) for task ${taskId}`);
 
+      // Track file for the task
+      if (!taskFiles.has(taskId)) {
+        taskFiles.set(taskId, []);
+      }
+      taskFiles.get(taskId).push({ filename, size });
+
       // Show announcement
       const coder = [...agentCharacters.values()].find(c => c.agentType === 'coder');
       if (coder) {
         showSpeechBubble(coder, `Created ${filename}`, 'status', 2000);
       }
+
+      // Update results display
+      updateResultsPanel();
     }
 
     // Task completed
@@ -2467,12 +2577,33 @@
       const { taskId, result } = data;
       console.log('Task complete:', taskId, result);
 
+      // Find the task
+      const task = serverTasks.find(t => t.id === taskId);
+      const files = taskFiles.get(taskId) || [];
+
+      // Add to completed results
+      completedResults.unshift({
+        taskId,
+        title: task?.title || `Task #${taskId}`,
+        completedAt: new Date(),
+        files,
+        result
+      });
+
+      // Keep only last 10 results
+      if (completedResults.length > 10) {
+        completedResults.pop();
+      }
+
+      // Update results panel
+      updateResultsPanel();
+
       // All agents celebrate in town square
       for (const [, character] of agentCharacters) {
         character.moveTo('town_square', () => {
           setTimeout(() => {
             if (character.agentType === 'coder') {
-              showSpeechBubble(character, 'Shipped! 🚀', 'saying', 4000);
+              showSpeechBubble(character, 'Shipped!', 'saying', 4000);
             } else if (character.agentType === 'designer') {
               showSpeechBubble(character, 'Looks great!', 'saying', 4000);
             } else if (character.agentType === 'reviewer') {
@@ -2482,6 +2613,70 @@
         });
       }
     }
+
+    // Update results panel display
+    function updateResultsPanel() {
+      const resultsList = document.getElementById('results-list');
+      const resultsCount = document.getElementById('results-count');
+
+      if (completedResults.length === 0) {
+        resultsList.innerHTML = `
+          <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+            Completed task results will appear here
+          </div>`;
+        resultsCount.textContent = '0';
+        return;
+      }
+
+      resultsCount.textContent = completedResults.length;
+
+      resultsList.innerHTML = completedResults.map(result => `
+        <div class="result-item">
+          <div class="result-header">
+            <span class="result-title">${escapeHtml(result.title)}</span>
+            <span class="result-status">Completed</span>
+          </div>
+          ${result.files.length > 0 ? `
+            <div class="result-files">
+              ${result.files.map(file => `
+                <div class="result-file" onclick="downloadTaskFile(${result.taskId}, '${file.filename}')">
+                  <span class="result-file-icon">📄</span>
+                  <span>${file.filename}</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+          <div style="font-size: 10px; color: #8a9a7a; margin-top: 6px;">
+            ${result.completedAt.toLocaleTimeString()}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Helper to escape HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Download task file
+    window.downloadTaskFile = async function(taskId, filename) {
+      try {
+        const response = await fetch(`/api/tasks/${taskId}/files/${filename}`);
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      } catch (e) {
+        console.error('Error downloading file:', e);
+      }
+    };
 
     // ==================== SPEECH BUBBLE SYSTEM ====================
     const bubbleContainer = document.getElementById('bubble-container');
@@ -2575,22 +2770,42 @@
         const character = agentCharacters.get(agentId);
         if (character) {
           const pos = character.getPosition();
-          pos.y += 2.5;
 
-          const vector = pos.clone().project(camera);
-          const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
-          const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+          // Calculate distance to camera
+          const distanceToCamera = camera.position.distanceTo(pos);
 
-          label.style.left = `${x}px`;
-          label.style.top = `${y}px`;
+          // Project position with height offset for label
+          const labelPos = pos.clone();
+          labelPos.y += 2.5;
+          const vector = labelPos.clone().project(camera);
 
-          // Update status text and working class
-          const isWorking = character.status === 'working';
-          label.classList.toggle('working', isWorking);
+          // Check if character is behind camera (z > 1) or too far away
+          const isBehindCamera = vector.z > 1;
+          const isTooFar = distanceToCamera > 80;
+          const isOffScreen = Math.abs(vector.x) > 1.2 || Math.abs(vector.y) > 1.2;
 
-          const statusText = label.querySelector('.status-text');
-          if (statusText) {
-            statusText.textContent = character.doing || '';
+          if (isBehindCamera || isTooFar || isOffScreen) {
+            label.style.display = 'none';
+          } else {
+            label.style.display = 'block';
+            const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+
+            label.style.left = `${x}px`;
+            label.style.top = `${y}px`;
+
+            // Scale label based on distance
+            const scale = Math.max(0.6, Math.min(1, 40 / distanceToCamera));
+            label.style.transform = `translate(-50%, -100%) scale(${scale})`;
+
+            // Update status text and working class
+            const isWorking = character.status === 'working';
+            label.classList.toggle('working', isWorking);
+
+            const statusText = label.querySelector('.status-text');
+            if (statusText) {
+              statusText.textContent = character.doing || '';
+            }
           }
         }
       }
