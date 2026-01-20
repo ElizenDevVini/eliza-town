@@ -300,6 +300,7 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 
     // Scene setup
     const scene = new THREE.Scene();
@@ -356,12 +357,15 @@
 
     // Loaders & State
     const gltfLoader = new GLTFLoader();
+    const fbxLoader = new FBXLoader();
     const clock = new THREE.Clock();
     const characters = [];
     let loadedCount = 0;
     let totalToLoad = 0;
 
     const CITY_PATH = 'assets/models/Model packs/Assets/kenney_city-kit-commercial_2.1/Models/GLB format/';
+    const HOLOMYTH_PATH = 'assets/models/Model packs/Characters/Smol Holomyth characters/';
+    const COUNCILRY_PATH = 'assets/models/Model packs/Characters/beeg Smol Councilry Characters/';
 
     function updateProgress() {
       loadedCount++;
@@ -407,26 +411,28 @@
       school: ['east', 'ne'],
     };
 
-    // Character configs - using actual GLB models from assets/models/
+    // Character configs - Smol Holomyth and beeg Smol Councilry characters
     const characterModels = [
-      { name: 'Protagonist A', model: 'Protagonist_A.glb' },
-      { name: 'Protagonist B', model: 'Protagonist_B.glb' },
-      { name: 'Helper A', model: 'Helper_A.glb' },
-      { name: 'Helper B', model: 'Helper_B.glb' },
-      { name: 'Witch', model: 'Witch.glb' },
-      { name: 'Vampire', model: 'Vampire.glb' },
-      { name: 'Superhero', model: 'Superhero.glb' },
-      { name: 'Hiker', model: 'Hiker.glb' },
+      // Smol Holomyth characters
+      { name: 'Gura', model: 'Gura.fbx', path: HOLOMYTH_PATH },
+      { name: 'Calli', model: 'Calli.fbx', path: HOLOMYTH_PATH },
+      { name: 'Ina', model: 'Ina.fbx', path: HOLOMYTH_PATH },
+      { name: 'Kiara', model: 'SmolKiara.fbx', path: HOLOMYTH_PATH },
+      { name: 'Ame', model: 'Smolame.fbx', path: HOLOMYTH_PATH },
+      // beeg Smol Councilry characters
+      { name: 'Kronii', model: 'SmolKronii.fbx', path: COUNCILRY_PATH },
+      { name: 'Mumei', model: 'SmolMumei.fbx', path: COUNCILRY_PATH },
+      { name: 'Fauna', model: 'SmolFauna.fbx', path: COUNCILRY_PATH },
+      { name: 'Bae', model: 'SmolBae.fbx', path: COUNCILRY_PATH },
+      { name: 'IRyS', model: 'SmolIRys.fbx', path: COUNCILRY_PATH },
+      { name: 'Sana', model: 'SmolSana.fbx', path: COUNCILRY_PATH },
     ];
 
-    const CHARACTER_PATH = 'assets/models/';
-
-    // Load character model
-    function loadCharacter(config, startWaypoint, callback) {
+    // Load character model (FBX)
+    function loadCharacter(config, startWaypoint) {
       totalToLoad++;
-      gltfLoader.load(CHARACTER_PATH + config.model, (gltf) => {
-        const model = gltf.scene;
-        model.scale.set(2, 2, 2);
+      fbxLoader.load(config.path + config.model, (model) => {
+        model.scale.set(0.04, 0.04, 0.04); // FBX models need smaller scale
         model.traverse(child => {
           if (child.isMesh) {
             child.castShadow = true;
@@ -439,7 +445,6 @@
         scene.add(model);
         characters.push(new Character(model, startWaypoint, config));
         updateProgress();
-        if (callback) callback();
       }, undefined, () => updateProgress());
     }
 
@@ -629,8 +634,8 @@
         });
       }
 
-      // Add characters from GLB models
-      const startPoints = ['center', 'cafe', 'shop', 'park', 'station', 'school', 'ne', 'sw'];
+      // Add Smol characters
+      const startPoints = ['center', 'cafe', 'shop', 'park', 'station', 'school', 'ne', 'sw', 'nw', 'se', 'north'];
       characterModels.forEach((config, i) => {
         const start = startPoints[i % startPoints.length];
         loadCharacter(config, start);
