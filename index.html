@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eliza Town</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital@0;1&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; background: #1a1a2e; font-family: 'Crimson Text', Georgia, serif; }
+    canvas { display: block; }
+
+    #loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #f4e4c1;
+      font-family: 'Cinzel', serif;
+      font-size: 24px;
+      text-align: center;
+      z-index: 100;
+    }
+    #loading .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #5c4a32;
+      border-top-color: #c9a959;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #info {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      color: #f4e4c1;
+      font-family: 'Crimson Text', serif;
+      font-size: 14px;
+      background: linear-gradient(135deg, rgba(60, 40, 25, 0.9), rgba(40, 25, 15, 0.95));
+      padding: 12px 18px;
+      border-radius: 4px;
+      border: 2px solid #8b6914;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    /* Medieval Wooden UI Theme */
+    #ui-container {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 320px;
+      max-height: calc(100vh - 20px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 50;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, #4a3728 0%, #3d2d1f 50%, #2e2218 100%);
+      border: 3px solid #8b6914;
+      border-radius: 8px;
+      color: #f4e4c1;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+      pointer-events: none;
+      border-radius: 6px;
+    }
+
+    .panel-header {
+      background: linear-gradient(180deg, #5c4a32 0%, #4a3728 100%);
+      padding: 10px 14px;
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #8b6914;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .panel-header .status {
+      font-family: 'Crimson Text', serif;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      border: 1px solid;
+    }
+
+    .panel-header .status.connected {
+      background: rgba(34, 85, 34, 0.6);
+      border-color: #4a7c4a;
+      color: #8fbc8f;
+    }
+
+    .panel-header .status.disconnected {
+      background: rgba(85, 34, 34, 0.6);
+      border-color: #7c4a4a;
+      color: #cd9b9b;
+    }
+
+    .panel-content {
+      padding: 10px;
+      overflow-y: auto;
+      max-height: 200px;
+    }
+
+    /* Agents Panel */
+    #agents-panel { flex: 0 0 auto; }
+    #agents-panel .panel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .agent-card {
+      background: linear-gradient(135deg, rgba(90, 70, 50, 0.5), rgba(60, 45, 30, 0.6));
+      border: 1px solid #6b5a3e;
+      border-radius: 6px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+
+    .agent-card:hover {
+      background: linear-gradient(135deg, rgba(110, 85, 60, 0.6), rgba(80, 60, 40, 0.7));
+      border-color: #8b6914;
+    }
+
+    .agent-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #8b6914, #c9a959);
+      border: 2px solid #c9a959;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 13px;
+      color: #2e1f0f;
+      flex-shrink: 0;
+    }
+
+    .agent-info { flex: 1; min-width: 0; }
+
+    .agent-name {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 13px;
+      color: #f4e4c1;
+    }
+
+    .agent-role {
+      font-size: 11px;
+      color: #b8a88a;
+      text-transform: capitalize;
+      font-style: italic;
+    }
+
+    .agent-status {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      text-transform: capitalize;
+      border: 1px solid;
+    }
+
+    .agent-status.idle { background: rgba(80, 70, 60, 0.6); border-color: #6b5a3e; color: #b8a88a; }
+    .agent-status.working { background: rgba(40, 60, 80, 0.6); border-color: #4a6a8a; color: #8ab4d4; }
+    .agent-status.traveling { background: rgba(80, 60, 30, 0.6); border-color: #8a6a3a; color: #d4b48a; }
+    .agent-status.chatting { background: rgba(70, 50, 80, 0.6); border-color: #6a4a7a; color: #b48ad4; }
+
+    /* Tasks Panel */
+    #tasks-panel { flex: 0 0 auto; }
+
+    .task-item {
+      background: linear-gradient(135deg, rgba(70, 55, 40, 0.5), rgba(50, 40, 30, 0.6));
+      border: 1px solid #5a4a3a;
+      border-left: 3px solid #c9a959;
+      border-radius: 4px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+    }
+
+    .task-item.completed { border-left-color: #4a7c4a; opacity: 0.7; }
+    .task-item.in_progress { border-left-color: #c9a959; }
+
+    .task-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: #f4e4c1;
+    }
+
+    .task-meta {
+      font-size: 10px;
+      color: #a89878;
+      margin-top: 3px;
+    }
+
+    /* Messages Panel */
+    #messages-panel { flex: 1; min-height: 150px; }
+    #messages-panel .panel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .message-item {
+      background: rgba(50, 40, 30, 0.5);
+      border: 1px solid #4a3a2a;
+      border-radius: 4px;
+      padding: 6px 8px;
+      font-size: 11px;
+    }
+
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+    }
+
+    .message-agent {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 11px;
+      color: #c9a959;
+    }
+
+    .message-time {
+      font-size: 9px;
+      color: #8a7a6a;
+    }
+
+    .message-content {
+      color: #d4c4a4;
+      line-height: 1.4;
+    }
+
+    .message-type {
+      display: inline-block;
+      font-size: 8px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-right: 5px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .message-type.thought { background: #2a3a4a; color: #8ab4d4; }
+    .message-type.chat { background: #3a2a4a; color: #b48ad4; }
+    .message-type.status { background: #2a3a2a; color: #8abc8a; }
+    .message-type.announcement { background: #4a2a2a; color: #d48a8a; }
+
+    /* Task Input - Medieval Scroll Style */
+    #task-input-container {
+      padding: 14px;
+      background: linear-gradient(180deg, #5c4a32 0%, #4a3728 50%, #3d2d1f 100%);
+      border: 3px solid #8b6914;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .input-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .input-header label {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #c9a959;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .input-header .char-count {
+      font-size: 10px;
+      color: #8a7a6a;
+    }
+
+    #task-input {
+      width: 100%;
+      background: linear-gradient(180deg, #2e2218, #3d2d1f);
+      border: 2px solid #6b5a3e;
+      border-radius: 4px;
+      padding: 12px;
+      color: #f4e4c1;
+      font-family: 'Crimson Text', serif;
+      font-size: 14px;
+      resize: none;
+      line-height: 1.5;
+      transition: all 0.2s ease;
+    }
+
+    #task-input:focus {
+      outline: none;
+      border-color: #c9a959;
+      box-shadow: 0 0 0 2px rgba(201, 169, 89, 0.2), inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    #task-input::placeholder {
+      color: #7a6a5a;
+      font-style: italic;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    #submit-task {
+      flex: 1;
+      padding: 10px 16px;
+      background: linear-gradient(180deg, #8b6914 0%, #6b5010 50%, #5a4210 100%);
+      border: 2px solid #c9a959;
+      border-radius: 4px;
+      color: #f4e4c1;
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+    }
+
+    #submit-task:hover:not(:disabled) {
+      background: linear-gradient(180deg, #a07818 0%, #8b6914 50%, #6b5010 100%);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    #submit-task:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    #submit-task:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #4a3a2a;
+      border-color: #5a4a3a;
+    }
+
+    #submit-task.submitting {
+      background: linear-gradient(180deg, #6b5a3a 0%, #5a4a2a 100%);
+    }
+
+    #submit-task.success {
+      background: linear-gradient(180deg, #4a6a3a 0%, #3a5a2a 100%);
+      border-color: #6a9a5a;
+    }
+
+    #submit-task.error {
+      background: linear-gradient(180deg, #6a3a3a 0%, #5a2a2a 100%);
+      border-color: #9a5a5a;
+    }
+
+    .priority-select {
+      background: linear-gradient(180deg, #3d2d1f, #2e2218);
+      border: 2px solid #6b5a3e;
+      border-radius: 4px;
+      padding: 10px 12px;
+      color: #f4e4c1;
+      font-family: 'Crimson Text', serif;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .priority-select:focus {
+      outline: none;
+      border-color: #c9a959;
+    }
+
+    .priority-select option {
+      background: #3d2d1f;
+      color: #f4e4c1;
+    }
+
+    .server-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 10px;
+      color: #8a7a6a;
+    }
+
+    .server-status .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #7a3a3a;
+      border: 1px solid #9a5a5a;
+    }
+
+    .server-status .dot.online {
+      background: #3a6a3a;
+      border-color: #5a9a5a;
+      box-shadow: 0 0 6px #5a9a5a;
+    }
+
+    /* Scrollbar styling */
+    .panel-content::-webkit-scrollbar {
+      width: 8px;
+    }
+    .panel-content::-webkit-scrollbar-track {
+      background: #2e2218;
+      border-radius: 4px;
+    }
+    .panel-content::-webkit-scrollbar-thumb {
+      background: #6b5a3e;
+      border-radius: 4px;
+    }
+    .panel-content::-webkit-scrollbar-thumb:hover {
+      background: #8b6914;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div class="spinner"></div>
+    <div>Loading Eliza Town...</div>
+  </div>
+  <div id="info">
+    Mouse: Rotate | Scroll: Zoom | Right-click drag: Pan
+  </div>
+
+  <!-- Agent Orchestration UI -->
+  <div id="ui-container">
+    <div id="agents-panel" class="panel">
+      <div class="panel-header">
+        <span>Agents</span>
+        <span id="ws-status" class="status disconnected">Offline</span>
+      </div>
+      <div class="panel-content" id="agents-list">
+        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+          Connecting to server...
+        </div>
+      </div>
+    </div>
+
+    <div id="tasks-panel" class="panel">
+      <div class="panel-header">
+        <span>Active Tasks</span>
+        <span id="task-count" style="font-size: 11px; color: #9ca3af;">0</span>
+      </div>
+      <div class="panel-content" id="tasks-list">
+        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+          No active tasks
+        </div>
+      </div>
+    </div>
+
+    <div id="messages-panel" class="panel">
+      <div class="panel-header">
+        <span>Activity Feed</span>
+      </div>
+      <div class="panel-content" id="messages-list">
+        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+          Waiting for activity...
+        </div>
+      </div>
+    </div>
+
+    <div id="task-input-container">
+      <div class="input-header">
+        <label>Assign a Task</label>
+        <span class="char-count"><span id="char-count">0</span>/500</span>
+      </div>
+      <textarea id="task-input" rows="3" placeholder="Describe what you want the agents to work on..." maxlength="500"></textarea>
+      <div class="button-row">
+        <select class="priority-select" id="priority-select">
+          <option value="3">High Priority</option>
+          <option value="5" selected>Normal</option>
+          <option value="7">Low Priority</option>
+        </select>
+        <button id="submit-task" disabled>
+          <span id="submit-text">Submit Task</span>
+        </button>
+      </div>
+      <div class="server-status">
+        <span class="dot" id="server-dot"></span>
+        <span id="server-status-text">Checking server...</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    // Scene setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x7EC8E3);
+    scene.fog = new THREE.FogExp2(0x7EC8E3, 0.012);
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera.position.set(60, 45, 60);
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    document.body.appendChild(renderer.domElement);
+
+    // Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2.1;
+    controls.minDistance = 5;
+    controls.maxDistance = 200;
+    controls.target.set(0, 0, 0);
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.5);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfffaf0, 1.5);
+    sunLight.position.set(30, 40, 20);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 4096;
+    sunLight.shadow.mapSize.height = 4096;
+    sunLight.shadow.camera.near = 0.5;
+    sunLight.shadow.camera.far = 300;
+    sunLight.shadow.camera.left = -100;
+    sunLight.shadow.camera.right = 100;
+    sunLight.shadow.camera.top = 100;
+    sunLight.shadow.camera.bottom = -100;
+    sunLight.shadow.bias = -0.0001;
+    scene.add(sunLight);
+
+    const fillLight = new THREE.DirectionalLight(0x8ecae6, 0.3);
+    fillLight.position.set(-20, 10, -20);
+    scene.add(fillLight);
+
+    // Ground
+    const groundGeometry = new THREE.PlaneGeometry(500, 500, 100, 100);
+    const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x4a7c4e, roughness: 0.9 });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.05;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Loaders & State
+    const gltfLoader = new GLTFLoader();
+    const clock = new THREE.Clock();
+    let loadedCount = 0;
+    let totalToLoad = 0;
+    const characters = [];
+    const animationClips = {};
+
+    function updateLoading() {
+      loadedCount++;
+      if (loadedCount >= totalToLoad) {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    // ==================== ROAD NETWORK ====================
+    // Define waypoints for roads - characters will walk between these (scaled 3x)
+    const waypoints = {
+      // Main street (north-south)
+      northGate: { x: 0, z: -30 },
+      northPlaza: { x: 0, z: -15 },
+      center: { x: 0, z: 0 },
+      southPlaza: { x: 0, z: 15 },
+      southGate: { x: 0, z: 30 },
+
+      // Cross street (east-west)
+      westGate: { x: -30, z: 0 },
+      westPlaza: { x: -15, z: 0 },
+      eastPlaza: { x: 15, z: 0 },
+      eastGate: { x: 30, z: 0 },
+
+      // Tavern district (northwest)
+      tavernFront: { x: -15, z: -12 },
+      tavernBack: { x: -21, z: -18 },
+
+      // Market district (northeast)
+      marketFront: { x: 15, z: -12 },
+      marketBack: { x: 21, z: -18 },
+
+      // Residential west (southwest)
+      houseWest1: { x: -18, z: 12 },
+      houseWest2: { x: -21, z: 18 },
+
+      // Residential east (southeast)
+      houseEast1: { x: 18, z: 12 },
+      houseEast2: { x: 21, z: 18 },
+
+      // Side streets
+      nwCorner: { x: -15, z: -15 },
+      neCorner: { x: 15, z: -15 },
+      swCorner: { x: -15, z: 15 },
+      seCorner: { x: 15, z: 15 },
+    };
+
+    // Define connected routes (which waypoints connect to which)
+    const connections = {
+      northGate: ['northPlaza'],
+      northPlaza: ['northGate', 'center', 'nwCorner', 'neCorner'],
+      center: ['northPlaza', 'southPlaza', 'westPlaza', 'eastPlaza'],
+      southPlaza: ['center', 'southGate', 'swCorner', 'seCorner'],
+      southGate: ['southPlaza'],
+
+      westGate: ['westPlaza'],
+      westPlaza: ['westGate', 'center', 'nwCorner', 'swCorner'],
+      eastPlaza: ['center', 'eastGate', 'neCorner', 'seCorner'],
+      eastGate: ['eastPlaza'],
+
+      nwCorner: ['northPlaza', 'westPlaza', 'tavernFront'],
+      neCorner: ['northPlaza', 'eastPlaza', 'marketFront'],
+      swCorner: ['southPlaza', 'westPlaza', 'houseWest1'],
+      seCorner: ['southPlaza', 'eastPlaza', 'houseEast1'],
+
+      tavernFront: ['nwCorner', 'tavernBack'],
+      tavernBack: ['tavernFront'],
+      marketFront: ['neCorner', 'marketBack'],
+      marketBack: ['marketFront'],
+
+      houseWest1: ['swCorner', 'houseWest2'],
+      houseWest2: ['houseWest1'],
+      houseEast1: ['seCorner', 'houseEast2'],
+      houseEast2: ['houseEast1'],
+    };
+
+    // ==================== ANIMATIONS ====================
+    async function loadAnimations() {
+      return new Promise((resolve) => {
+        let loaded = 0;
+        const needed = 4;
+
+        gltfLoader.load('assets/animations/rig_medium/General.glb', (gltf) => {
+          animationClips.mediumGeneral = gltf.animations;
+          if (++loaded === needed) resolve();
+        });
+        gltfLoader.load('assets/animations/rig_medium/MovementBasic.glb', (gltf) => {
+          animationClips.mediumMovement = gltf.animations;
+          if (++loaded === needed) resolve();
+        });
+        gltfLoader.load('assets/animations/rig_large/General.glb', (gltf) => {
+          animationClips.largeGeneral = gltf.animations;
+          if (++loaded === needed) resolve();
+        });
+        gltfLoader.load('assets/animations/rig_large/MovementBasic.glb', (gltf) => {
+          animationClips.largeMovement = gltf.animations;
+          if (++loaded === needed) resolve();
+        });
+      });
+    }
+
+    // ==================== CHARACTER CLASS ====================
+    class Character {
+      constructor(model, rig, startWaypoint) {
+        this.model = model;
+        this.rig = rig;
+        this.mixer = new THREE.AnimationMixer(model);
+
+        // Pathfinding
+        this.currentWaypoint = startWaypoint;
+        this.targetWaypoint = null;
+        this.path = [];
+
+        // Movement
+        this.maxSpeed = 1.5 + Math.random() * 0.8;
+        this.currentSpeed = 0;
+        this.acceleration = 2.5;
+        this.deceleration = 3.5;
+        this.turnSpeed = 5.0;
+
+        // State
+        this.state = 'idle';
+        this.stateTime = 0;
+        this.idleDuration = 2 + Math.random() * 4;
+        this.waitTime = 0;
+
+        // Setup animations
+        const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
+        const movementClips = rig === 'large' ? animationClips.largeMovement : animationClips.mediumMovement;
+
+        if (generalClips?.length > 0) {
+          const idleOptions = generalClips.filter(c => c.name.includes('Idle'));
+          const idleClip = idleOptions[Math.floor(Math.random() * idleOptions.length)] || generalClips[0];
+          this.idleAction = this.mixer.clipAction(idleClip);
+          this.idleAction.setEffectiveTimeScale(0.8 + Math.random() * 0.4);
+          this.idleAction.play();
+        }
+
+        if (movementClips?.length > 0) {
+          const walkOptions = movementClips.filter(c => c.name.includes('Walking'));
+          const walkClip = walkOptions[Math.floor(Math.random() * walkOptions.length)];
+          if (walkClip) {
+            this.walkAction = this.mixer.clipAction(walkClip);
+            this.walkAction.setEffectiveTimeScale(1.0 + Math.random() * 0.2);
+          }
+        }
+      }
+
+      lerpAngle(from, to, t) {
+        let diff = to - from;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        return from + diff * Math.min(t, 1);
+      }
+
+      pickNextWaypoint() {
+        const possibleNext = connections[this.currentWaypoint];
+        if (!possibleNext || possibleNext.length === 0) return null;
+
+        // Prefer waypoints we haven't just come from
+        let choices = possibleNext.filter(w => w !== this.lastWaypoint);
+        if (choices.length === 0) choices = possibleNext;
+
+        return choices[Math.floor(Math.random() * choices.length)];
+      }
+
+      update(delta) {
+        this.mixer.update(delta);
+        this.stateTime += delta;
+
+        switch (this.state) {
+          case 'idle':
+            // Small idle movements
+            if (Math.random() < 0.003) {
+              this.model.rotation.y += (Math.random() - 0.5) * 0.3;
+            }
+
+            if (this.stateTime > this.idleDuration) {
+              this.targetWaypoint = this.pickNextWaypoint();
+              if (this.targetWaypoint) {
+                this.state = 'turning';
+                this.stateTime = 0;
+              }
+            }
+            break;
+
+          case 'turning':
+            const target = waypoints[this.targetWaypoint];
+            const dx = target.x - this.model.position.x;
+            const dz = target.z - this.model.position.z;
+            const targetAngle = Math.atan2(dx, dz);
+
+            this.model.rotation.y = this.lerpAngle(this.model.rotation.y, targetAngle, delta * this.turnSpeed);
+
+            let angleDiff = Math.abs(targetAngle - this.model.rotation.y);
+            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+
+            if (Math.abs(angleDiff) < 0.15) {
+              this.state = 'walking';
+              this.stateTime = 0;
+              if (this.walkAction && this.idleAction) {
+                this.idleAction.fadeOut(0.3);
+                this.walkAction.reset().fadeIn(0.3).play();
+              }
+            }
+            break;
+
+          case 'walking':
+            const dest = waypoints[this.targetWaypoint];
+            const dirX = dest.x - this.model.position.x;
+            const dirZ = dest.z - this.model.position.z;
+            const dist = Math.sqrt(dirX * dirX + dirZ * dirZ);
+
+            // Accelerate/decelerate based on distance
+            if (dist > 2) {
+              this.currentSpeed = Math.min(this.currentSpeed + this.acceleration * delta, this.maxSpeed);
+            } else {
+              this.currentSpeed = Math.max(this.currentSpeed - this.deceleration * delta, 0.3);
+            }
+
+            if (dist > 0.3) {
+              const moveX = (dirX / dist) * this.currentSpeed * delta;
+              const moveZ = (dirZ / dist) * this.currentSpeed * delta;
+              this.model.position.x += moveX;
+              this.model.position.z += moveZ;
+
+              // Face movement direction smoothly
+              const moveAngle = Math.atan2(dirX, dirZ);
+              this.model.rotation.y = this.lerpAngle(this.model.rotation.y, moveAngle, delta * this.turnSpeed * 0.5);
+
+              // Walking bob
+              const bob = Math.sin(this.stateTime * 10) * 0.01 * (this.currentSpeed / this.maxSpeed);
+              this.model.position.y = bob;
+            } else {
+              // Arrived at waypoint
+              this.lastWaypoint = this.currentWaypoint;
+              this.currentWaypoint = this.targetWaypoint;
+              this.targetWaypoint = null;
+              this.currentSpeed = 0;
+              this.model.position.y = 0;
+
+              this.state = 'idle';
+              this.stateTime = 0;
+              this.idleDuration = 1 + Math.random() * 3;
+
+              if (this.idleAction && this.walkAction) {
+                this.walkAction.fadeOut(0.4);
+                this.idleAction.reset().fadeIn(0.4).play();
+              }
+            }
+            break;
+        }
+      }
+    }
+
+    // ==================== LOADERS ====================
+    function loadCharacter(name, startWaypoint, rig = 'medium', scale = 1) {
+      totalToLoad++;
+      const pos = waypoints[startWaypoint];
+      gltfLoader.load(`assets/models/${name}.glb`, (gltf) => {
+        const model = gltf.scene;
+        model.position.set(pos.x, 0, pos.z);
+        model.scale.set(scale, scale, scale);
+        model.rotation.y = Math.random() * Math.PI * 2;
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        scene.add(model);
+        characters.push(new Character(model, rig, startWaypoint));
+        updateLoading();
+      }, undefined, () => updateLoading());
+    }
+
+    function loadTownAsset(category, name, position, scale = 1, rotation = 0) {
+      totalToLoad++;
+      gltfLoader.load(`assets/town/${category}/${name}.gltf`, (gltf) => {
+        const model = gltf.scene;
+        model.position.set(position.x, position.y, position.z);
+        model.scale.set(scale, scale, scale);
+        model.rotation.y = rotation;
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        scene.add(model);
+        updateLoading();
+      }, undefined, () => updateLoading());
+    }
+
+    // ==================== BUILD TOWN ====================
+    async function buildTown() {
+      await loadAnimations();
+
+      // Scale factor for all structures (3x bigger)
+      const S = 3;
+
+      // === GROUND TILES ===
+      const hexW = 1.73 * S, hexH = 1.5 * S;
+      for (let x = -8; x <= 8; x++) {
+        for (let z = -8; z <= 8; z++) {
+          const offX = z % 2 === 0 ? 0 : hexW / 2;
+          const px = x * hexW + offX, pz = z * hexH;
+
+          // Road pattern - main cross + side streets
+          const isMainRoad = (Math.abs(x) <= 1 && Math.abs(z) <= 8) || (Math.abs(z) <= 1 && Math.abs(x) <= 8);
+          const isSideStreet = (Math.abs(x) >= 2 && Math.abs(x) <= 4 && Math.abs(z) === 4) ||
+                               (Math.abs(z) >= 2 && Math.abs(z) <= 4 && Math.abs(x) === 4);
+
+          if (isMainRoad || isSideStreet) {
+            loadTownAsset('tiles', 'hex_road_A', { x: px, y: 0.01, z: pz }, S);
+          } else {
+            loadTownAsset('tiles', 'hex_grass', { x: px, y: 0, z: pz }, S);
+          }
+        }
+      }
+
+      // === HOUSES - Northwest District (Tavern Area) ===
+      loadTownAsset('buildings', 'building_stage_A', { x: -18, y: 0, z: -15 }, S * 1.3, Math.PI/4);
+      loadTownAsset('buildings', 'building_stage_B', { x: -24, y: 0, z: -12 }, S * 1.2, Math.PI/3);
+      loadTownAsset('buildings', 'building_stage_C', { x: -21, y: 0, z: -21 }, S * 1.1, Math.PI/5);
+      loadTownAsset('buildings', 'building_grain', { x: -15, y: 0, z: -21 }, S * 1.0, Math.PI/6);
+
+      // === HOUSES - Northeast District (Market Area) ===
+      loadTownAsset('buildings', 'building_stage_A', { x: 18, y: 0, z: -15 }, S * 1.3, -Math.PI/4);
+      loadTownAsset('buildings', 'building_stage_B', { x: 24, y: 0, z: -12 }, S * 1.2, -Math.PI/3);
+      loadTownAsset('buildings', 'building_stage_C', { x: 21, y: 0, z: -21 }, S * 1.1, -Math.PI/5);
+      loadTownAsset('buildings', 'building_grain', { x: 15, y: 0, z: -21 }, S * 1.0, -Math.PI/6);
+
+      // === HOUSES - Southwest District (Residential) ===
+      loadTownAsset('buildings', 'building_stage_A', { x: -18, y: 0, z: 15 }, S * 1.2, Math.PI * 0.75);
+      loadTownAsset('buildings', 'building_stage_B', { x: -24, y: 0, z: 12 }, S * 1.1, Math.PI * 0.6);
+      loadTownAsset('buildings', 'building_stage_C', { x: -21, y: 0, z: 21 }, S * 1.3, Math.PI * 0.8);
+      loadTownAsset('buildings', 'building_dirt', { x: -15, y: 0, z: 21 }, S * 1.0, Math.PI * 0.7);
+
+      // === HOUSES - Southeast District (Residential) ===
+      loadTownAsset('buildings', 'building_stage_A', { x: 18, y: 0, z: 15 }, S * 1.2, -Math.PI * 0.75);
+      loadTownAsset('buildings', 'building_stage_B', { x: 24, y: 0, z: 12 }, S * 1.1, -Math.PI * 0.6);
+      loadTownAsset('buildings', 'building_stage_C', { x: 21, y: 0, z: 21 }, S * 1.3, -Math.PI * 0.8);
+      loadTownAsset('buildings', 'building_grain', { x: 15, y: 0, z: 21 }, S * 1.0, -Math.PI * 0.7);
+
+      // === CENTRAL PLAZA ===
+      loadTownAsset('buildings', 'building_scaffolding', { x: 0, y: 0, z: 0 }, S * 2, 0);
+      loadTownAsset('props', 'flag_blue', { x: -4, y: 0, z: -4 }, S * 1.5);
+      loadTownAsset('props', 'flag_red', { x: 4, y: 0, z: -4 }, S * 1.5);
+      loadTownAsset('props', 'flag_green', { x: -4, y: 0, z: 4 }, S * 1.5);
+      loadTownAsset('props', 'flag_yellow', { x: 4, y: 0, z: 4 }, S * 1.5);
+
+      // === WALLS ===
+      for (let i = -5; i <= 5; i++) {
+        loadTownAsset('buildings', 'wall_straight', { x: i * 7.5, y: 0, z: -36 }, S, 0);
+        loadTownAsset('buildings', 'wall_straight', { x: i * 7.5, y: 0, z: 36 }, S, Math.PI);
+        loadTownAsset('buildings', 'wall_straight', { x: -36, y: 0, z: i * 7.5 }, S, -Math.PI/2);
+        loadTownAsset('buildings', 'wall_straight', { x: 36, y: 0, z: i * 7.5 }, S, Math.PI/2);
+      }
+
+      // Corner towers
+      loadTownAsset('buildings', 'wall_corner_A_outside', { x: -36, y: 0, z: -36 }, S * 1.4, 0);
+      loadTownAsset('buildings', 'wall_corner_A_outside', { x: 36, y: 0, z: -36 }, S * 1.4, Math.PI/2);
+      loadTownAsset('buildings', 'wall_corner_A_outside', { x: 36, y: 0, z: 36 }, S * 1.4, Math.PI);
+      loadTownAsset('buildings', 'wall_corner_A_outside', { x: -36, y: 0, z: 36 }, S * 1.4, -Math.PI/2);
+
+      // Gates
+      loadTownAsset('buildings', 'wall_straight_gate', { x: 0, y: 0, z: -36 }, S * 1.3, 0);
+      loadTownAsset('buildings', 'wall_straight_gate', { x: 0, y: 0, z: 36 }, S * 1.3, Math.PI);
+      loadTownAsset('buildings', 'wall_straight_gate', { x: -36, y: 0, z: 0 }, S * 1.3, -Math.PI/2);
+      loadTownAsset('buildings', 'wall_straight_gate', { x: 36, y: 0, z: 0 }, S * 1.3, Math.PI/2);
+
+      // === MARKET PROPS ===
+      loadTownAsset('props', 'barrel', { x: 16, y: 0, z: -13 }, S);
+      loadTownAsset('props', 'barrel', { x: 18, y: 0, z: -12 }, S);
+      loadTownAsset('props', 'crate_A_big', { x: 20, y: 0, z: -15 }, S);
+      loadTownAsset('props', 'crate_B_big', { x: 22, y: 0, z: -13 }, S);
+      loadTownAsset('props', 'sack', { x: 17, y: 0, z: -15 }, S);
+      loadTownAsset('props', 'sack', { x: 19, y: 0, z: -16 }, S);
+      loadTownAsset('props', 'tent', { x: 23, y: 0, z: -18 }, S * 1.2, -Math.PI/4);
+
+      // === TAVERN PROPS ===
+      loadTownAsset('props', 'barrel', { x: -16, y: 0, z: -13 }, S);
+      loadTownAsset('props', 'barrel', { x: -18, y: 0, z: -12 }, S);
+      loadTownAsset('props', 'barrel', { x: -15, y: 0, z: -11 }, S);
+      loadTownAsset('props', 'bucket_water', { x: -20, y: 0, z: -15 }, S);
+      loadTownAsset('props', 'crate_long_A', { x: -22, y: 0, z: -16 }, S);
+
+      // === RESIDENTIAL PROPS ===
+      loadTownAsset('props', 'wheelbarrow', { x: -20, y: 0, z: 12 }, S, Math.PI/3);
+      loadTownAsset('props', 'bucket_empty', { x: -16, y: 0, z: 16 }, S);
+      loadTownAsset('props', 'pallet', { x: -22, y: 0, z: 15 }, S);
+      loadTownAsset('props', 'resource_lumber', { x: -22, y: 0.1, z: 15 }, S);
+      loadTownAsset('props', 'ladder', { x: 20, y: 0, z: 16 }, S, -Math.PI/4);
+      loadTownAsset('props', 'crate_open', { x: 22, y: 0, z: 13 }, S);
+
+      // === TRAINING AREA ===
+      loadTownAsset('props', 'target', { x: 28, y: 0, z: 12 }, S);
+      loadTownAsset('props', 'target', { x: 28, y: 0, z: 18 }, S);
+      loadTownAsset('props', 'weaponrack', { x: 25, y: 0, z: 9 }, S, -Math.PI/2);
+      loadTownAsset('props', 'bucket_arrows', { x: 26, y: 0, z: 15 }, S);
+
+      // === FENCES ===
+      loadTownAsset('buildings', 'fence_wood_straight', { x: -12, y: 0, z: 10 }, S, Math.PI/2);
+      loadTownAsset('buildings', 'fence_wood_straight_gate', { x: -12, y: 0, z: 15 }, S, Math.PI/2);
+      loadTownAsset('buildings', 'fence_stone_straight', { x: 12, y: 0, z: -10 }, S, Math.PI/2);
+
+      // === NATURE - Inside Town ===
+      loadTownAsset('nature', 'tree_single_A', { x: -10, y: 0, z: -10 }, S);
+      loadTownAsset('nature', 'tree_single_B', { x: 10, y: 0, z: 10 }, S);
+      loadTownAsset('nature', 'tree_single_A', { x: -25, y: 0, z: 0 }, S * 0.9);
+      loadTownAsset('nature', 'tree_single_B', { x: 25, y: 0, z: 0 }, S * 0.9);
+      loadTownAsset('nature', 'rock_single_A', { x: -28, y: 0, z: -25 }, S * 0.8);
+      loadTownAsset('nature', 'rock_single_B', { x: 28, y: 0, z: 25 }, S * 0.8);
+
+      // === NATURE - Outside Walls ===
+      loadTownAsset('nature', 'trees_A_large', { x: -50, y: 0, z: -30 }, S * 1.5);
+      loadTownAsset('nature', 'trees_B_large', { x: -50, y: 0, z: 0 }, S * 1.4);
+      loadTownAsset('nature', 'trees_A_medium', { x: -50, y: 0, z: 30 }, S * 1.6);
+      loadTownAsset('nature', 'trees_B_large', { x: 50, y: 0, z: -30 }, S * 1.5);
+      loadTownAsset('nature', 'trees_A_large', { x: 50, y: 0, z: 0 }, S * 1.4);
+      loadTownAsset('nature', 'trees_B_medium', { x: 50, y: 0, z: 30 }, S * 1.6);
+      loadTownAsset('nature', 'trees_A_large', { x: 0, y: 0, z: -55 }, S * 1.7);
+      loadTownAsset('nature', 'trees_B_large', { x: 0, y: 0, z: 55 }, S * 1.7);
+
+      // Hills & Mountains
+      loadTownAsset('nature', 'hills_A_trees', { x: -70, y: 0, z: 0 }, S * 3);
+      loadTownAsset('nature', 'hills_B_trees', { x: 70, y: 0, z: 0 }, S * 3);
+      loadTownAsset('nature', 'hills_C_trees', { x: 0, y: 0, z: -70 }, S * 3);
+      loadTownAsset('nature', 'mountain_A_grass_trees', { x: -90, y: 0, z: -60 }, S * 5);
+      loadTownAsset('nature', 'mountain_B_grass_trees', { x: 90, y: 0, z: -60 }, S * 5);
+      loadTownAsset('nature', 'mountain_C_grass', { x: 0, y: 0, z: -100 }, S * 6);
+
+      // Clouds
+      loadTownAsset('nature', 'cloud_big', { x: -50, y: 40, z: -40 }, S * 4);
+      loadTownAsset('nature', 'cloud_small', { x: 40, y: 45, z: 30 }, S * 3);
+      loadTownAsset('nature', 'cloud_big', { x: 60, y: 35, z: -50 }, S * 3.5);
+      loadTownAsset('nature', 'cloud_small', { x: -30, y: 50, z: 50 }, S * 2.5);
+
+      // === CHARACTERS - Walking the roads ===
+      // Townspeople on main routes
+      loadCharacter('BlackKnight', 'center', 'medium', 1);
+      loadCharacter('Witch', 'northPlaza', 'medium', 1);
+      loadCharacter('Vampire', 'southPlaza', 'medium', 1);
+      loadCharacter('Hiker', 'westPlaza', 'medium', 1);
+      loadCharacter('Tiefling', 'eastPlaza', 'medium', 1);
+
+      // Tavern district regulars
+      loadCharacter('Caveman', 'tavernFront', 'medium', 1);
+      loadCharacter('Helper_A', 'tavernBack', 'medium', 1);
+
+      // Market shoppers
+      loadCharacter('Helper_B', 'marketFront', 'medium', 1);
+      loadCharacter('Protagonist_A', 'marketBack', 'medium', 1);
+
+      // Residential wanderers
+      loadCharacter('Superhero', 'houseWest1', 'medium', 1);
+      loadCharacter('Protagonist_B', 'houseEast1', 'medium', 1);
+
+      // Gate guards (larger, slower)
+      loadCharacter('FrostGolem', 'northGate', 'large', 1.2);
+      loadCharacter('CombatMech', 'southGate', 'large', 1.2);
+      loadCharacter('Clanker', 'westGate', 'large', 1.2);
+    }
+
+    // Start
+    buildTown();
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      for (const char of characters) char.update(delta);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // ==================== WEBSOCKET & UI ====================
+    const wsStatus = document.getElementById('ws-status');
+    const agentsList = document.getElementById('agents-list');
+    const tasksList = document.getElementById('tasks-list');
+    const taskCount = document.getElementById('task-count');
+    const messagesList = document.getElementById('messages-list');
+    const taskInput = document.getElementById('task-input');
+    const submitTask = document.getElementById('submit-task');
+
+    let ws = null;
+    let serverAgents = [];
+    let serverTasks = [];
+    let serverMessages = [];
+
+    // Agent type colors
+    const typeColors = {
+      planner: '#c084fc',
+      designer: '#f472b6',
+      coder: '#60a5fa',
+      reviewer: '#4ade80'
+    };
+
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        wsStatus.textContent = 'Online';
+        wsStatus.className = 'status connected';
+        submitTask.disabled = false;
+        console.log('WebSocket connected');
+      };
+
+      ws.onclose = () => {
+        wsStatus.textContent = 'Offline';
+        wsStatus.className = 'status disconnected';
+        submitTask.disabled = true;
+        console.log('WebSocket disconnected, reconnecting in 3s...');
+        setTimeout(connectWebSocket, 3000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          handleServerMessage(message);
+        } catch (e) {
+          console.error('Failed to parse message:', e);
+        }
+      };
+    }
+
+    function handleServerMessage(message) {
+      switch (message.type) {
+        case 'connected':
+          console.log('Server welcome:', message.data.message);
+          break;
+        case 'state_update':
+          serverAgents = message.data.agents || [];
+          serverTasks = message.data.tasks || [];
+          serverMessages = message.data.messages || [];
+          updateUI();
+          break;
+        case 'task_created':
+          console.log('New task created:', message.data);
+          break;
+      }
+    }
+
+    function updateUI() {
+      // Update agents list
+      if (serverAgents.length > 0) {
+        agentsList.innerHTML = serverAgents.map(agent => `
+          <div class="agent-card" data-agent-id="${agent.id}">
+            <div class="agent-avatar" style="background: linear-gradient(135deg, ${typeColors[agent.type] || '#667eea'}, #4a5568);">
+              ${agent.name.charAt(0)}
+            </div>
+            <div class="agent-info">
+              <div class="agent-name">${agent.name}</div>
+              <div class="agent-role">${agent.type}</div>
+            </div>
+            <div class="agent-status ${agent.status}">${agent.status}</div>
+          </div>
+        `).join('');
+      }
+
+      // Update tasks list
+      const activeTasks = serverTasks.filter(t => t.status !== 'completed').slice(0, 5);
+      taskCount.textContent = activeTasks.length;
+
+      if (activeTasks.length > 0) {
+        tasksList.innerHTML = activeTasks.map(task => `
+          <div class="task-item ${task.status}">
+            <div class="task-title">${task.title}</div>
+            <div class="task-meta">Priority: ${task.priority} | Status: ${task.status}</div>
+          </div>
+        `).join('');
+      } else {
+        tasksList.innerHTML = '<div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">No active tasks</div>';
+      }
+
+      // Update messages list
+      if (serverMessages.length > 0) {
+        const recentMessages = serverMessages.slice(0, 15);
+        messagesList.innerHTML = recentMessages.map(msg => {
+          const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return `
+            <div class="message-item">
+              <div class="message-header">
+                <span class="message-agent">${msg.agent_name || 'Agent'}</span>
+                <span class="message-time">${time}</span>
+              </div>
+              <div class="message-content">
+                <span class="message-type ${msg.type}">${msg.type}</span>
+                ${msg.content}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Additional UI elements
+    const charCount = document.getElementById('char-count');
+    const prioritySelect = document.getElementById('priority-select');
+    const submitText = document.getElementById('submit-text');
+    const serverDot = document.getElementById('server-dot');
+    const serverStatusText = document.getElementById('server-status-text');
+
+    let serverOnline = false;
+
+    // Character count
+    taskInput.addEventListener('input', () => {
+      charCount.textContent = taskInput.value.length;
+    });
+
+    // Check server health
+    async function checkServerHealth() {
+      try {
+        const response = await fetch('/api/health');
+        if (response.ok) {
+          const data = await response.json();
+          serverOnline = true;
+          serverDot.classList.add('online');
+          if (data.dbAvailable && data.orchestrationReady) {
+            serverStatusText.textContent = 'Server online - agents ready';
+            submitTask.disabled = false;
+          } else if (data.dbAvailable) {
+            serverStatusText.textContent = 'Server online - waiting for orchestration';
+            submitTask.disabled = false;
+          } else {
+            serverStatusText.textContent = 'Server online - database not configured';
+            submitTask.disabled = true;
+          }
+        }
+      } catch (error) {
+        serverOnline = false;
+        serverDot.classList.remove('online');
+        serverStatusText.textContent = 'Server offline - task submission unavailable';
+        submitTask.disabled = true;
+      }
+    }
+
+    // Check health on load and periodically
+    checkServerHealth();
+    setInterval(checkServerHealth, 10000);
+
+    // Submit task with improved UX
+    submitTask.addEventListener('click', async () => {
+      const title = taskInput.value.trim();
+      if (!title || !serverOnline) return;
+
+      const priority = parseInt(prioritySelect.value);
+
+      submitTask.disabled = true;
+      submitTask.classList.add('submitting');
+      submitText.textContent = 'Submitting...';
+
+      try {
+        const response = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, priority })
+        });
+
+        if (response.ok) {
+          taskInput.value = '';
+          charCount.textContent = '0';
+          submitTask.classList.remove('submitting');
+          submitTask.classList.add('success');
+          submitText.textContent = 'Task Created!';
+
+          setTimeout(() => {
+            submitTask.classList.remove('success');
+            submitText.textContent = 'Submit Task';
+            submitTask.disabled = false;
+          }, 2000);
+        } else {
+          throw new Error('Server returned error');
+        }
+      } catch (error) {
+        console.error('Error submitting task:', error);
+        submitTask.classList.remove('submitting');
+        submitTask.classList.add('error');
+        submitText.textContent = 'Failed - Try Again';
+
+        setTimeout(() => {
+          submitTask.classList.remove('error');
+          submitText.textContent = 'Submit Task';
+          submitTask.disabled = false;
+        }, 2000);
+      }
+    });
+
+    taskInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey && !submitTask.disabled) {
+        e.preventDefault();
+        submitTask.click();
+      }
+    });
+
+    // Initialize WebSocket connection
+    connectWebSocket();
+  </script>
+</body>
+</html>

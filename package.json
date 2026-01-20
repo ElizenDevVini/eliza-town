@@ -1,0 +1,22 @@
+{
+  "name": "eliza-town",
+  "version": "1.0.0",
+  "description": "Autonomous agent orchestration platform with 3D town visualization",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "db:init": "node src/db/init.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.0",
+    "pg": "^8.12.0",
+    "ws": "^8.18.0",
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

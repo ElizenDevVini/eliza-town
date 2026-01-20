@@ -1,0 +1,275 @@
+{
+  "name": "eliza-town-assets",
+  "version": "1.1.0",
+  "description": "3D character models, animations, and medieval town assets for Eliza Town",
+  "license": "CC0",
+  "sources": [
+    "KayKit Mystery Monthly Series 5",
+    "KayKit Medieval Hexagon Pack"
+  ],
+  "characters": [
+    {
+      "id": "combat_mech",
+      "name": "Combat Mech",
+      "model": "models/CombatMech.glb",
+      "rig": "large",
+      "textures": {
+        "default": "textures/combatmech.png",
+        "alt": "textures/combatmech_alt.png"
+      }
+    },
+    {
+      "id": "superhero",
+      "name": "Superhero",
+      "model": "models/Superhero.glb",
+      "rig": "medium",
+      "textures": {
+        "default": "textures/superhero.png",
+        "alt": "textures/superhero_alt.png"
+      }
+    },
+    {
+      "id": "black_knight",
+      "name": "Black Knight",
+      "model": "models/BlackKnight.glb",
+      "rig": "medium",
+      "textures": {
+        "default": "textures/blackknight.png",
+        "alt": "textures/blackknight_alt.png"
+      }
+    },
+    {
+      "id": "vampire",
+      "name": "Vampire",
+      "model": "models/Vampire.glb",
+      "rig": "medium",
+      "textures": {
+        "default": "textures/vampire.png"
+      }
+    },
+    {
+      "id": "witch",
+      "name": "Witch",
+      "model": "models/Witch.glb",
+      "rig": "medium",
+      "textures": {
+        "default": "textures/witch_a.png",
+        "variant_b": "textures/witch_b.png"
+      }
+    },
+    {
+      "id": "helper_a",
+      "name": "Helper A",
+      "model": "models/Helper_A.glb",
+      "rig": "medium",
+      "textures": {
+        "default": "textures/helpers.png"
+      }
+    },
+    {
+      "id": "helper_b",
+      "name": "Helper B",
+      "model": "models/Helper_B.glb",
+      "rig": "medium",
+      "textures": {
+        "default": "textures/helpers.png"
+      }
+    },
+    {
+      "id": "frost_golem",
+      "name": "Frost Golem",
+      "model": "models/FrostGolem.glb",
+      "rig": "large",
+      "textures": {
+        "default": "textures/frostgolem.png"
+      }
+    },
+    {
+      "id": "caveman",
+      "name": "Caveman",
+      "model": "models/Caveman.glb",
+      "rig": "medium",
+      "textures": {
+        "default": "textures/caveman.png"
+      }
+    },
+    {
+      "id": "clanker",
+      "name": "Clanker",
+      "model": "models/Clanker.glb",
+      "rig": "large",
+      "textures": {
+        "default": "textures/clanker.png",
+        "alt": "textures/clanker_alt.png"
+      }
+    },
+    {
+      "id": "protagonist_a",
+      "name": "Protagonist A",
+      "model": "models/Protagonist_A.glb",
+      "rig": "medium",
+      "textures": {
+        "default": "textures/protagonist.png"
+      }
+    },
+    {
+      "id": "protagonist_b",
+      "name": "Protagonist B",
+      "model": "models/Protagonist_B.glb",
+      "rig": "medium",
+      "textures": {
+        "default": "textures/protagonist.png"
+      }
+    },
+    {
+      "id": "hiker",
+      "name": "Hiker",
+      "model": "models/Hiker.glb",
+      "rig": "medium",
+      "textures": {
+        "default": "textures/hiker.png",
+        "variant_b": "textures/hiker_b.png"
+      }
+    },
+    {
+      "id": "tiefling",
+      "name": "Tiefling",
+      "model": "models/Tiefling.glb",
+      "rig": "medium",
+      "textures": {
+        "default": "textures/tiefling.png",
+        "variant_b": "textures/tiefling_b.png"
+      }
+    }
+  ],
+  "animations": {
+    "rig_large": {
+      "general": "animations/rig_large/General.glb",
+      "movement_basic": "animations/rig_large/MovementBasic.glb"
+    },
+    "rig_medium": {
+      "general": "animations/rig_medium/General.glb",
+      "movement_basic": "animations/rig_medium/MovementBasic.glb"
+    }
+  },
+  "town": {
+    "texture": "town/buildings/hexagons_medieval.png",
+    "buildings": [
+      "town/buildings/building_bridge_A.gltf",
+      "town/buildings/building_bridge_B.gltf",
+      "town/buildings/building_destroyed.gltf",
+      "town/buildings/building_dirt.gltf",
+      "town/buildings/building_grain.gltf",
+      "town/buildings/building_scaffolding.gltf",
+      "town/buildings/building_stage_A.gltf",
+      "town/buildings/building_stage_B.gltf",
+      "town/buildings/building_stage_C.gltf",
+      "town/buildings/fence_stone_straight.gltf",
+      "town/buildings/fence_stone_straight_gate.gltf",
+      "town/buildings/fence_wood_straight.gltf",
+      "town/buildings/fence_wood_straight_gate.gltf",
+      "town/buildings/projectile_catapult.gltf",
+      "town/buildings/wall_corner_A_gate.gltf",
+      "town/buildings/wall_corner_A_inside.gltf",
+      "town/buildings/wall_corner_A_outside.gltf",
+      "town/buildings/wall_corner_B_inside.gltf",
+      "town/buildings/wall_corner_B_outside.gltf",
+      "town/buildings/wall_straight.gltf",
+      "town/buildings/wall_straight_gate.gltf"
+    ],
+    "props": [
+      "town/props/barrel.gltf",
+      "town/props/bucket_arrows.gltf",
+      "town/props/bucket_empty.gltf",
+      "town/props/bucket_water.gltf",
+      "town/props/crate_A_big.gltf",
+      "town/props/crate_A_small.gltf",
+      "town/props/crate_B_big.gltf",
+      "town/props/crate_B_small.gltf",
+      "town/props/crate_long_A.gltf",
+      "town/props/crate_long_B.gltf",
+      "town/props/crate_long_C.gltf",
+      "town/props/crate_long_empty.gltf",
+      "town/props/crate_open.gltf",
+      "town/props/flag_blue.gltf",
+      "town/props/flag_green.gltf",
+      "town/props/flag_red.gltf",
+      "town/props/flag_yellow.gltf",
+      "town/props/ladder.gltf",
+      "town/props/pallet.gltf",
+      "town/props/resource_lumber.gltf",
+      "town/props/resource_stone.gltf",
+      "town/props/sack.gltf",
+      "town/props/target.gltf",
+      "town/props/tent.gltf",
+      "town/props/weaponrack.gltf",
+      "town/props/wheelbarrow.gltf"
+    ],
+    "nature": [
+      "town/nature/cloud_big.gltf",
+      "town/nature/cloud_small.gltf",
+      "town/nature/hill_single_A.gltf",
+      "town/nature/hill_single_B.gltf",
+      "town/nature/hill_single_C.gltf",
+      "town/nature/hills_A.gltf",
+      "town/nature/hills_A_trees.gltf",
+      "town/nature/hills_B.gltf",
+      "town/nature/hills_B_trees.gltf",
+      "town/nature/hills_C.gltf",
+      "town/nature/hills_C_trees.gltf",
+      "town/nature/mountain_A.gltf",
+      "town/nature/mountain_A_grass.gltf",
+      "town/nature/mountain_A_grass_trees.gltf",
+      "town/nature/mountain_B.gltf",
+      "town/nature/mountain_B_grass.gltf",
+      "town/nature/mountain_B_grass_trees.gltf",
+      "town/nature/mountain_C.gltf",
+      "town/nature/mountain_C_grass.gltf",
+      "town/nature/mountain_C_grass_trees.gltf",
+      "town/nature/rock_single_A.gltf",
+      "town/nature/rock_single_B.gltf",
+      "town/nature/rock_single_C.gltf",
+      "town/nature/rock_single_D.gltf",
+      "town/nature/rock_single_E.gltf",
+      "town/nature/tree_single_A.gltf",
+      "town/nature/tree_single_A_cut.gltf",
+      "town/nature/tree_single_B.gltf",
+      "town/nature/tree_single_B_cut.gltf",
+      "town/nature/trees_A_cut.gltf",
+      "town/nature/trees_A_large.gltf",
+      "town/nature/trees_A_medium.gltf",
+      "town/nature/trees_A_small.gltf",
+      "town/nature/trees_B_cut.gltf",
+      "town/nature/trees_B_large.gltf",
+      "town/nature/trees_B_medium.gltf",
+      "town/nature/trees_B_small.gltf",
+      "town/nature/waterlily_A.gltf",
+      "town/nature/waterlily_B.gltf",
+      "town/nature/waterplant_A.gltf",
+      "town/nature/waterplant_B.gltf",
+      "town/nature/waterplant_C.gltf"
+    ],
+    "tiles": [
+      "town/tiles/hex_grass.gltf",
+      "town/tiles/hex_grass_bottom.gltf",
+      "town/tiles/hex_grass_sloped_high.gltf",
+      "town/tiles/hex_grass_sloped_low.gltf",
+      "town/tiles/hex_road_A.gltf",
+      "town/tiles/hex_road_A_sloped_high.gltf",
+      "town/tiles/hex_road_A_sloped_low.gltf",
+      "town/tiles/hex_road_B.gltf",
+      "town/tiles/hex_road_C.gltf",
+      "town/tiles/hex_road_D.gltf",
+      "town/tiles/hex_road_E.gltf",
+      "town/tiles/hex_road_F.gltf",
+      "town/tiles/hex_road_G.gltf",
+      "town/tiles/hex_road_H.gltf",
+      "town/tiles/hex_road_I.gltf",
+      "town/tiles/hex_road_J.gltf",
+      "town/tiles/hex_road_K.gltf",
+      "town/tiles/hex_road_L.gltf",
+      "town/tiles/hex_road_M.gltf",
+      "town/tiles/hex_water.gltf"
+    ]
+  }
+}

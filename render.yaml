@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: eliza-town
+    runtime: node
+    buildCommand: npm install
+    startCommand: node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: eliza-town-db
+          property: connectionString
+      - key: ANTHROPIC_API_KEY
+        sync: false
+
+databases:
+  - name: eliza-town-db
+    databaseName: eliza_town
+    user: eliza_town_user
+    plan: free
