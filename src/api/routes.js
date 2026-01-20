@@ -222,6 +222,30 @@ router.get('/orchestration/state', (req, res) => {
   }
 });
 
+// Debug endpoint to check orchestration status
+router.get('/orchestration/debug', async (req, res) => {
+  try {
+    const state = orchestration.getState();
+    const agents = await db.getAgents();
+    const pendingTasks = await db.getTasks('pending');
+    const inProgressTasks = await db.getTasks('in_progress');
+
+    res.json({
+      stateAgentCount: state.agents.length,
+      dbAgentCount: agents.length,
+      agents: agents.map(a => ({ id: a.id, name: a.name, type: a.type, status: a.status })),
+      pendingTaskCount: pendingTasks.length,
+      pendingTasks: pendingTasks.map(t => ({ id: t.id, title: t.title, status: t.status })),
+      inProgressTaskCount: inProgressTasks.length,
+      inProgressTasks: inProgressTasks.map(t => ({ id: t.id, title: t.title, status: t.status })),
+      activeWork: state.activeWork,
+      travelingAgents: state.travelingAgents
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.post('/orchestration/start', (req, res) => {
   try {
     const { interval } = req.body;
