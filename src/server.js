@@ -4,6 +4,7 @@ import cors from 'cors';
 import { createServer } from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import * as ws from './websocket/index.js';
 
 // Try to load dotenv, but don't fail if it doesn't exist
 try {
@@ -24,6 +25,7 @@ const PORT = process.env.PORT || 3000;
 // Track if database is available
 let dbAvailable = false;
 let orchestrationReady = false;
+let wsInitialized = false;
 
 // Global error handlers to prevent crashes
 process.on('uncaughtException', (err) => {
@@ -44,6 +46,7 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     dbAvailable,
     orchestrationReady,
+    wsInitialized,
     timestamp: Date.now()
   });
 });
@@ -68,10 +71,17 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(rootDir, 'index.html'));
 });
 
+// Initialize WebSocket BEFORE server starts listening
+// This ensures the upgrade handler is ready for any incoming connections
+ws.initialize(server);
+wsInitialized = true;
+console.log('WebSocket server initialized');
+
 // Start the server immediately so static files work
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Eliza Town server running on port ${PORT}`);
   console.log('Static file serving is active');
+  console.log('WebSocket ready on /ws');
 });
 
 // Try to initialize database and orchestration (non-blocking)
@@ -106,11 +116,6 @@ async function initializeBackend() {
       }
       console.log(`Created ${DEFAULT_AGENTS.length} default agents`);
     }
-
-    // Initialize WebSocket
-    const ws = await import('./websocket/index.js');
-    ws.initialize(server);
-    console.log('WebSocket server initialized');
 
     // Mount API routes (now that db is available)
     const { default: apiRoutes } = await import('./api/routes.js');
