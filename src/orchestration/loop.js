@@ -2,6 +2,7 @@ import * as db from '../db/index.js';
 import * as claude from '../agents/claude.js';
 import { AGENT_TYPES, getAgentConfig } from '../agents/config.js';
 import { broadcast } from '../websocket/index.js';
+import * as storage from '../storage/index.js';
 
 let isRunning = false;
 let loopInterval = null;
@@ -319,20 +320,33 @@ async function executeSubtask(agent, task, subtask) {
       data: { agent: agent.name, agentId: agent.id, text: `Done with ${subtask.title}!`, type: 'saying' }
     });
 
-    // Check if this was coder creating files
+    // Save output files for coder
     if (agent.type === 'coder' && result.content) {
       try {
-        const parsed = JSON.parse(result.content);
-        if (parsed.files && Array.isArray(parsed.files)) {
-          for (const file of parsed.files) {
-            broadcast({
-              type: 'file_created',
-              data: { taskId: task.id, filename: file.path || file.name, size: (file.content || '').length }
-            });
-          }
+        const savedFiles = await storage.saveCoderOutput(task.id, result.content);
+        for (const file of savedFiles) {
+          broadcast({
+            type: 'file_created',
+            data: { taskId: task.id, filename: file.name, size: file.size }
+          });
         }
+        console.log(`Saved ${savedFiles.length} files for task ${task.id}`);
       } catch (e) {
-        // Not JSON or no files - that's ok
+        console.error('Failed to save coder output:', e);
+      }
+    }
+
+    // Save output for designer and reviewer too
+    if ((agent.type === 'designer' || agent.type === 'reviewer') && result.content) {
+      try {
+        const filename = agent.type === 'designer' ? 'design.json' : 'review.json';
+        await storage.saveTaskFile(task.id, filename, result.content);
+        broadcast({
+          type: 'file_created',
+          data: { taskId: task.id, filename, size: result.content.length }
+        });
+      } catch (e) {
+        console.error('Failed to save output:', e);
       }
     }
   } else {

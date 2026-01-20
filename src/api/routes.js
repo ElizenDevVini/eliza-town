@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as db from '../db/index.js';
 import * as orchestration from '../orchestration/loop.js';
+import * as storage from '../storage/index.js';
 
 const router = Router();
 
@@ -123,6 +124,28 @@ router.patch('/tasks/:id', async (req, res) => {
     res.json(task);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Get task files
+router.get('/tasks/:id/files', async (req, res) => {
+  try {
+    const files = await storage.getTaskFiles(parseInt(req.params.id));
+    res.json(files);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Download a specific task file
+router.get('/tasks/:id/files/:filename', async (req, res) => {
+  try {
+    const content = await storage.getTaskFile(parseInt(req.params.id), req.params.filename);
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Disposition', `attachment; filename="${req.params.filename}"`);
+    res.send(content);
+  } catch (error) {
+    res.status(404).json({ error: 'File not found' });
   }
 });
 

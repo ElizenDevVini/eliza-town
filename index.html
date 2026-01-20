@@ -533,26 +533,50 @@
       margin-bottom: 2px;
     }
 
-    /* Name label floating above character */
+    /* Name label floating above character - minimal by default */
     .agent-name-label {
       position: absolute;
-      padding: 2px 8px;
-      background: rgba(0, 0, 0, 0.6);
-      border-radius: 4px;
+      padding: 3px 8px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 10px;
       color: #f4e4c1;
       font-family: 'Cinzel', serif;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 600;
       transform: translate(-50%, 0);
       white-space: nowrap;
+      opacity: 0.8;
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    .agent-name-label:hover,
+    .agent-name-label.working {
+      opacity: 1;
+      background: rgba(30, 20, 10, 0.9);
+      border: 1px solid #8b6914;
+    }
+
+    .agent-name-label.working {
+      animation: labelPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes labelPulse {
+      0%, 100% { box-shadow: 0 0 5px rgba(139, 105, 20, 0.3); }
+      50% { box-shadow: 0 0 10px rgba(139, 105, 20, 0.6); }
     }
 
     .agent-name-label .status-text {
       font-family: 'Crimson Text', serif;
-      font-size: 9px;
-      color: #b8a88a;
+      font-size: 8px;
+      color: #c9a959;
       margin-left: 4px;
       font-weight: 400;
+      display: none;
+    }
+
+    .agent-name-label.working .status-text {
+      display: inline;
     }
 
     @keyframes bubbleFadeIn {
@@ -568,6 +592,137 @@
     .bubble-fading {
       animation: bubbleFadeOut 0.3s ease-in forwards;
     }
+
+    /* Selected Agent Panel */
+    #selected-agent-panel {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      width: 300px;
+      background: linear-gradient(180deg, #4a3728 0%, #3d2d1f 50%, #2e2218 100%);
+      border: 3px solid #8b6914;
+      border-radius: 8px;
+      color: #f4e4c1;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+      display: none;
+      z-index: 60;
+    }
+
+    #selected-agent-panel.visible { display: block; }
+
+    #selected-agent-panel .panel-header {
+      background: linear-gradient(180deg, #5c4a32 0%, #4a3728 100%);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #8b6914;
+    }
+
+    #selected-agent-panel .panel-header h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    #selected-agent-panel .close-btn {
+      background: none;
+      border: none;
+      color: #b8a88a;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0 5px;
+    }
+
+    #selected-agent-panel .close-btn:hover { color: #f4e4c1; }
+
+    #selected-agent-panel .agent-details {
+      padding: 14px;
+    }
+
+    #selected-agent-panel .agent-avatar-large {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #8b6914, #c9a959);
+      border: 3px solid #c9a959;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: #2e1f0f;
+      margin-bottom: 12px;
+    }
+
+    #selected-agent-panel .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    #selected-agent-panel .detail-label {
+      color: #8a7a6a;
+    }
+
+    #selected-agent-panel .detail-value {
+      color: #f4e4c1;
+      font-weight: 500;
+    }
+
+    #selected-agent-panel .agent-personality {
+      font-size: 11px;
+      color: #b8a88a;
+      font-style: italic;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #5a4a3a;
+      line-height: 1.4;
+    }
+
+    /* Powered by Eliza OS branding */
+    #branding {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, rgba(60, 40, 25, 0.95), rgba(40, 25, 15, 0.98));
+      border: 2px solid #8b6914;
+      border-radius: 6px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      z-index: 50;
+    }
+
+    #branding .logo {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #c9a959, #8b6914);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 12px;
+      color: #2e1f0f;
+    }
+
+    #branding .text {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      color: #f4e4c1;
+    }
+
+    #branding .text strong {
+      color: #c9a959;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -576,7 +731,43 @@
     <div>Loading Eliza Town...</div>
   </div>
   <div id="info">
-    Mouse: Rotate | Scroll: Zoom | Right-click drag: Pan
+    Click agent to inspect | Mouse: Rotate | Scroll: Zoom
+  </div>
+
+  <!-- Powered by Eliza OS Branding -->
+  <div id="branding">
+    <div class="logo">E</div>
+    <div class="text">Powered by <strong>Eliza OS</strong></div>
+  </div>
+
+  <!-- Selected Agent Info Panel -->
+  <div id="selected-agent-panel">
+    <div class="panel-header">
+      <h3 id="selected-agent-name">Agent Name</h3>
+      <button class="close-btn" onclick="closeAgentPanel()">&times;</button>
+    </div>
+    <div class="agent-details">
+      <div class="agent-avatar-large" id="selected-agent-avatar">E</div>
+      <div class="detail-row">
+        <span class="detail-label">Role:</span>
+        <span class="detail-value" id="selected-agent-role">Planner</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Status:</span>
+        <span class="detail-value" id="selected-agent-status">Idle</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Current Task:</span>
+        <span class="detail-value" id="selected-agent-task">None</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Location:</span>
+        <span class="detail-value" id="selected-agent-location">Town Square</span>
+      </div>
+      <div class="agent-personality" id="selected-agent-personality">
+        Wise and methodical. Sees the big picture.
+      </div>
+    </div>
   </div>
 
   <!-- Speech & Thought Bubbles Container -->
@@ -686,6 +877,81 @@
     controls.minDistance = 5;
     controls.maxDistance = 200;
     controls.target.set(0, 0, 0);
+
+    // Raycaster for agent selection
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let selectedAgent = null;
+
+    // Click handler for agent selection
+    renderer.domElement.addEventListener('click', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+
+      // Get all agent models
+      const agentModels = [];
+      for (const [, character] of agentCharacters) {
+        if (character.model) {
+          agentModels.push(character.model);
+        }
+      }
+
+      const intersects = raycaster.intersectObjects(agentModels, true);
+
+      if (intersects.length > 0) {
+        // Find the agent that was clicked
+        let clickedObject = intersects[0].object;
+        while (clickedObject.parent && !agentModels.includes(clickedObject)) {
+          clickedObject = clickedObject.parent;
+        }
+
+        // Find the character for this model
+        for (const [agentId, character] of agentCharacters) {
+          if (character.model === clickedObject || character.model.children.includes(clickedObject) ||
+              isDescendant(clickedObject, character.model)) {
+            selectAgent(character);
+            break;
+          }
+        }
+      }
+    });
+
+    function isDescendant(obj, ancestor) {
+      while (obj) {
+        if (obj === ancestor) return true;
+        obj = obj.parent;
+      }
+      return false;
+    }
+
+    function selectAgent(character) {
+      selectedAgent = character;
+      const panel = document.getElementById('selected-agent-panel');
+
+      document.getElementById('selected-agent-name').textContent = character.agentName;
+      document.getElementById('selected-agent-avatar').textContent = character.agentName.charAt(0);
+      document.getElementById('selected-agent-role').textContent = character.agentType.charAt(0).toUpperCase() + character.agentType.slice(1);
+      document.getElementById('selected-agent-status').textContent = character.status.charAt(0).toUpperCase() + character.status.slice(1);
+      document.getElementById('selected-agent-task').textContent = character.doing || 'None';
+
+      const hubName = hubs[character.currentHub]?.name || 'Unknown';
+      document.getElementById('selected-agent-location').textContent = hubName;
+
+      // Get personality from server data if available
+      const serverAgent = serverAgents.find(a => a.id === character.agentId);
+      if (serverAgent?.personality) {
+        document.getElementById('selected-agent-personality').textContent = serverAgent.personality;
+      }
+
+      panel.classList.add('visible');
+    }
+
+    window.closeAgentPanel = function() {
+      document.getElementById('selected-agent-panel').classList.remove('visible');
+      selectedAgent = null;
+    };
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.5);
@@ -1778,10 +2044,13 @@
           label.style.left = `${x}px`;
           label.style.top = `${y}px`;
 
-          // Update status text
+          // Update status text and working class
+          const isWorking = character.status === 'working';
+          label.classList.toggle('working', isWorking);
+
           const statusText = label.querySelector('.status-text');
           if (statusText) {
-            statusText.textContent = character.doing || character.status || character.agentType;
+            statusText.textContent = character.doing || '';
           }
         }
       }
@@ -1856,25 +2125,30 @@
         }, 500);
       }
 
-      // Start the demo loop - each agent does something every few seconds
-      let agentIndex = 0;
+      // Start the demo loop - pick a random agent that's not busy
       demoInterval = setInterval(() => {
         if (!demoModeActive) return;
 
-        const agent = agents[agentIndex % agents.length];
-        agentIndex++;
-
-        // Only trigger if agent is truly idle (not traveling, not working)
-        if (agent.state === 'idle' && agent.status === 'idle') {
+        // Find agents that are actually free
+        const freeAgents = agents.filter(a => a.state === 'idle' && a.status === 'idle');
+        if (freeAgents.length > 0) {
+          const agent = freeAgents[Math.floor(Math.random() * freeAgents.length)];
           demoAgentWork(agent);
         }
-      }, 6000); // Slower interval for better performance
+      }, 5000);
 
       // Also run an immediate first action
       setTimeout(() => {
         const coder = agents.find(a => a.agentType === 'coder');
-        if (coder && coder.state === 'idle') {
-          demoAgentWork(coder);
+        if (coder) {
+          // Force reset state in case it's stuck
+          if (coder.state !== 'traveling') {
+            coder.state = 'idle';
+            coder.status = 'idle';
+          }
+          if (coder.state === 'idle') {
+            demoAgentWork(coder);
+          }
         }
       }, 2000);
     }
@@ -1882,6 +2156,9 @@
     function demoAgentWork(agent) {
       const workHub = agentHubs[agent.agentType];
       if (!workHub) return;
+
+      // Safety: don't start if already traveling
+      if (agent.state === 'traveling') return;
 
       const quotes = demoQuotes[agent.agentType] || demoQuotes.coder;
       const quote = quotes[Math.floor(Math.random() * quotes.length)];
@@ -1896,21 +2173,8 @@
         setTimeout(() => {
           if (!demoModeActive) return;
           agent.setStatus('idle', '');
-
-          // 30% chance to visit another hub to "collaborate"
-          if (Math.random() < 0.3) {
-            const otherHubs = ['coding_desk', 'design_studio', 'review_station'].filter(h => h !== workHub);
-            const visitHub = otherHubs[Math.floor(Math.random() * otherHubs.length)];
-            agent.moveTo(visitHub, () => {
-              showSpeechBubble(agent, "Quick question...", 'saying', 2000);
-              setTimeout(() => {
-                agent.moveTo('town_square', null, false);
-              }, 2500);
-            });
-          } else {
-            agent.moveTo('town_square', null, false);
-          }
-        }, 4000);
+          agent.moveTo('town_square', null, false);
+        }, 3500);
       });
     }
 
