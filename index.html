@@ -726,6 +726,10 @@
     const characters = [];
     const animationClips = {};
 
+    // Speech bubble state (declared early for animation loop)
+    const activeBubbles = new Map();
+    const agentLabels = new Map();
+
     function updateLoading() {
       loadedCount++;
       if (loadedCount >= totalToLoad) {
@@ -1632,7 +1636,6 @@
     // ==================== SPEECH BUBBLE SYSTEM ====================
     const bubbleContainer = document.getElementById('bubble-container');
     const labelsContainer = document.getElementById('labels-container');
-    const activeBubbles = new Map(); // agentId -> bubble element
 
     function showSpeechBubble(character, text, type = 'saying', duration = 4000, toAgent = null) {
       // Remove existing bubble for this agent
@@ -1709,8 +1712,6 @@
     }
 
     // ==================== AGENT NAME LABELS ====================
-    const agentLabels = new Map();
-
     function createAgentLabel(character) {
       const label = document.createElement('div');
       label.className = 'agent-name-label';
