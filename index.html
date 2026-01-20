@@ -965,20 +965,11 @@
 
         switch (this.state) {
           case 'idle':
-            // Subtle idle animation - slight movement
-            if (Math.random() < 0.002) {
-              this.model.rotation.y += (Math.random() - 0.5) * 0.2;
+            // Subtle idle animation - occasional slight rotation
+            if (Math.random() < 0.001) {
+              this.model.rotation.y += (Math.random() - 0.5) * 0.15;
             }
-
-            // Wander around when idle (only if not working/commanded)
-            if (this.status === 'idle' && this.stateTime > this.idleDuration) {
-              const wanderTarget = this.pickWanderTarget();
-              if (wanderTarget) {
-                this.moveTo(wanderTarget, null, false);
-              }
-              this.stateTime = 0;
-              this.idleDuration = 2 + Math.random() * 5;
-            }
+            // Note: Wandering disabled - demo mode handles agent movement
             break;
 
           case 'working':
@@ -1333,6 +1324,7 @@
     buildTown();
 
     // Animation loop
+    let frameCount = 0;
     function animate() {
       requestAnimationFrame(animate);
       const delta = clock.getDelta();
@@ -1340,9 +1332,12 @@
       controls.update();
       renderer.render(scene, camera);
 
-      // Update speech bubble and label positions
-      updateAllBubblePositions();
-      updateAgentLabels();
+      // Only update bubble/label positions every 3 frames for performance
+      frameCount++;
+      if (frameCount % 3 === 0) {
+        updateAllBubblePositions();
+        updateAgentLabels();
+      }
     }
     animate();
 
@@ -1824,7 +1819,7 @@
         if (agent.state === 'idle' && agent.status === 'idle') {
           demoAgentWork(agent);
         }
-      }, 3000);
+      }, 6000); // Slower interval for better performance
 
       // Also run an immediate first action
       setTimeout(() => {
