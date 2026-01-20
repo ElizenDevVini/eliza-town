@@ -948,20 +948,62 @@
 
       // Set agent status (idle, working, chatting)
       setStatus(status, doing = '') {
+        const wasWorking = this.status === 'working';
         this.status = status;
         this.doing = doing;
+
         if (status === 'idle' && this.state !== 'traveling') {
           this.state = 'idle';
+          // Remove working glow
+          if (this.workingGlow) {
+            scene.remove(this.workingGlow);
+            this.workingGlow = null;
+          }
         } else if (status === 'working') {
           this.state = 'working';
+          // Add working glow effect
+          if (!this.workingGlow) {
+            this.createWorkingGlow();
+          }
         } else if (status === 'chatting') {
           this.state = 'chatting';
         }
       }
 
+      // Create a glowing ring effect when working
+      createWorkingGlow() {
+        const colors = {
+          planner: 0xc084fc,
+          designer: 0xf472b6,
+          coder: 0x60a5fa,
+          reviewer: 0x4ade80
+        };
+        const color = colors[this.agentType] || 0xffffff;
+
+        const glowGeom = new THREE.RingGeometry(0.8, 1.2, 32);
+        const glowMat = new THREE.MeshBasicMaterial({
+          color: color,
+          transparent: true,
+          opacity: 0.4,
+          side: THREE.DoubleSide
+        });
+        this.workingGlow = new THREE.Mesh(glowGeom, glowMat);
+        this.workingGlow.rotation.x = -Math.PI / 2;
+        this.workingGlow.position.copy(this.model.position);
+        this.workingGlow.position.y = 0.05;
+        scene.add(this.workingGlow);
+      }
+
       update(delta) {
         this.mixer.update(delta);
         this.stateTime += delta;
+
+        // Update working glow position
+        if (this.workingGlow) {
+          this.workingGlow.position.x = this.model.position.x;
+          this.workingGlow.position.z = this.model.position.z;
+          this.workingGlow.rotation.z += delta * 0.5; // Slow rotation
+        }
 
         switch (this.state) {
           case 'idle':
@@ -974,9 +1016,16 @@
 
           case 'working':
           case 'chatting':
-            // Working bob
+            // Enhanced working animation
             if (this.state === 'working') {
-              this.model.position.y = Math.sin(this.stateTime * 3) * 0.02;
+              // Typing/working bob
+              this.model.position.y = Math.sin(this.stateTime * 4) * 0.05;
+              // Slight side-to-side sway like typing
+              this.model.rotation.y += Math.sin(this.stateTime * 2) * 0.002;
+              // Pulse the working glow
+              if (this.workingGlow) {
+                this.workingGlow.material.opacity = 0.3 + Math.sin(this.stateTime * 3) * 0.15;
+              }
             }
             break;
 
@@ -1939,6 +1988,17 @@
     const serverDot = document.getElementById('server-dot');
     const serverStatusText = document.getElementById('server-status-text');
 
+    // Generate or retrieve session ID for per-user task isolation
+    function getSessionId() {
+      let sessionId = localStorage.getItem('eliza-session-id');
+      if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('eliza-session-id', sessionId);
+      }
+      return sessionId;
+    }
+    const SESSION_ID = getSessionId();
+
     let serverOnline = false;
 
     // Character count
@@ -1991,7 +2051,10 @@
       try {
         const response = await fetch('/api/tasks', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Session-Id': SESSION_ID
+          },
           body: JSON.stringify({ title, priority })
         });
 

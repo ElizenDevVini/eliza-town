@@ -487,8 +487,8 @@ async function broadcastState() {
 }
 
 // Public methods for manual control
-export async function createTask(title, description, priority = 5) {
-  const task = await db.createTask(title, description, priority);
+export async function createTask(title, description, priority = 5, sessionId = null) {
+  const task = await db.createTask(title, description, priority, sessionId);
 
   broadcast({
     type: 'task_created',

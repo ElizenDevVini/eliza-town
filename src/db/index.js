@@ -96,12 +96,22 @@ export async function getHubByName(name) {
 }
 
 // Task queries
-export async function getTasks(status = null) {
+export async function getTasks(status = null, sessionId = null) {
+  const conditions = [];
+  const params = [];
+  let paramIndex = 1;
+
   if (status) {
-    const result = await query('SELECT * FROM tasks WHERE status = $1 ORDER BY priority, created_at', [status]);
-    return result.rows;
+    conditions.push(`status = $${paramIndex++}`);
+    params.push(status);
   }
-  const result = await query('SELECT * FROM tasks ORDER BY priority, created_at');
+  if (sessionId) {
+    conditions.push(`session_id = $${paramIndex++}`);
+    params.push(sessionId);
+  }
+
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const result = await query(`SELECT * FROM tasks ${whereClause} ORDER BY priority, created_at`, params);
   return result.rows;
 }
 
@@ -110,10 +120,10 @@ export async function getTask(id) {
   return result.rows[0];
 }
 
-export async function createTask(title, description, priority = 5) {
+export async function createTask(title, description, priority = 5, sessionId = null) {
   const result = await query(
-    `INSERT INTO tasks (title, description, priority) VALUES ($1, $2, $3) RETURNING *`,
-    [title, description, priority]
+    `INSERT INTO tasks (title, description, priority, session_id) VALUES ($1, $2, $3, $4) RETURNING *`,
+    [title, description, priority, sessionId]
   );
   return result.rows[0];
 }

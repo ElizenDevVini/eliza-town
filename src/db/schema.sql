@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     priority INTEGER DEFAULT 5, -- 1 (highest) to 10 (lowest)
     assigned_agent_id INTEGER REFERENCES agents(id),
     parent_task_id INTEGER REFERENCES tasks(id),
+    session_id VARCHAR(64), -- per-user browser session isolation
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP
@@ -115,3 +116,13 @@ CREATE INDEX IF NOT EXISTS idx_subtasks_task ON subtasks(task_id);
 CREATE INDEX IF NOT EXISTS idx_messages_agent ON messages(agent_id);
 CREATE INDEX IF NOT EXISTS idx_messages_task ON messages(task_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
+CREATE INDEX IF NOT EXISTS idx_tasks_session ON tasks(session_id);
+
+-- Add session_id column if it doesn't exist (for existing databases)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_name = 'tasks' AND column_name = 'session_id') THEN
+        ALTER TABLE tasks ADD COLUMN session_id VARCHAR(64);
+    END IF;
+END $$;

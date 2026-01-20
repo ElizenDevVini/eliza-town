@@ -4,6 +4,11 @@ import * as orchestration from '../orchestration/loop.js';
 
 const router = Router();
 
+// Helper to extract session ID from request
+function getSessionId(req) {
+  return req.headers['x-session-id'] || null;
+}
+
 // Health check
 router.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
@@ -73,7 +78,8 @@ router.get('/hubs/:id', async (req, res) => {
 router.get('/tasks', async (req, res) => {
   try {
     const { status } = req.query;
-    const tasks = await db.getTasks(status || null);
+    const sessionId = getSessionId(req);
+    const tasks = await db.getTasks(status || null, sessionId);
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -98,7 +104,8 @@ router.post('/tasks', async (req, res) => {
     if (!title) {
       return res.status(400).json({ error: 'title is required' });
     }
-    const task = await orchestration.createTask(title, description, priority);
+    const sessionId = getSessionId(req);
+    const task = await orchestration.createTask(title, description, priority, sessionId);
     res.status(201).json(task);
   } catch (error) {
     res.status(500).json({ error: error.message });
