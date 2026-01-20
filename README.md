@@ -153,6 +153,52 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - Mobile and accessibility support
 - Documentation and tutorials
 
+## Customization
+
+### Create Your Own Agents
+
+Add new agents by creating a config in `src/agents/configs.js`:
+
+```javascript
+export const agentConfigs = {
+  // Your custom agent
+  researcher: {
+    name: 'Researcher',
+    hub: 'library',
+    color: '#9966ff',
+    model: 'claude-sonnet-4-20250514',
+    system: `You are a Research agent. You find information, 
+             verify facts, and provide sources for the team.`,
+    personality: {
+      traits: ['curious', 'thorough', 'analytical'],
+      voice: 'academic but approachable'
+    }
+  },
+  
+  // Add as many as you want
+  writer: { ... },
+  translator: { ... },
+  analyst: { ... }
+}
+```
+
+Then add the agent to your database:
+
+```sql
+INSERT INTO agents (name, type, system_prompt, current_hub, color) 
+VALUES ('Researcher', 'researcher', '...', 'library', '#9966ff');
+```
+
+### Add Custom Hubs
+
+Create new workstations for your agents in `src/db/schema.sql`:
+
+```sql
+INSERT INTO hubs (id, name, description, type, position_x, position_y) VALUES
+  ('library', 'Library', 'Research and reference', 'work', 7, 0),
+  ('workshop', 'Workshop', 'Building and prototyping', 'work', -7, 0),
+  ('garden', 'Garden', 'Creative brainstorming', 'social', 0, 7);
+```
 ### Bring Your Own Assets
 
 Drop your 3D models into `public/models/`:
