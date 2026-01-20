@@ -1023,13 +1023,12 @@
           }
         }
 
-        // Animate preview
+        // Animate preview - idle animation only, no rotation
         const previewClock = new THREE.Clock();
         function animatePreview() {
           previewAnimationId = requestAnimationFrame(animatePreview);
           const delta = previewClock.getDelta();
           if (previewMixer) previewMixer.update(delta);
-          previewModel.rotation.y += delta * 0.3; // Slow rotation
           previewRenderer.render(previewScene, previewCamera);
         }
         animatePreview();

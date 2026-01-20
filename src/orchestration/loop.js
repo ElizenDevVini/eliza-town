@@ -38,6 +38,7 @@ export async function initialize() {
   const agents = await db.getAgents();
   for (const agent of agents) {
     state.agents.set(agent.id, agent);
+    console.log(`  Loaded agent: ${agent.name} (${agent.type}) status=${agent.status}`);
   }
   console.log(`Orchestration initialized with ${agents.length} agents`);
 }
@@ -58,21 +59,35 @@ export function stop() {
 
 async function tick() {
   try {
+    // Debug logging
+    const allAgents = [...state.agents.values()];
+    console.log(`[TICK] Agents in state: ${allAgents.length}`);
+    if (allAgents.length > 0) {
+      console.log(`[TICK] Agent statuses: ${allAgents.map(a => `${a.name}(${a.type}):${a.status}`).join(', ')}`);
+    }
+
     // Update traveling agents
     await updateTravelingAgents();
 
     // Check for pending tasks
     const pendingTasks = await db.getTasks('pending');
+    console.log(`[TICK] Pending tasks: ${pendingTasks.length}`);
 
     // Find idle planner agents
     const planners = [...state.agents.values()].filter(
       a => a.type === 'planner' && a.status === 'idle'
     );
+    console.log(`[TICK] Idle planners: ${planners.length}`);
 
     // Assign pending tasks to planners for breakdown
     for (const task of pendingTasks) {
-      if (planners.length === 0) break;
+      console.log(`[TICK] Processing pending task: "${task.title}" (id: ${task.id})`);
+      if (planners.length === 0) {
+        console.log('[TICK] No idle planners available');
+        break;
+      }
       const planner = planners.shift();
+      console.log(`[TICK] Assigning to planner: ${planner.name}`);
       await assignTaskToPlanner(planner, task);
     }
 
