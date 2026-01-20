@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eliza City</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:ital@0;1&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { overflow: hidden; background: #1a1a2e; font-family: 'Nunito', sans-serif; }
+    body { overflow: hidden; background: #0a0a0a; font-family: 'Inter', sans-serif; }
     canvas { display: block; }
 
     #loading {
@@ -16,8 +16,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      color: #ffd1dc;
-      font-family: 'Quicksand', sans-serif;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
       font-size: 24px;
       text-align: center;
       z-index: 100;
@@ -25,7 +25,7 @@
     #loading .spinner {
       width: 50px;
       height: 50px;
-      border: 4px solid #ff69b4;
+      border: 4px solid #333;
       border-top-color: #fff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
@@ -34,7 +34,7 @@
     #loading .progress {
       font-size: 14px;
       margin-top: 10px;
-      color: #ffb6c1;
+      color: #888;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -42,22 +42,21 @@
       position: fixed;
       bottom: 20px;
       left: 20px;
-      color: #fff;
-      font-family: 'Nunito', sans-serif;
-      font-size: 14px;
-      background: linear-gradient(135deg, rgba(255, 105, 180, 0.8), rgba(148, 0, 211, 0.8));
-      padding: 12px 18px;
-      border-radius: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+      color: #ccc;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid #333;
     }
 
-    /* Cute Anime UI Theme */
+    /* Dark City UI Theme */
     #ui-container {
       position: fixed;
       top: 10px;
       right: 10px;
-      width: 320px;
+      width: 300px;
       max-height: calc(100vh - 20px);
       display: flex;
       flex-direction: column;
@@ -66,36 +65,33 @@
     }
 
     .panel {
-      background: linear-gradient(180deg, rgba(255, 182, 193, 0.95), rgba(255, 218, 233, 0.9));
-      border: 3px solid #ff69b4;
-      border-radius: 20px;
-      color: #4a154b;
+      background: rgba(15, 15, 15, 0.95);
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #e0e0e0;
       overflow: hidden;
-      box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
 
     .panel-header {
-      background: linear-gradient(180deg, #ff69b4, #ff1493);
+      background: rgba(30, 30, 30, 0.95);
       padding: 10px 14px;
-      font-family: 'Quicksand', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      color: white;
+      font-weight: 600;
+      font-size: 13px;
+      color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 1px solid #333;
     }
 
     .panel-header .status {
-      font-family: 'Nunito', sans-serif;
       font-size: 11px;
       padding: 3px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 4px;
     }
 
-    .panel-header .status.connected { background: rgba(144, 238, 144, 0.8); color: #006400; }
-    .panel-header .status.disconnected { background: rgba(255, 99, 71, 0.8); color: #8b0000; }
+    .panel-header .status.connected { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .panel-header .status.disconnected { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
 
     .panel-content {
       padding: 10px;
@@ -107,9 +103,9 @@
     #agents-panel .panel-content { display: flex; flex-direction: column; gap: 6px; }
 
     .agent-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 240, 245, 0.8));
-      border: 2px solid #ffb6c1;
-      border-radius: 15px;
+      background: rgba(40, 40, 40, 0.8);
+      border: 1px solid #444;
+      border-radius: 6px;
       padding: 8px 10px;
       display: flex;
       align-items: center;
@@ -118,116 +114,113 @@
     }
 
     .agent-card:hover {
-      transform: scale(1.02);
-      border-color: #ff69b4;
-      box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+      background: rgba(50, 50, 50, 0.9);
+      border-color: #555;
     }
 
     .agent-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #ff69b4, #da70d6);
-      border: 2px solid white;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Quicksand', sans-serif;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 13px;
       color: white;
       flex-shrink: 0;
     }
 
     .agent-info { flex: 1; min-width: 0; }
-    .agent-name { font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 13px; color: #4a154b; }
-    .agent-role { font-size: 11px; color: #9b59b6; text-transform: capitalize; }
+    .agent-name { font-weight: 600; font-size: 13px; color: #fff; }
+    .agent-role { font-size: 11px; color: #888; text-transform: capitalize; }
 
-    .agent-status { font-size: 10px; padding: 3px 10px; border-radius: 10px; text-transform: capitalize; font-weight: 600; }
-    .agent-status.idle { background: #e8daef; color: #8e44ad; }
-    .agent-status.working { background: #d5f5e3; color: #27ae60; }
+    .agent-status { font-size: 10px; padding: 3px 8px; border-radius: 4px; text-transform: capitalize; font-weight: 500; }
+    .agent-status.idle { background: rgba(100, 100, 100, 0.3); color: #aaa; }
+    .agent-status.working { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
 
     #tasks-panel { flex: 0 0 auto; }
     .task-item {
-      background: rgba(255, 255, 255, 0.6);
-      border: 2px solid #dda0dd;
-      border-left: 4px solid #ff69b4;
-      border-radius: 10px;
+      background: rgba(40, 40, 40, 0.6);
+      border: 1px solid #444;
+      border-left: 3px solid #3b82f6;
+      border-radius: 6px;
       padding: 8px 10px;
       margin-bottom: 6px;
     }
-    .task-title { font-size: 12px; font-weight: 600; color: #4a154b; }
-    .task-meta { font-size: 10px; color: #9b59b6; margin-top: 3px; }
+    .task-title { font-size: 12px; font-weight: 500; color: #fff; }
+    .task-meta { font-size: 10px; color: #888; margin-top: 3px; }
 
     #messages-panel { flex: 1; min-height: 150px; }
     #messages-panel .panel-content { display: flex; flex-direction: column; gap: 6px; }
-    .message-item { background: rgba(255, 255, 255, 0.5); border: 1px solid #ffb6c1; border-radius: 10px; padding: 6px 8px; font-size: 11px; }
-    .message-agent { font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 11px; color: #ff69b4; }
-    .message-content { color: #4a154b; line-height: 1.4; }
-    .message-type { display: inline-block; font-size: 8px; padding: 2px 6px; border-radius: 8px; margin-right: 5px; text-transform: uppercase; font-weight: 700; }
-    .message-type.thought { background: #e8daef; color: #8e44ad; }
-    .message-type.status { background: #d5f5e3; color: #27ae60; }
+    .message-item { background: rgba(40, 40, 40, 0.5); border: 1px solid #333; border-radius: 6px; padding: 6px 8px; font-size: 11px; }
+    .message-agent { font-weight: 600; font-size: 11px; color: #3b82f6; }
+    .message-content { color: #ccc; line-height: 1.4; }
+    .message-type { display: inline-block; font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-right: 5px; text-transform: uppercase; font-weight: 600; }
+    .message-type.thought { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+    .message-type.status { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
 
     #task-input-container {
       padding: 14px;
-      background: linear-gradient(180deg, rgba(255, 182, 193, 0.95), rgba(255, 218, 233, 0.9));
-      border: 3px solid #ff69b4;
-      border-radius: 20px;
+      background: rgba(15, 15, 15, 0.95);
+      border: 1px solid #333;
+      border-radius: 8px;
     }
 
     .input-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .input-header label { font-family: 'Quicksand', sans-serif; font-size: 13px; font-weight: 700; color: #ff1493; }
-    .input-header .char-count { font-size: 10px; color: #9b59b6; }
+    .input-header label { font-size: 13px; font-weight: 600; color: #fff; }
+    .input-header .char-count { font-size: 10px; color: #666; }
 
     #task-input {
       width: 100%;
-      background: white;
-      border: 2px solid #ffb6c1;
-      border-radius: 12px;
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 6px;
       padding: 12px;
-      color: #4a154b;
-      font-family: 'Nunito', sans-serif;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
       font-size: 14px;
       resize: none;
     }
-    #task-input:focus { outline: none; border-color: #ff69b4; }
-    #task-input::placeholder { color: #dda0dd; }
+    #task-input:focus { outline: none; border-color: #3b82f6; }
+    #task-input::placeholder { color: #666; }
 
     .button-row { display: flex; gap: 8px; margin-top: 10px; }
 
     #submit-task {
       flex: 1;
       padding: 10px 16px;
-      background: linear-gradient(180deg, #ff69b4, #ff1493);
-      border: 2px solid white;
-      border-radius: 12px;
+      background: #3b82f6;
+      border: none;
+      border-radius: 6px;
       color: white;
-      font-family: 'Quicksand', sans-serif;
-      font-weight: 700;
+      font-weight: 600;
       font-size: 13px;
       cursor: pointer;
+      transition: background 0.2s;
     }
-    #submit-task:hover:not(:disabled) { transform: translateY(-2px); }
-    #submit-task:disabled { opacity: 0.5; cursor: not-allowed; background: #ddd; }
-    #submit-task.success { background: linear-gradient(180deg, #90ee90, #32cd32); }
+    #submit-task:hover:not(:disabled) { background: #2563eb; }
+    #submit-task:disabled { opacity: 0.5; cursor: not-allowed; background: #444; }
+    #submit-task.success { background: #22c55e; }
 
     .priority-select {
-      background: white;
-      border: 2px solid #ffb6c1;
-      border-radius: 12px;
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 6px;
       padding: 10px 12px;
-      color: #4a154b;
-      font-family: 'Nunito', sans-serif;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
       font-size: 13px;
     }
 
-    .server-status { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 10px; color: #9b59b6; }
-    .server-status .dot { width: 8px; height: 8px; border-radius: 50%; background: #ff6b6b; }
-    .server-status .dot.online { background: #90ee90; box-shadow: 0 0 8px #90ee90; }
+    .server-status { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 10px; color: #888; }
+    .server-status .dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
+    .server-status .dot.online { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
 
-    .panel-content::-webkit-scrollbar { width: 8px; }
-    .panel-content::-webkit-scrollbar-track { background: #fce4ec; border-radius: 4px; }
-    .panel-content::-webkit-scrollbar-thumb { background: #ff69b4; border-radius: 4px; }
+    .panel-content::-webkit-scrollbar { width: 6px; }
+    .panel-content::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 3px; }
+    .panel-content::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
   </style>
 </head>
 <body>
@@ -326,11 +319,11 @@
     controls.minDistance = 10;
     controls.maxDistance = 300;
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffeef5, 0.7);
+    // Lighting - neutral city lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.4);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
     sunLight.position.set(80, 120, 50);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 4096;
@@ -343,9 +336,9 @@
     sunLight.shadow.camera.bottom = -200;
     scene.add(sunLight);
 
-    const rimLight = new THREE.DirectionalLight(0xffb6c1, 0.3);
-    rimLight.position.set(-50, 30, -50);
-    scene.add(rimLight);
+    const fillLight = new THREE.DirectionalLight(0xaaccff, 0.4);
+    fillLight.position.set(-50, 30, -50);
+    scene.add(fillLight);
 
     // Ground
     const groundGeo = new THREE.PlaneGeometry(600, 600);
@@ -431,12 +424,20 @@
     // Load character model (FBX)
     function loadCharacter(config, startWaypoint) {
       totalToLoad++;
-      fbxLoader.load(config.path + config.model, (model) => {
+      const fullPath = config.path + config.model;
+      console.log('Loading character:', config.name, 'from', fullPath);
+
+      fbxLoader.load(fullPath, (model) => {
+        console.log('Loaded:', config.name);
         model.scale.set(0.04, 0.04, 0.04); // FBX models need smaller scale
         model.traverse(child => {
           if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
+            // Ensure materials are visible
+            if (child.material) {
+              child.material.side = THREE.DoubleSide;
+            }
           }
         });
         const pos = waypoints[startWaypoint];
@@ -445,7 +446,14 @@
         scene.add(model);
         characters.push(new Character(model, startWaypoint, config));
         updateProgress();
-      }, undefined, () => updateProgress());
+      },
+      (progress) => {
+        // Progress callback
+      },
+      (error) => {
+        console.error('Failed to load:', config.name, error);
+        updateProgress();
+      });
     }
 
     // Character class
@@ -617,14 +625,6 @@
       parkGround.position.set(0, 0.02, 45);
       scene.add(parkGround);
 
-      // Cherry blossom trees
-      for (let i = 0; i < 8; i++) {
-        const angle = (i / 8) * Math.PI * 2;
-        const tree = createTree();
-        tree.position.set(Math.cos(angle) * 18, 0, 45 + Math.sin(angle) * 18);
-        scene.add(tree);
-      }
-
       // Street lamps
       for (let x = -80; x <= 80; x += 25) {
         [12, -12].forEach(z => {
@@ -645,25 +645,6 @@
       if (totalToLoad === 0) {
         document.getElementById('loading').style.display = 'none';
       }
-    }
-
-    function createTree() {
-      const group = new THREE.Group();
-      const trunkGeo = new THREE.CylinderGeometry(0.4, 0.5, 4, 8);
-      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
-      const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-      trunk.position.y = 2;
-      trunk.castShadow = true;
-      group.add(trunk);
-
-      const foliageGeo = new THREE.SphereGeometry(3.5, 16, 16);
-      const foliageMat = new THREE.MeshStandardMaterial({ color: 0xffb7c5 });
-      const foliage = new THREE.Mesh(foliageGeo, foliageMat);
-      foliage.position.y = 6;
-      foliage.castShadow = true;
-      group.add(foliage);
-
-      return group;
     }
 
     function createStreetLamp() {
