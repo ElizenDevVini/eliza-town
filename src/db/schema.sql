@@ -107,6 +107,10 @@ INSERT INTO hubs (name, type, position_x, position_z) VALUES
     ('Library', 'general', 15, 15)
 ON CONFLICT (name) DO NOTHING;
 
+-- Add session_id column if it doesn't exist (for existing databases)
+-- MUST run BEFORE creating index on session_id
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS session_id VARCHAR(64);
+
 -- Create indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_agents_status ON agents(status);
 CREATE INDEX IF NOT EXISTS idx_agents_hub ON agents(current_hub_id);
@@ -117,7 +121,3 @@ CREATE INDEX IF NOT EXISTS idx_messages_agent ON messages(agent_id);
 CREATE INDEX IF NOT EXISTS idx_messages_task ON messages(task_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
 CREATE INDEX IF NOT EXISTS idx_tasks_session ON tasks(session_id);
-
--- Add session_id column if it doesn't exist (for existing databases)
--- Using a separate ALTER statement that will be caught if column exists
-ALTER TABLE tasks ADD COLUMN IF NOT EXISTS session_id VARCHAR(64);

@@ -17,20 +17,32 @@ export async function initializeDatabase() {
   const schemaPath = join(__dirname, 'schema.sql');
   const schema = readFileSync(schemaPath, 'utf-8');
 
+  // First, ensure the tasks table has session_id column (for existing databases)
+  // This must run BEFORE the schema which creates an index on session_id
+  try {
+    // Check if tasks table exists first
+    const tableCheck = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_name = 'tasks'
+      )
+    `);
+
+    if (tableCheck.rows[0].exists) {
+      await pool.query('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS session_id VARCHAR(64)');
+      console.log('Migration: session_id column ensured on existing tasks table');
+    }
+  } catch (migrationError) {
+    console.log('Migration note:', migrationError.message);
+  }
+
+  // Now run the full schema
   try {
     await pool.query(schema);
     console.log('Database schema initialized');
   } catch (error) {
     console.error('Database initialization error:', error);
     throw error;
-  }
-
-  // Run migrations separately to ensure they succeed even if main schema has issues
-  try {
-    await pool.query('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS session_id VARCHAR(64)');
-    console.log('Migration: session_id column ensured');
-  } catch (migrationError) {
-    console.log('Migration note:', migrationError.message);
   }
 }
 
