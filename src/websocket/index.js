@@ -4,7 +4,22 @@ let wss = null;
 const clients = new Set();
 
 export function initialize(server) {
-  wss = new WebSocketServer({ server, path: '/ws' });
+  // Create WebSocket server without automatic upgrade handling
+  // This works better with reverse proxies like Render
+  wss = new WebSocketServer({ noServer: true });
+
+  // Handle upgrade manually
+  server.on('upgrade', (request, socket, head) => {
+    const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
+
+    if (pathname === '/ws') {
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit('connection', ws, request);
+      });
+    } else {
+      socket.destroy();
+    }
+  });
 
   wss.on('connection', (ws) => {
     console.log('WebSocket client connected');
@@ -36,7 +51,7 @@ export function initialize(server) {
     }));
   });
 
-  console.log('WebSocket server initialized');
+  console.log('WebSocket server initialized (manual upgrade handling)');
 }
 
 function handleMessage(ws, data) {

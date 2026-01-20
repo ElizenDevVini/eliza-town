@@ -1,8 +1,14 @@
 import { Router } from 'express';
 import * as db from '../db/index.js';
 import * as orchestration from '../orchestration/loop.js';
+import * as storage from '../storage/index.js';
 
 const router = Router();
+
+// Helper to extract session ID from request
+function getSessionId(req) {
+  return req.headers['x-session-id'] || null;
+}
 
 // Health check
 router.get('/health', (req, res) => {
@@ -45,6 +51,26 @@ router.post('/agents/:id/move', async (req, res) => {
   }
 });
 
+// Update agent properties
+router.patch('/agents/:id', async (req, res) => {
+  try {
+    const { name, type, model, personality, capabilities } = req.body;
+    const agent = await db.updateAgent(parseInt(req.params.id), {
+      name,
+      type,
+      model_id: model,
+      personality,
+      capabilities
+    });
+    if (!agent) {
+      return res.status(404).json({ error: 'Agent not found' });
+    }
+    res.json(agent);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // === Hubs ===
 
 router.get('/hubs', async (req, res) => {
@@ -73,7 +99,8 @@ router.get('/hubs/:id', async (req, res) => {
 router.get('/tasks', async (req, res) => {
   try {
     const { status } = req.query;
-    const tasks = await db.getTasks(status || null);
+    const sessionId = getSessionId(req);
+    const tasks = await db.getTasks(status || null, sessionId);
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -98,7 +125,8 @@ router.post('/tasks', async (req, res) => {
     if (!title) {
       return res.status(400).json({ error: 'title is required' });
     }
-    const task = await orchestration.createTask(title, description, priority);
+    const sessionId = getSessionId(req);
+    const task = await orchestration.createTask(title, description, priority, sessionId);
     res.status(201).json(task);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -116,6 +144,28 @@ router.patch('/tasks/:id', async (req, res) => {
     res.json(task);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Get task files
+router.get('/tasks/:id/files', async (req, res) => {
+  try {
+    const files = await storage.getTaskFiles(parseInt(req.params.id));
+    res.json(files);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Download a specific task file
+router.get('/tasks/:id/files/:filename', async (req, res) => {
+  try {
+    const content = await storage.getTaskFile(parseInt(req.params.id), req.params.filename);
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Disposition', `attachment; filename="${req.params.filename}"`);
+    res.send(content);
+  } catch (error) {
+    res.status(404).json({ error: 'File not found' });
   }
 });
 
@@ -187,6 +237,30 @@ router.get('/orchestration/state', (req, res) => {
   try {
     const state = orchestration.getState();
     res.json(state);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Debug endpoint to check orchestration status
+router.get('/orchestration/debug', async (req, res) => {
+  try {
+    const state = orchestration.getState();
+    const agents = await db.getAgents();
+    const pendingTasks = await db.getTasks('pending');
+    const inProgressTasks = await db.getTasks('in_progress');
+
+    res.json({
+      stateAgentCount: state.agents.length,
+      dbAgentCount: agents.length,
+      agents: agents.map(a => ({ id: a.id, name: a.name, type: a.type, status: a.status })),
+      pendingTaskCount: pendingTasks.length,
+      pendingTasks: pendingTasks.map(t => ({ id: t.id, title: t.title, status: t.status })),
+      inProgressTaskCount: inProgressTasks.length,
+      inProgressTasks: inProgressTasks.map(t => ({ id: t.id, title: t.title, status: t.status })),
+      activeWork: state.activeWork,
+      travelingAgents: state.travelingAgents
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

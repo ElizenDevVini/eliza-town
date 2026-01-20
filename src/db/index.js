@@ -17,6 +17,26 @@ export async function initializeDatabase() {
   const schemaPath = join(__dirname, 'schema.sql');
   const schema = readFileSync(schemaPath, 'utf-8');
 
+  // First, ensure the tasks table has session_id column (for existing databases)
+  // This must run BEFORE the schema which creates an index on session_id
+  try {
+    // Check if tasks table exists first
+    const tableCheck = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_name = 'tasks'
+      )
+    `);
+
+    if (tableCheck.rows[0].exists) {
+      await pool.query('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS session_id VARCHAR(64)');
+      console.log('Migration: session_id column ensured on existing tasks table');
+    }
+  } catch (migrationError) {
+    console.log('Migration note:', migrationError.message);
+  }
+
+  // Now run the full schema
   try {
     await pool.query(schema);
     console.log('Database schema initialized');
@@ -79,6 +99,45 @@ export async function createAgent(name, type, modelId, personality, capabilities
   return result.rows[0];
 }
 
+export async function updateAgent(id, updates) {
+  const fields = [];
+  const params = [id];
+  let paramIndex = 2;
+
+  if (updates.name !== undefined) {
+    fields.push(`name = $${paramIndex++}`);
+    params.push(updates.name);
+  }
+  if (updates.type !== undefined) {
+    fields.push(`type = $${paramIndex++}`);
+    params.push(updates.type);
+  }
+  if (updates.model_id !== undefined) {
+    fields.push(`model_id = $${paramIndex++}`);
+    params.push(updates.model_id);
+  }
+  if (updates.personality !== undefined) {
+    fields.push(`personality = $${paramIndex++}`);
+    params.push(updates.personality);
+  }
+  if (updates.capabilities !== undefined) {
+    fields.push(`capabilities = $${paramIndex++}`);
+    params.push(updates.capabilities);
+  }
+
+  if (fields.length === 0) {
+    return getAgent(id);
+  }
+
+  fields.push('updated_at = CURRENT_TIMESTAMP');
+
+  const result = await query(
+    `UPDATE agents SET ${fields.join(', ')} WHERE id = $1 RETURNING *`,
+    params
+  );
+  return result.rows[0];
+}
+
 // Hub queries
 export async function getHubs() {
   const result = await query('SELECT * FROM hubs ORDER BY id');
@@ -96,12 +155,22 @@ export async function getHubByName(name) {
 }
 
 // Task queries
-export async function getTasks(status = null) {
+export async function getTasks(status = null, sessionId = null) {
+  const conditions = [];
+  const params = [];
+  let paramIndex = 1;
+
   if (status) {
-    const result = await query('SELECT * FROM tasks WHERE status = $1 ORDER BY priority, created_at', [status]);
-    return result.rows;
+    conditions.push(`status = $${paramIndex++}`);
+    params.push(status);
   }
-  const result = await query('SELECT * FROM tasks ORDER BY priority, created_at');
+  if (sessionId) {
+    conditions.push(`session_id = $${paramIndex++}`);
+    params.push(sessionId);
+  }
+
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const result = await query(`SELECT * FROM tasks ${whereClause} ORDER BY priority, created_at`, params);
   return result.rows;
 }
 
@@ -110,10 +179,10 @@ export async function getTask(id) {
   return result.rows[0];
 }
 
-export async function createTask(title, description, priority = 5) {
+export async function createTask(title, description, priority = 5, sessionId = null) {
   const result = await query(
-    `INSERT INTO tasks (title, description, priority) VALUES ($1, $2, $3) RETURNING *`,
-    [title, description, priority]
+    `INSERT INTO tasks (title, description, priority, session_id) VALUES ($1, $2, $3, $4) RETURNING *`,
+    [title, description, priority, sessionId]
   );
   return result.rows[0];
 }

@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eliza City</title>
+  <title>Eliza Town</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:ital@0;1&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital@0;1&display=swap');
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { overflow: hidden; background: #1a1a2e; font-family: 'Nunito', sans-serif; }
+    body { overflow: hidden; background: #1a1a2e; font-family: 'Crimson Text', Georgia, serif; }
     canvas { display: block; }
 
     #loading {
@@ -16,8 +16,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      color: #ffd1dc;
-      font-family: 'Quicksand', sans-serif;
+      color: #f4e4c1;
+      font-family: 'Cinzel', serif;
       font-size: 24px;
       text-align: center;
       z-index: 100;
@@ -25,16 +25,11 @@
     #loading .spinner {
       width: 50px;
       height: 50px;
-      border: 4px solid #ff69b4;
-      border-top-color: #fff;
+      border: 4px solid #5c4a32;
+      border-top-color: #c9a959;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin: 20px auto;
-    }
-    #loading .progress {
-      font-size: 14px;
-      margin-top: 10px;
-      color: #ffb6c1;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -42,202 +37,1157 @@
       position: fixed;
       bottom: 20px;
       left: 20px;
-      color: #fff;
-      font-family: 'Nunito', sans-serif;
+      color: #f4e4c1;
+      font-family: 'Crimson Text', serif;
       font-size: 14px;
-      background: linear-gradient(135deg, rgba(255, 105, 180, 0.8), rgba(148, 0, 211, 0.8));
+      background: linear-gradient(135deg, rgba(60, 40, 25, 0.9), rgba(40, 25, 15, 0.95));
       padding: 12px 18px;
-      border-radius: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+      border-radius: 4px;
+      border: 2px solid #8b6914;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
     }
 
-    /* Cute Anime UI Theme */
+    /* Medieval Wooden UI Theme - Laptop Optimized */
     #ui-container {
       position: fixed;
       top: 10px;
       right: 10px;
-      width: 320px;
+      width: 260px;
       max-height: calc(100vh - 20px);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       z-index: 50;
     }
 
+    @media (max-height: 800px) {
+      #ui-container { width: 240px; gap: 6px; }
+    }
+
     .panel {
-      background: linear-gradient(180deg, rgba(255, 182, 193, 0.95), rgba(255, 218, 233, 0.9));
-      border: 3px solid #ff69b4;
-      border-radius: 20px;
-      color: #4a154b;
+      background: linear-gradient(180deg, #4a3728 0%, #3d2d1f 50%, #2e2218 100%);
+      border: 2px solid #8b6914;
+      border-radius: 6px;
+      color: #f4e4c1;
       overflow: hidden;
-      box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
     }
 
     .panel-header {
-      background: linear-gradient(180deg, #ff69b4, #ff1493);
-      padding: 10px 14px;
-      font-family: 'Quicksand', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      color: white;
+      background: linear-gradient(180deg, #5c4a32 0%, #4a3728 100%);
+      padding: 8px 12px;
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 2px solid #8b6914;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      cursor: pointer;
     }
+
+    .panel-header:hover { background: linear-gradient(180deg, #6c5a42 0%, #5a4738 100%); }
 
     .panel-header .status {
-      font-family: 'Nunito', sans-serif;
-      font-size: 11px;
-      padding: 3px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.5);
+      font-family: 'Crimson Text', serif;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid;
     }
 
-    .panel-header .status.connected { background: rgba(144, 238, 144, 0.8); color: #006400; }
-    .panel-header .status.disconnected { background: rgba(255, 99, 71, 0.8); color: #8b0000; }
+    .panel-header .status.connected {
+      background: rgba(34, 85, 34, 0.6);
+      border-color: #4a7c4a;
+      color: #8fbc8f;
+    }
+
+    .panel-header .status.disconnected {
+      background: rgba(85, 34, 34, 0.6);
+      border-color: #7c4a4a;
+      color: #cd9b9b;
+    }
 
     .panel-content {
-      padding: 10px;
+      padding: 8px;
       overflow-y: auto;
-      max-height: 200px;
+      max-height: 140px;
     }
 
+    @media (max-height: 800px) {
+      .panel-content { max-height: 100px; padding: 6px; }
+    }
+
+    .panel.collapsed .panel-content { display: none; }
+
+    /* Agents Panel */
     #agents-panel { flex: 0 0 auto; }
-    #agents-panel .panel-content { display: flex; flex-direction: column; gap: 6px; }
+    #agents-panel .panel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
 
     .agent-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 240, 245, 0.8));
-      border: 2px solid #ffb6c1;
-      border-radius: 15px;
-      padding: 8px 10px;
+      background: linear-gradient(135deg, rgba(90, 70, 50, 0.5), rgba(60, 45, 30, 0.6));
+      border: 1px solid #6b5a3e;
+      border-radius: 4px;
+      padding: 6px 8px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       transition: all 0.2s;
+      cursor: pointer;
     }
 
     .agent-card:hover {
-      transform: scale(1.02);
-      border-color: #ff69b4;
-      box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+      background: linear-gradient(135deg, rgba(110, 85, 60, 0.6), rgba(80, 60, 40, 0.7));
+      border-color: #8b6914;
     }
 
     .agent-avatar {
-      width: 36px;
-      height: 36px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #ff69b4, #da70d6);
-      border: 2px solid white;
+      background: linear-gradient(135deg, #8b6914, #c9a959);
+      border: 2px solid #c9a959;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Quicksand', sans-serif;
+      font-family: 'Cinzel', serif;
       font-weight: 700;
-      font-size: 14px;
-      color: white;
+      font-size: 11px;
+      color: #2e1f0f;
       flex-shrink: 0;
     }
 
     .agent-info { flex: 1; min-width: 0; }
-    .agent-name { font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 13px; color: #4a154b; }
-    .agent-role { font-size: 11px; color: #9b59b6; text-transform: capitalize; }
 
-    .agent-status { font-size: 10px; padding: 3px 10px; border-radius: 10px; text-transform: capitalize; font-weight: 600; }
-    .agent-status.idle { background: #e8daef; color: #8e44ad; }
-    .agent-status.working { background: #d5f5e3; color: #27ae60; }
+    .agent-name {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 11px;
+      color: #f4e4c1;
+    }
 
+    .agent-role {
+      font-size: 9px;
+      color: #b8a88a;
+      text-transform: capitalize;
+      font-style: italic;
+    }
+
+    .agent-status {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      text-transform: capitalize;
+      border: 1px solid;
+    }
+
+    .agent-status.idle { background: rgba(80, 70, 60, 0.6); border-color: #6b5a3e; color: #b8a88a; }
+    .agent-status.working { background: rgba(40, 60, 80, 0.6); border-color: #4a6a8a; color: #8ab4d4; }
+    .agent-status.traveling { background: rgba(80, 60, 30, 0.6); border-color: #8a6a3a; color: #d4b48a; }
+    .agent-status.chatting { background: rgba(70, 50, 80, 0.6); border-color: #6a4a7a; color: #b48ad4; }
+
+    /* Tasks Panel */
     #tasks-panel { flex: 0 0 auto; }
+
     .task-item {
-      background: rgba(255, 255, 255, 0.6);
-      border: 2px solid #dda0dd;
-      border-left: 4px solid #ff69b4;
-      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(70, 55, 40, 0.5), rgba(50, 40, 30, 0.6));
+      border: 1px solid #5a4a3a;
+      border-left: 3px solid #c9a959;
+      border-radius: 4px;
       padding: 8px 10px;
       margin-bottom: 6px;
     }
-    .task-title { font-size: 12px; font-weight: 600; color: #4a154b; }
-    .task-meta { font-size: 10px; color: #9b59b6; margin-top: 3px; }
 
-    #messages-panel { flex: 1; min-height: 150px; }
-    #messages-panel .panel-content { display: flex; flex-direction: column; gap: 6px; }
-    .message-item { background: rgba(255, 255, 255, 0.5); border: 1px solid #ffb6c1; border-radius: 10px; padding: 6px 8px; font-size: 11px; }
-    .message-agent { font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 11px; color: #ff69b4; }
-    .message-content { color: #4a154b; line-height: 1.4; }
-    .message-type { display: inline-block; font-size: 8px; padding: 2px 6px; border-radius: 8px; margin-right: 5px; text-transform: uppercase; font-weight: 700; }
-    .message-type.thought { background: #e8daef; color: #8e44ad; }
-    .message-type.status { background: #d5f5e3; color: #27ae60; }
+    .task-item.completed { border-left-color: #4a7c4a; opacity: 0.7; }
+    .task-item.in_progress { border-left-color: #c9a959; }
 
-    #task-input-container {
-      padding: 14px;
-      background: linear-gradient(180deg, rgba(255, 182, 193, 0.95), rgba(255, 218, 233, 0.9));
-      border: 3px solid #ff69b4;
-      border-radius: 20px;
+    .task-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: #f4e4c1;
     }
 
-    .input-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .input-header label { font-family: 'Quicksand', sans-serif; font-size: 13px; font-weight: 700; color: #ff1493; }
-    .input-header .char-count { font-size: 10px; color: #9b59b6; }
+    .task-meta {
+      font-size: 10px;
+      color: #a89878;
+      margin-top: 3px;
+    }
+
+    /* Results Panel */
+    #results-panel { flex: 0 0 auto; max-height: 200px; }
+    #results-panel .panel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .result-item {
+      background: linear-gradient(135deg, rgba(60, 80, 60, 0.5), rgba(40, 60, 40, 0.6));
+      border: 1px solid #4a6a4a;
+      border-left: 3px solid #6b8e23;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 6px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .result-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #c9d9a9;
+    }
+
+    .result-status {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #4a6a4a;
+      color: #a9d9a9;
+    }
+
+    .result-files {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .result-file {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid #5a6a5a;
+      border-radius: 4px;
+      font-size: 10px;
+      color: #b8c8a8;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .result-file:hover {
+      background: rgba(107, 142, 35, 0.3);
+      border-color: #6b8e23;
+    }
+
+    .result-file-icon {
+      font-size: 12px;
+    }
+
+    .result-preview {
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 10px;
+      color: #a0d911;
+      max-height: 80px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    /* Messages Panel */
+    #messages-panel { flex: 1; min-height: 150px; }
+    #messages-panel .panel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .message-item {
+      background: rgba(50, 40, 30, 0.5);
+      border: 1px solid #4a3a2a;
+      border-radius: 4px;
+      padding: 6px 8px;
+      font-size: 11px;
+    }
+
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+    }
+
+    .message-agent {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 11px;
+      color: #c9a959;
+    }
+
+    .message-time {
+      font-size: 9px;
+      color: #8a7a6a;
+    }
+
+    .message-content {
+      color: #d4c4a4;
+      line-height: 1.4;
+    }
+
+    .message-type {
+      display: inline-block;
+      font-size: 8px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-right: 5px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .message-type.thought { background: #2a3a4a; color: #8ab4d4; }
+    .message-type.chat { background: #3a2a4a; color: #b48ad4; }
+    .message-type.status { background: #2a3a2a; color: #8abc8a; }
+    .message-type.announcement { background: #4a2a2a; color: #d48a8a; }
+
+    /* Task Input - Medieval Scroll Style - Compact */
+    #task-input-container {
+      padding: 10px;
+      background: linear-gradient(180deg, #5c4a32 0%, #4a3728 50%, #3d2d1f 100%);
+      border: 2px solid #8b6914;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    @media (max-height: 800px) {
+      #task-input-container { padding: 8px; }
+    }
+
+    .input-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .input-header label {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #c9a959;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .input-header .char-count {
+      font-size: 9px;
+      color: #8a7a6a;
+    }
 
     #task-input {
       width: 100%;
-      background: white;
-      border: 2px solid #ffb6c1;
-      border-radius: 12px;
-      padding: 12px;
-      color: #4a154b;
-      font-family: 'Nunito', sans-serif;
-      font-size: 14px;
+      background: linear-gradient(180deg, #2e2218, #3d2d1f);
+      border: 2px solid #6b5a3e;
+      border-radius: 4px;
+      padding: 8px 10px;
+      color: #f4e4c1;
+      font-family: 'Crimson Text', serif;
+      font-size: 12px;
       resize: none;
+      line-height: 1.4;
+      transition: all 0.2s ease;
     }
-    #task-input:focus { outline: none; border-color: #ff69b4; }
-    #task-input::placeholder { color: #dda0dd; }
 
-    .button-row { display: flex; gap: 8px; margin-top: 10px; }
+    #task-input:focus {
+      outline: none;
+      border-color: #c9a959;
+      box-shadow: 0 0 0 2px rgba(201, 169, 89, 0.2), inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    #task-input::placeholder {
+      color: #7a6a5a;
+      font-style: italic;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
 
     #submit-task {
       flex: 1;
-      padding: 10px 16px;
-      background: linear-gradient(180deg, #ff69b4, #ff1493);
-      border: 2px solid white;
-      border-radius: 12px;
-      color: white;
-      font-family: 'Quicksand', sans-serif;
-      font-weight: 700;
+      padding: 8px 12px;
+      background: linear-gradient(180deg, #8b6914 0%, #6b5010 50%, #5a4210 100%);
+      border: 2px solid #c9a959;
+      border-radius: 4px;
+      color: #f4e4c1;
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+    }
+
+    #submit-task:hover:not(:disabled) {
+      background: linear-gradient(180deg, #a07818 0%, #8b6914 50%, #6b5010 100%);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    #submit-task:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    #submit-task:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #4a3a2a;
+      border-color: #5a4a3a;
+    }
+
+    #submit-task.submitting {
+      background: linear-gradient(180deg, #6b5a3a 0%, #5a4a2a 100%);
+    }
+
+    #submit-task.success {
+      background: linear-gradient(180deg, #4a6a3a 0%, #3a5a2a 100%);
+      border-color: #6a9a5a;
+    }
+
+    #submit-task.error {
+      background: linear-gradient(180deg, #6a3a3a 0%, #5a2a2a 100%);
+      border-color: #9a5a5a;
+    }
+
+    .priority-select {
+      background: linear-gradient(180deg, #3d2d1f, #2e2218);
+      border: 2px solid #6b5a3e;
+      border-radius: 4px;
+      padding: 10px 12px;
+      color: #f4e4c1;
+      font-family: 'Crimson Text', serif;
       font-size: 13px;
       cursor: pointer;
     }
-    #submit-task:hover:not(:disabled) { transform: translateY(-2px); }
-    #submit-task:disabled { opacity: 0.5; cursor: not-allowed; background: #ddd; }
-    #submit-task.success { background: linear-gradient(180deg, #90ee90, #32cd32); }
 
-    .priority-select {
-      background: white;
-      border: 2px solid #ffb6c1;
-      border-radius: 12px;
-      padding: 10px 12px;
-      color: #4a154b;
-      font-family: 'Nunito', sans-serif;
-      font-size: 13px;
+    .priority-select:focus {
+      outline: none;
+      border-color: #c9a959;
     }
 
-    .server-status { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 10px; color: #9b59b6; }
-    .server-status .dot { width: 8px; height: 8px; border-radius: 50%; background: #ff6b6b; }
-    .server-status .dot.online { background: #90ee90; box-shadow: 0 0 8px #90ee90; }
+    .priority-select option {
+      background: #3d2d1f;
+      color: #f4e4c1;
+    }
 
-    .panel-content::-webkit-scrollbar { width: 8px; }
-    .panel-content::-webkit-scrollbar-track { background: #fce4ec; border-radius: 4px; }
-    .panel-content::-webkit-scrollbar-thumb { background: #ff69b4; border-radius: 4px; }
+    .server-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 10px;
+      color: #8a7a6a;
+    }
+
+    .server-status .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #7a3a3a;
+      border: 1px solid #9a5a5a;
+    }
+
+    .server-status .dot.online {
+      background: #3a6a3a;
+      border-color: #5a9a5a;
+      box-shadow: 0 0 6px #5a9a5a;
+    }
+
+    /* Scrollbar styling */
+    .panel-content::-webkit-scrollbar {
+      width: 8px;
+    }
+    .panel-content::-webkit-scrollbar-track {
+      background: #2e2218;
+      border-radius: 4px;
+    }
+    .panel-content::-webkit-scrollbar-thumb {
+      background: #6b5a3e;
+      border-radius: 4px;
+    }
+    .panel-content::-webkit-scrollbar-thumb:hover {
+      background: #8b6914;
+    }
+
+    /* Speech Bubble System */
+    #bubble-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 40;
+    }
+
+    .speech-bubble {
+      position: absolute;
+      max-width: 250px;
+      padding: 10px 14px;
+      background: linear-gradient(180deg, #4a3728 0%, #3d2d1f 100%);
+      border: 2px solid #c9a959;
+      border-radius: 12px;
+      color: #f4e4c1;
+      font-family: 'Crimson Text', serif;
+      font-size: 13px;
+      line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      transform: translate(-50%, -100%);
+      animation: bubbleFadeIn 0.3s ease-out;
+      pointer-events: auto;
+    }
+
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 10px 8px 0;
+      border-style: solid;
+      border-color: #3d2d1f transparent transparent;
+    }
+
+    .speech-bubble::before {
+      content: '';
+      position: absolute;
+      bottom: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 12px 10px 0;
+      border-style: solid;
+      border-color: #c9a959 transparent transparent;
+    }
+
+    .speech-bubble .agent-label {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 11px;
+      color: #c9a959;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .speech-bubble .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+    }
+
+    .speech-bubble .status-dot.working { background: #60a5fa; }
+    .speech-bubble .status-dot.traveling { background: #fbbf24; }
+    .speech-bubble .status-dot.chatting { background: #c084fc; }
+
+    /* Thought bubble - smaller, different style */
+    .thought-bubble {
+      position: absolute;
+      max-width: 180px;
+      padding: 8px 12px;
+      background: rgba(40, 30, 20, 0.9);
+      border: 1px solid #6b5a3e;
+      border-radius: 16px;
+      color: #b8a88a;
+      font-family: 'Crimson Text', serif;
+      font-size: 11px;
+      font-style: italic;
+      line-height: 1.3;
+      transform: translate(-50%, -100%);
+      animation: bubbleFadeIn 0.2s ease-out;
+    }
+
+    .thought-bubble .agent-label {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      color: #8a7a6a;
+      margin-bottom: 2px;
+    }
+
+    /* Name label floating above character - minimal by default */
+    .agent-name-label {
+      position: absolute;
+      padding: 3px 8px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 10px;
+      color: #f4e4c1;
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      font-weight: 600;
+      transform: translate(-50%, 0);
+      white-space: nowrap;
+      opacity: 0.8;
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    .agent-name-label:hover,
+    .agent-name-label.working {
+      opacity: 1;
+      background: rgba(30, 20, 10, 0.9);
+      border: 1px solid #8b6914;
+    }
+
+    .agent-name-label.working {
+      animation: labelPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes labelPulse {
+      0%, 100% { box-shadow: 0 0 5px rgba(139, 105, 20, 0.3); }
+      50% { box-shadow: 0 0 10px rgba(139, 105, 20, 0.6); }
+    }
+
+    .agent-name-label .status-text {
+      font-family: 'Crimson Text', serif;
+      font-size: 8px;
+      color: #c9a959;
+      margin-left: 4px;
+      font-weight: 400;
+      display: none;
+    }
+
+    .agent-name-label.working .status-text {
+      display: inline;
+    }
+
+    @keyframes bubbleFadeIn {
+      from { opacity: 0; transform: translate(-50%, -90%) scale(0.9); }
+      to { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+    }
+
+    @keyframes bubbleFadeOut {
+      from { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+      to { opacity: 0; transform: translate(-50%, -110%) scale(0.9); }
+    }
+
+    .bubble-fading {
+      animation: bubbleFadeOut 0.3s ease-in forwards;
+    }
+
+    /* Agent Modal - Full Screen Centered */
+    #agent-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #agent-modal-backdrop.visible {
+      display: flex;
+    }
+
+    #agent-modal {
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      background: linear-gradient(180deg, #4a3728 0%, #3d2d1f 50%, #2e2218 100%);
+      border: 3px solid #8b6914;
+      border-radius: 12px;
+      color: #f4e4c1;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #agent-modal .modal-header {
+      background: linear-gradient(180deg, #5c4a32 0%, #4a3728 100%);
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #8b6914;
+    }
+
+    #agent-modal .modal-header h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0;
+      color: #c9a959;
+    }
+
+    #agent-modal .modal-close {
+      background: none;
+      border: none;
+      color: #b8a88a;
+      font-size: 28px;
+      cursor: pointer;
+      padding: 0 8px;
+      line-height: 1;
+    }
+
+    #agent-modal .modal-close:hover { color: #f4e4c1; }
+
+    #agent-modal .modal-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    #agent-modal .character-section {
+      width: 300px;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, #2a1f15, #1a1510);
+      border-right: 2px solid #5a4a3a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    #agent-modal .character-preview-large {
+      width: 260px;
+      height: 320px;
+      background: radial-gradient(ellipse at center, #3a2a1a 0%, #1a1510 100%);
+      border: 2px solid #5a4a3a;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #agent-modal .character-preview-large canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    #agent-modal .character-name-badge {
+      margin-top: 15px;
+      padding: 8px 20px;
+      background: linear-gradient(180deg, #5c4a32, #4a3728);
+      border: 2px solid #8b6914;
+      border-radius: 20px;
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #c9a959;
+    }
+
+    #agent-modal .character-role {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #8a7a6a;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    #agent-modal .details-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #agent-modal .tabs {
+      display: flex;
+      border-bottom: 2px solid #5a4a3a;
+      background: rgba(0,0,0,0.2);
+    }
+
+    #agent-modal .tab {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      color: #8a7a6a;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    #agent-modal .tab:hover { color: #b8a88a; }
+    #agent-modal .tab.active {
+      color: #c9a959;
+      border-bottom-color: #c9a959;
+      background: rgba(139, 105, 20, 0.1);
+    }
+
+    #agent-modal .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    #agent-modal .tab-panel { display: none; }
+    #agent-modal .tab-panel.active { display: block; }
+
+    /* Info Tab */
+    #agent-modal .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    #agent-modal .info-item {
+      background: rgba(0,0,0,0.2);
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #5a4a3a;
+    }
+
+    #agent-modal .info-label {
+      font-size: 11px;
+      color: #8a7a6a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    #agent-modal .info-value {
+      font-size: 14px;
+      color: #f4e4c1;
+      font-weight: 500;
+    }
+
+    #agent-modal .personality-box {
+      grid-column: 1 / -1;
+      margin-top: 10px;
+    }
+
+    #agent-modal .personality-box .info-value {
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    #agent-modal .capabilities-list {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 5px;
+    }
+
+    #agent-modal .capability-tag {
+      background: linear-gradient(180deg, #5c4a32, #4a3728);
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 11px;
+      border: 1px solid #8b6914;
+      color: #c9a959;
+    }
+
+    /* Customize Tab */
+    #agent-modal .form-group {
+      margin-bottom: 20px;
+    }
+
+    #agent-modal .form-label {
+      display: block;
+      font-size: 12px;
+      color: #8a7a6a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    #agent-modal .form-input,
+    #agent-modal .form-select,
+    #agent-modal .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.3);
+      border: 2px solid #5a4a3a;
+      border-radius: 6px;
+      color: #f4e4c1;
+      font-family: 'Crimson Text', serif;
+      font-size: 14px;
+    }
+
+    #agent-modal .form-input:focus,
+    #agent-modal .form-select:focus,
+    #agent-modal .form-textarea:focus {
+      outline: none;
+      border-color: #8b6914;
+    }
+
+    #agent-modal .form-select {
+      cursor: pointer;
+    }
+
+    #agent-modal .form-select option {
+      background: #3d2d1f;
+      color: #f4e4c1;
+    }
+
+    #agent-modal .form-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    #agent-modal .save-btn {
+      background: linear-gradient(180deg, #6b8e23, #556b2f);
+      border: 2px solid #8fbc8f;
+      padding: 12px 30px;
+      border-radius: 6px;
+      color: #f4e4c1;
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    #agent-modal .save-btn:hover {
+      background: linear-gradient(180deg, #7ba428, #607d3b);
+    }
+
+    /* JSON Tab */
+    #agent-modal .json-editor {
+      width: 100%;
+      min-height: 300px;
+      background: #1a1510;
+      border: 2px solid #5a4a3a;
+      border-radius: 6px;
+      color: #a0d911;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 12px;
+      padding: 15px;
+      resize: vertical;
+    }
+
+    #agent-modal .json-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    #agent-modal .json-btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      cursor: pointer;
+      border: 2px solid;
+    }
+
+    #agent-modal .json-btn.copy {
+      background: linear-gradient(180deg, #4a5568, #2d3748);
+      border-color: #718096;
+      color: #f4e4c1;
+    }
+
+    #agent-modal .json-btn.apply {
+      background: linear-gradient(180deg, #6b8e23, #556b2f);
+      border-color: #8fbc8f;
+      color: #f4e4c1;
+    }
+
+    @media (max-width: 700px) {
+      #agent-modal .modal-body { flex-direction: column; }
+      #agent-modal .character-section {
+        width: 100%;
+        border-right: none;
+        border-bottom: 2px solid #5a4a3a;
+        padding: 15px;
+      }
+      #agent-modal .character-preview-large {
+        width: 200px;
+        height: 250px;
+      }
+    }
+
+    /* Powered by Eliza OS branding - compact */
+    #branding {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background: linear-gradient(135deg, rgba(60, 40, 25, 0.9), rgba(40, 25, 15, 0.95));
+      border: 1px solid #8b6914;
+      border-radius: 4px;
+      padding: 5px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      z-index: 50;
+    }
+
+    #branding .logo {
+      width: 18px;
+      height: 18px;
+      background: linear-gradient(135deg, #c9a959, #8b6914);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 10px;
+      color: #2e1f0f;
+    }
+
+    #branding .text {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      color: #f4e4c1;
+    }
+
+    #branding .text strong {
+      color: #c9a959;
+      font-weight: 700;
+    }
+
+    /* Info box compact */
+    #info {
+      padding: 8px 12px;
+      font-size: 11px;
+    }
+
+    @media (max-height: 800px) {
+      #info { padding: 6px 10px; font-size: 10px; }
+    }
   </style>
 </head>
 <body>
   <div id="loading">
     <div class="spinner"></div>
-    <div>Loading Eliza City...</div>
-    <div class="progress" id="load-progress">0%</div>
+    <div>Loading Eliza Town...</div>
   </div>
-  <div id="info">Mouse: Rotate | Scroll: Zoom | Right-click: Pan</div>
+  <div id="info">
+    Click agent to inspect | Mouse: Rotate | Scroll: Zoom
+  </div>
 
+  <!-- Powered by Eliza OS Branding -->
+  <div id="branding">
+    <div class="logo">E</div>
+    <div class="text">Powered by <strong>Eliza OS</strong></div>
+  </div>
+
+  <!-- Agent Modal - Full Screen -->
+  <div id="agent-modal-backdrop">
+    <div id="agent-modal">
+      <div class="modal-header">
+        <h2 id="modal-agent-name">Agent Name</h2>
+        <button class="modal-close" onclick="closeAgentModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="character-section">
+          <div class="character-preview-large">
+            <canvas id="character-preview-canvas"></canvas>
+          </div>
+          <div class="character-name-badge" id="modal-agent-badge">Agent</div>
+          <div class="character-role" id="modal-agent-role">Planner</div>
+        </div>
+        <div class="details-section">
+          <div class="tabs">
+            <button class="tab active" data-tab="info">Info</button>
+            <button class="tab" data-tab="customize">Customize</button>
+            <button class="tab" data-tab="json">JSON</button>
+          </div>
+          <div class="tab-content">
+            <!-- Info Tab -->
+            <div class="tab-panel active" id="tab-info">
+              <div class="info-grid">
+                <div class="info-item">
+                  <div class="info-label">Status</div>
+                  <div class="info-value" id="modal-agent-status">Idle</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Location</div>
+                  <div class="info-value" id="modal-agent-location">Town Square</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Current Task</div>
+                  <div class="info-value" id="modal-agent-task">None</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Model</div>
+                  <div class="info-value" id="modal-agent-model">claude-3-5-sonnet</div>
+                </div>
+                <div class="info-item personality-box">
+                  <div class="info-label">Personality</div>
+                  <div class="info-value" id="modal-agent-personality">Wise and methodical.</div>
+                </div>
+                <div class="info-item" style="grid-column: 1 / -1;">
+                  <div class="info-label">Capabilities</div>
+                  <div class="capabilities-list" id="modal-agent-capabilities">
+                    <span class="capability-tag">planning</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customize Tab -->
+            <div class="tab-panel" id="tab-customize">
+              <div class="form-group">
+                <label class="form-label">Agent Name</label>
+                <input type="text" class="form-input" id="edit-agent-name" placeholder="Agent name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">LLM Model</label>
+                <select class="form-select" id="edit-agent-llm">
+                  <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet (Recommended)</option>
+                  <option value="claude-3-opus-20240229">Claude 3 Opus (Most Capable)</option>
+                  <option value="claude-3-haiku-20240307">Claude 3 Haiku (Fastest)</option>
+                  <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                  <option value="gpt-4o">GPT-4o</option>
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Role Type</label>
+                <select class="form-select" id="edit-agent-type">
+                  <option value="planner">Planner - Breaks down tasks</option>
+                  <option value="designer">Designer - Architecture & UI</option>
+                  <option value="coder">Coder - Writes code</option>
+                  <option value="reviewer">Reviewer - Reviews code</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Personality</label>
+                <textarea class="form-textarea" id="edit-agent-personality" placeholder="Describe the agent's personality..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Capabilities (comma-separated)</label>
+                <input type="text" class="form-input" id="edit-agent-capabilities" placeholder="e.g., javascript, python, architecture">
+              </div>
+              <button class="save-btn" onclick="saveAgentChanges()">Save Changes</button>
+            </div>
+
+            <!-- JSON Tab -->
+            <div class="tab-panel" id="tab-json">
+              <textarea class="json-editor" id="agent-json-editor" spellcheck="false"></textarea>
+              <div class="json-actions">
+                <button class="json-btn copy" onclick="copyAgentJson()">Copy JSON</button>
+                <button class="json-btn apply" onclick="applyAgentJson()">Apply Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Speech & Thought Bubbles Container -->
+  <div id="bubble-container"></div>
+
+  <!-- Agent Name Labels Container -->
+  <div id="labels-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 35;"></div>
+
+  <!-- Agent Orchestration UI -->
   <div id="ui-container">
     <div id="agents-panel" class="panel">
       <div class="panel-header">
@@ -245,24 +1195,44 @@
         <span id="ws-status" class="status disconnected">Offline</span>
       </div>
       <div class="panel-content" id="agents-list">
-        <div style="color: #9b59b6; font-size: 12px; text-align: center; padding: 20px;">Connecting...</div>
+        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+          Connecting to server...
+        </div>
       </div>
     </div>
 
     <div id="tasks-panel" class="panel">
       <div class="panel-header">
         <span>Active Tasks</span>
-        <span id="task-count" style="font-size: 11px; color: rgba(255,255,255,0.8);">0</span>
+        <span id="task-count" style="font-size: 11px; color: #9ca3af;">0</span>
       </div>
       <div class="panel-content" id="tasks-list">
-        <div style="color: #9b59b6; font-size: 12px; text-align: center; padding: 20px;">No active tasks</div>
+        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+          No active tasks
+        </div>
+      </div>
+    </div>
+
+    <div id="results-panel" class="panel">
+      <div class="panel-header">
+        <span>Results</span>
+        <span id="results-count" style="font-size: 11px; color: #9ca3af;">0</span>
+      </div>
+      <div class="panel-content" id="results-list">
+        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+          Completed task results will appear here
+        </div>
       </div>
     </div>
 
     <div id="messages-panel" class="panel">
-      <div class="panel-header"><span>Activity Feed</span></div>
+      <div class="panel-header">
+        <span>Activity Feed</span>
+      </div>
       <div class="panel-content" id="messages-list">
-        <div style="color: #9b59b6; font-size: 12px; text-align: center; padding: 20px;">Waiting...</div>
+        <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+          Waiting for activity...
+        </div>
       </div>
     </div>
 
@@ -271,14 +1241,16 @@
         <label>Assign a Task</label>
         <span class="char-count"><span id="char-count">0</span>/500</span>
       </div>
-      <textarea id="task-input" rows="3" placeholder="What should the team work on?" maxlength="500"></textarea>
+      <textarea id="task-input" rows="3" placeholder="Describe what you want the agents to work on..." maxlength="500"></textarea>
       <div class="button-row">
         <select class="priority-select" id="priority-select">
-          <option value="3">Urgent!</option>
+          <option value="3">High Priority</option>
           <option value="5" selected>Normal</option>
-          <option value="7">Whenever~</option>
+          <option value="7">Low Priority</option>
         </select>
-        <button id="submit-task" disabled><span id="submit-text">Send Task</span></button>
+        <button id="submit-task" disabled>
+          <span id="submit-text">Submit Task</span>
+        </button>
       </div>
       <div class="server-status">
         <span class="dot" id="server-dot"></span>
@@ -300,164 +1272,547 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87CEEB);
-    scene.fog = new THREE.FogExp2(0x87CEEB, 0.006);
+    scene.background = new THREE.Color(0x7EC8E3);
+    scene.fog = new THREE.FogExp2(0x7EC8E3, 0.012);
 
+    // Camera
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
-    camera.position.set(100, 80, 100);
+    camera.position.set(60, 45, 60);
 
+    // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.3;
+    renderer.toneMappingExposure = 1.2;
     document.body.appendChild(renderer.domElement);
 
+    // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.maxPolarAngle = Math.PI / 2.1;
-    controls.minDistance = 10;
-    controls.maxDistance = 300;
+    controls.minDistance = 5;
+    controls.maxDistance = 200;
+    controls.target.set(0, 0, 0);
+
+    // Raycaster for agent selection
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let selectedAgent = null;
+
+    // Click handler for agent selection
+    renderer.domElement.addEventListener('click', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+
+      // Get all agent models
+      const agentModels = [];
+      for (const [, character] of agentCharacters) {
+        if (character.model) {
+          agentModels.push(character.model);
+        }
+      }
+
+      const intersects = raycaster.intersectObjects(agentModels, true);
+
+      if (intersects.length > 0) {
+        // Find the agent that was clicked
+        let clickedObject = intersects[0].object;
+        while (clickedObject.parent && !agentModels.includes(clickedObject)) {
+          clickedObject = clickedObject.parent;
+        }
+
+        // Find the character for this model
+        for (const [agentId, character] of agentCharacters) {
+          if (character.model === clickedObject || character.model.children.includes(clickedObject) ||
+              isDescendant(clickedObject, character.model)) {
+            selectAgent(character);
+            break;
+          }
+        }
+      }
+    });
+
+    function isDescendant(obj, ancestor) {
+      while (obj) {
+        if (obj === ancestor) return true;
+        obj = obj.parent;
+      }
+      return false;
+    }
+
+    // Preview renderer for character display
+    let previewRenderer = null;
+    let previewScene = null;
+    let previewCamera = null;
+    let previewModel = null;
+    let previewMixer = null;
+    let previewAnimationId = null;
+
+    function initPreviewRenderer() {
+      const canvas = document.getElementById('character-preview-canvas');
+      if (!canvas) {
+        console.error('Character preview canvas not found');
+        return;
+      }
+
+      previewRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      previewRenderer.setSize(260, 320);
+      previewRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      previewRenderer.setClearColor(0x1a1510, 1);
+
+      previewScene = new THREE.Scene();
+
+      // Camera positioned to frame a character nicely
+      previewCamera = new THREE.PerspectiveCamera(35, 260 / 320, 0.1, 100);
+      previewCamera.position.set(0, 1.0, 3.5);
+      previewCamera.lookAt(0, 0.8, 0);
+
+      // Better lighting for larger preview
+      const ambientLight = new THREE.AmbientLight(0xfff5e6, 1.0);
+      previewScene.add(ambientLight);
+      const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.8);
+      keyLight.position.set(3, 4, 3);
+      previewScene.add(keyLight);
+      const fillLight = new THREE.DirectionalLight(0x8ecae6, 0.6);
+      fillLight.position.set(-3, 2, -2);
+      previewScene.add(fillLight);
+      const rimLight = new THREE.DirectionalLight(0xffd700, 0.4);
+      rimLight.position.set(0, 2, -3);
+      previewScene.add(rimLight);
+
+      console.log('Preview renderer initialized');
+    }
+
+    function renderPreviewCharacter(character) {
+      // Clear old model and animation
+      if (previewModel && previewScene) {
+        previewScene.remove(previewModel);
+        previewModel = null;
+      }
+      if (previewMixer) {
+        previewMixer.stopAllAction();
+        previewMixer = null;
+      }
+      if (previewAnimationId) {
+        cancelAnimationFrame(previewAnimationId);
+        previewAnimationId = null;
+      }
+
+      // Initialize renderer if needed (must happen after modal is visible)
+      if (!previewRenderer) {
+        initPreviewRenderer();
+      }
+
+      // Ensure canvas is properly sized
+      const canvas = document.getElementById('character-preview-canvas');
+      if (canvas && previewRenderer) {
+        previewRenderer.setSize(260, 320);
+      }
+
+      if (!character.model) {
+        console.log('No model for character preview');
+        previewRenderer.render(previewScene, previewCamera);
+        return;
+      }
+
+      try {
+        // Clone the character's model for preview using SkeletonUtils for proper skinned mesh cloning
+        previewModel = SkeletonUtils.clone(character.model);
+        previewModel.scale.copy(character.model.scale);
+        previewModel.position.set(0, 0, 0);
+        previewModel.rotation.set(0, 0.4, 0);
+        previewScene.add(previewModel);
+
+        console.log('Preview model added for:', character.agentName);
+
+        // Setup animation mixer for preview with idle animation
+        const rig = character.rig;
+        const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
+        if (generalClips && generalClips.length > 0) {
+          previewMixer = new THREE.AnimationMixer(previewModel);
+          const idleClip = generalClips.find(c => c.name.toLowerCase().includes('idle')) || generalClips[0];
+          if (idleClip) {
+            const action = previewMixer.clipAction(idleClip);
+            action.play();
+          }
+        }
+
+        // Animate preview - idle animation only
+        const previewClock = new THREE.Clock();
+        function animatePreview() {
+          previewAnimationId = requestAnimationFrame(animatePreview);
+          const delta = previewClock.getDelta();
+          if (previewMixer) previewMixer.update(delta);
+          if (previewRenderer && previewScene && previewCamera) {
+            previewRenderer.render(previewScene, previewCamera);
+          }
+        }
+        animatePreview();
+      } catch (e) {
+        console.error('Error cloning character model:', e);
+        if (previewRenderer && previewScene && previewCamera) {
+          previewRenderer.render(previewScene, previewCamera);
+        }
+      }
+    }
+
+    // Current agent being edited
+    let currentEditAgent = null;
+
+    function selectAgent(character) {
+      selectedAgent = character;
+      currentEditAgent = character;
+
+      const backdrop = document.getElementById('agent-modal-backdrop');
+
+      // Get server data for this agent
+      const serverAgent = serverAgents.find(a => a.id === character.agentId) || {};
+      const capabilities = serverAgent.capabilities || [];
+
+      // Update Info tab
+      document.getElementById('modal-agent-name').textContent = character.agentName;
+      document.getElementById('modal-agent-badge').textContent = character.agentName;
+      document.getElementById('modal-agent-role').textContent = character.agentType.charAt(0).toUpperCase() + character.agentType.slice(1);
+      document.getElementById('modal-agent-status').textContent = character.status.charAt(0).toUpperCase() + character.status.slice(1);
+      document.getElementById('modal-agent-task').textContent = character.doing || 'None';
+      document.getElementById('modal-agent-location').textContent = hubs[character.currentHub]?.name || 'Town Square';
+      document.getElementById('modal-agent-model').textContent = serverAgent.model_id || 'claude-3-5-sonnet';
+      document.getElementById('modal-agent-personality').textContent = serverAgent.personality || 'No personality set';
+
+      // Update capabilities
+      const capabilitiesEl = document.getElementById('modal-agent-capabilities');
+      capabilitiesEl.innerHTML = capabilities.map(cap =>
+        `<span class="capability-tag">${cap}</span>`
+      ).join('') || '<span style="color: #8a7a6a;">No capabilities set</span>';
+
+      // Update Customize tab
+      document.getElementById('edit-agent-name').value = character.agentName;
+      document.getElementById('edit-agent-type').value = character.agentType;
+      document.getElementById('edit-agent-personality').value = serverAgent.personality || '';
+      document.getElementById('edit-agent-capabilities').value = capabilities.join(', ');
+
+      // Update JSON tab
+      const agentJson = {
+        id: character.agentId,
+        name: character.agentName,
+        type: character.agentType,
+        model_id: serverAgent.model_id || 'witch',
+        status: character.status,
+        personality: serverAgent.personality || '',
+        capabilities: capabilities,
+        currentHub: character.currentHub,
+        position: { x: character.position?.x || 0, z: character.position?.z || 0 }
+      };
+      document.getElementById('agent-json-editor').value = JSON.stringify(agentJson, null, 2);
+
+      // Reset to Info tab
+      document.querySelectorAll('#agent-modal .tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#agent-modal .tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelector('#agent-modal .tab[data-tab="info"]').classList.add('active');
+      document.getElementById('tab-info').classList.add('active');
+
+      // Show modal FIRST so canvas is visible
+      backdrop.classList.add('visible');
+
+      // Render character preview AFTER modal is visible (need small delay for DOM update)
+      requestAnimationFrame(() => {
+        renderPreviewCharacter(character);
+      });
+    }
+
+    window.closeAgentModal = function() {
+      document.getElementById('agent-modal-backdrop').classList.remove('visible');
+      selectedAgent = null;
+      currentEditAgent = null;
+      if (previewAnimationId) {
+        cancelAnimationFrame(previewAnimationId);
+        previewAnimationId = null;
+      }
+    };
+
+    // Close modal on backdrop click
+    document.getElementById('agent-modal-backdrop').addEventListener('click', function(e) {
+      if (e.target === this) closeAgentModal();
+    });
+
+    // Tab switching
+    document.querySelectorAll('#agent-modal .tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        const tabName = this.dataset.tab;
+        document.querySelectorAll('#agent-modal .tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#agent-modal .tab-panel').forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+      });
+    });
+
+    // Save agent changes
+    window.saveAgentChanges = async function() {
+      if (!currentEditAgent) return;
+
+      const updates = {
+        name: document.getElementById('edit-agent-name').value,
+        type: document.getElementById('edit-agent-type').value,
+        model: document.getElementById('edit-agent-llm').value,
+        personality: document.getElementById('edit-agent-personality').value,
+        capabilities: document.getElementById('edit-agent-capabilities').value.split(',').map(c => c.trim()).filter(c => c)
+      };
+
+      try {
+        const response = await fetch(`/api/agents/${currentEditAgent.agentId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        });
+
+        if (response.ok) {
+          alert('Agent updated successfully!');
+          // Refresh agent data
+          const updatedAgent = await response.json();
+          // Update local data
+          const idx = serverAgents.findIndex(a => a.id === currentEditAgent.agentId);
+          if (idx >= 0) serverAgents[idx] = { ...serverAgents[idx], ...updatedAgent };
+        } else {
+          alert('Failed to update agent');
+        }
+      } catch (e) {
+        console.error('Error saving agent:', e);
+        alert('Error saving agent: ' + e.message);
+      }
+    };
+
+    // Copy JSON to clipboard
+    window.copyAgentJson = function() {
+      const json = document.getElementById('agent-json-editor').value;
+      navigator.clipboard.writeText(json).then(() => {
+        alert('JSON copied to clipboard!');
+      });
+    };
+
+    // Apply JSON changes
+    window.applyAgentJson = async function() {
+      try {
+        const json = JSON.parse(document.getElementById('agent-json-editor').value);
+        const response = await fetch(`/api/agents/${json.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(json)
+        });
+
+        if (response.ok) {
+          alert('Agent updated from JSON!');
+        } else {
+          alert('Failed to apply JSON changes');
+        }
+      } catch (e) {
+        alert('Invalid JSON: ' + e.message);
+      }
+    };
 
     // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffeef5, 0.7);
+    const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.5);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.4);
-    sunLight.position.set(80, 120, 50);
+    const sunLight = new THREE.DirectionalLight(0xfffaf0, 1.5);
+    sunLight.position.set(30, 40, 20);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 4096;
     sunLight.shadow.mapSize.height = 4096;
     sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 500;
-    sunLight.shadow.camera.left = -200;
-    sunLight.shadow.camera.right = 200;
-    sunLight.shadow.camera.top = 200;
-    sunLight.shadow.camera.bottom = -200;
+    sunLight.shadow.camera.far = 300;
+    sunLight.shadow.camera.left = -100;
+    sunLight.shadow.camera.right = 100;
+    sunLight.shadow.camera.top = 100;
+    sunLight.shadow.camera.bottom = -100;
+    sunLight.shadow.bias = -0.0001;
     scene.add(sunLight);
 
-    const rimLight = new THREE.DirectionalLight(0xffb6c1, 0.3);
-    rimLight.position.set(-50, 30, -50);
-    scene.add(rimLight);
+    const fillLight = new THREE.DirectionalLight(0x8ecae6, 0.3);
+    fillLight.position.set(-20, 10, -20);
+    scene.add(fillLight);
 
     // Ground
-    const groundGeo = new THREE.PlaneGeometry(600, 600);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.9 });
-    const ground = new THREE.Mesh(groundGeo, groundMat);
+    const groundGeometry = new THREE.PlaneGeometry(500, 500, 100, 100);
+    const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x4a7c4e, roughness: 0.9 });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.05;
     ground.receiveShadow = true;
     scene.add(ground);
 
     // Loaders & State
     const gltfLoader = new GLTFLoader();
     const clock = new THREE.Clock();
-    const characters = [];
     let loadedCount = 0;
     let totalToLoad = 0;
+    const characters = [];
+    const animationClips = {};
 
-    const CITY_PATH = 'assets/models/Model packs/Assets/kenney_city-kit-commercial_2.1/Models/GLB format/';
+    // Speech bubble state (declared early for animation loop)
+    const activeBubbles = new Map();
+    const agentLabels = new Map();
 
-    function updateProgress() {
+    function updateLoading() {
       loadedCount++;
-      const pct = Math.round((loadedCount / totalToLoad) * 100);
-      document.getElementById('load-progress').textContent = `${pct}%`;
       if (loadedCount >= totalToLoad) {
         document.getElementById('loading').style.display = 'none';
       }
     }
 
-    // City waypoints
+    // ==================== HUB SYSTEM ====================
+    // Hubs are physical locations where agents go to work
+    const hubs = {
+      town_square: { x: 0, z: 0, name: 'Town Square', description: 'Center of town, where agents meet' },
+      planning_room: { x: -18, z: -15, name: 'Planning Room', description: 'Planner works here' },
+      design_studio: { x: 18, z: -15, name: 'Design Studio', description: 'Designer works here' },
+      coding_desk: { x: -18, z: 15, name: 'Coding Desk', description: 'Coder works here' },
+      review_station: { x: 18, z: 15, name: 'Review Station', description: 'Reviewer works here' },
+      deploy_station: { x: 0, z: -25, name: 'Deploy Station', description: 'Where finished work ships' },
+    };
+
+    // Map agent types to their default hub
+    const agentHubs = {
+      planner: 'planning_room',
+      designer: 'design_studio',
+      coder: 'coding_desk',
+      reviewer: 'review_station'
+    };
+
+    // Road network waypoints for pathfinding
     const waypoints = {
-      center: { x: 0, z: 0 },
-      north: { x: 0, z: -60 },
-      south: { x: 0, z: 60 },
-      east: { x: 60, z: 0 },
-      west: { x: -60, z: 0 },
-      ne: { x: 50, z: -50 },
-      nw: { x: -50, z: -50 },
-      se: { x: 50, z: 50 },
-      sw: { x: -50, z: 50 },
-      cafe: { x: -30, z: -20 },
-      shop: { x: 30, z: -20 },
-      park: { x: 0, z: 40 },
-      station: { x: -55, z: 15 },
-      school: { x: 55, z: -35 },
+      // Main hubs (agents go here to work)
+      town_square: { x: 0, z: 0 },
+      planning_room: { x: -18, z: -15 },
+      design_studio: { x: 18, z: -15 },
+      coding_desk: { x: -18, z: 15 },
+      review_station: { x: 18, z: 15 },
+      deploy_station: { x: 0, z: -25 },
+
+      // Road intersections for pathfinding
+      northPlaza: { x: 0, z: -15 },
+      southPlaza: { x: 0, z: 15 },
+      westPlaza: { x: -15, z: 0 },
+      eastPlaza: { x: 15, z: 0 },
+      nwCorner: { x: -15, z: -15 },
+      neCorner: { x: 15, z: -15 },
+      swCorner: { x: -15, z: 15 },
+      seCorner: { x: 15, z: 15 },
     };
 
+    // Define connected routes for pathfinding
     const connections = {
-      center: ['north', 'south', 'east', 'west', 'cafe', 'shop', 'park'],
-      north: ['center', 'ne', 'nw'],
-      south: ['center', 'se', 'sw', 'park'],
-      east: ['center', 'ne', 'se', 'shop', 'school'],
-      west: ['center', 'nw', 'sw', 'cafe', 'station'],
-      ne: ['north', 'east', 'school'],
-      nw: ['north', 'west', 'cafe'],
-      se: ['south', 'east'],
-      sw: ['south', 'west', 'station'],
-      cafe: ['center', 'west', 'nw'],
-      shop: ['center', 'east'],
-      park: ['center', 'south'],
-      station: ['west', 'sw'],
-      school: ['east', 'ne'],
+      town_square: ['northPlaza', 'southPlaza', 'westPlaza', 'eastPlaza'],
+      planning_room: ['nwCorner'],
+      design_studio: ['neCorner'],
+      coding_desk: ['swCorner'],
+      review_station: ['seCorner'],
+      deploy_station: ['northPlaza'],
+
+      northPlaza: ['town_square', 'deploy_station', 'nwCorner', 'neCorner'],
+      southPlaza: ['town_square', 'swCorner', 'seCorner'],
+      westPlaza: ['town_square', 'nwCorner', 'swCorner'],
+      eastPlaza: ['town_square', 'neCorner', 'seCorner'],
+
+      nwCorner: ['northPlaza', 'westPlaza', 'planning_room'],
+      neCorner: ['northPlaza', 'eastPlaza', 'design_studio'],
+      swCorner: ['southPlaza', 'westPlaza', 'coding_desk'],
+      seCorner: ['southPlaza', 'eastPlaza', 'review_station'],
     };
 
-    // Character configs - using actual GLB models from assets/models/
-    const characterModels = [
-      { name: 'Protagonist A', model: 'Protagonist_A.glb' },
-      { name: 'Protagonist B', model: 'Protagonist_B.glb' },
-      { name: 'Helper A', model: 'Helper_A.glb' },
-      { name: 'Helper B', model: 'Helper_B.glb' },
-      { name: 'Witch', model: 'Witch.glb' },
-      { name: 'Vampire', model: 'Vampire.glb' },
-      { name: 'Superhero', model: 'Superhero.glb' },
-      { name: 'Hiker', model: 'Hiker.glb' },
-    ];
+    // ==================== ANIMATIONS ====================
+    async function loadAnimations() {
+      return new Promise((resolve) => {
+        let loaded = 0;
+        const needed = 4;
 
-    const CHARACTER_PATH = 'assets/models/';
-
-    // Load character model
-    function loadCharacter(config, startWaypoint, callback) {
-      totalToLoad++;
-      gltfLoader.load(CHARACTER_PATH + config.model, (gltf) => {
-        const model = gltf.scene;
-        model.scale.set(2, 2, 2);
-        model.traverse(child => {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
+        gltfLoader.load('assets/animations/rig_medium/General.glb', (gltf) => {
+          animationClips.mediumGeneral = gltf.animations;
+          if (++loaded === needed) resolve();
         });
-        const pos = waypoints[startWaypoint];
-        model.position.set(pos.x, 0, pos.z);
-        model.rotation.y = Math.random() * Math.PI * 2;
-        scene.add(model);
-        characters.push(new Character(model, startWaypoint, config));
-        updateProgress();
-        if (callback) callback();
-      }, undefined, () => updateProgress());
+        gltfLoader.load('assets/animations/rig_medium/MovementBasic.glb', (gltf) => {
+          animationClips.mediumMovement = gltf.animations;
+          if (++loaded === needed) resolve();
+        });
+        gltfLoader.load('assets/animations/rig_large/General.glb', (gltf) => {
+          animationClips.largeGeneral = gltf.animations;
+          if (++loaded === needed) resolve();
+        });
+        gltfLoader.load('assets/animations/rig_large/MovementBasic.glb', (gltf) => {
+          animationClips.largeMovement = gltf.animations;
+          if (++loaded === needed) resolve();
+        });
+      });
     }
 
-    // Character class
-    class Character {
-      constructor(model, startWaypoint, config) {
+    // ==================== AGENT CHARACTER CLASS ====================
+    // Agent characters are controlled by the backend orchestrator
+    class AgentCharacter {
+      constructor(model, rig, agentId, agentName, agentType, startHub) {
         this.model = model;
-        this.config = config;
-        this.currentWaypoint = startWaypoint;
-        this.targetWaypoint = null;
-        this.lastWaypoint = null;
-        this.maxSpeed = 3 + Math.random() * 1.5;
+        this.rig = rig;
+        this.agentId = agentId;
+        this.agentName = agentName;
+        this.agentType = agentType;
+        this.mixer = new THREE.AnimationMixer(model);
+
+        // Current location
+        this.currentHub = startHub;
+        this.currentWaypoint = startHub;
+
+        // Path to follow (calculated by findPath)
+        this.path = [];
+        this.pathIndex = 0;
+
+        // Movement
+        this.maxSpeed = 4;
         this.currentSpeed = 0;
-        this.turnSpeed = 4;
+        this.acceleration = 3;
+        this.deceleration = 4;
+        this.turnSpeed = 6;
+
+        // State: 'idle', 'working', 'traveling', 'chatting'
         this.state = 'idle';
+        this.status = 'idle';
         this.stateTime = 0;
-        this.idleDuration = 2 + Math.random() * 3;
-        this.bouncePhase = Math.random() * Math.PI * 2;
+        this.doing = '';
+
+        // Idle wandering
+        this.idleDuration = 3 + Math.random() * 4;
+        this.isCommandedMove = false; // True if backend commanded this move
+
+        // Setup animations
+        const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
+        const movementClips = rig === 'large' ? animationClips.largeMovement : animationClips.mediumMovement;
+
+        if (generalClips?.length > 0) {
+          const idleOptions = generalClips.filter(c => c.name.includes('Idle'));
+          const idleClip = idleOptions[Math.floor(Math.random() * idleOptions.length)] || generalClips[0];
+          this.idleAction = this.mixer.clipAction(idleClip);
+          this.idleAction.setEffectiveTimeScale(0.8 + Math.random() * 0.4);
+          this.idleAction.play();
+        }
+
+        if (movementClips?.length > 0) {
+          const walkOptions = movementClips.filter(c => c.name.includes('Walking'));
+          const walkClip = walkOptions[Math.floor(Math.random() * walkOptions.length)];
+          if (walkClip) {
+            this.walkAction = this.mixer.clipAction(walkClip);
+            this.walkAction.setEffectiveTimeScale(1.2);
+          }
+        }
+
+        // Arrival callback
+        this.onArrival = null;
       }
 
       lerpAngle(from, to, t) {
@@ -467,238 +1822,514 @@
         return from + diff * Math.min(t, 1);
       }
 
-      pickNextWaypoint() {
-        const possibleNext = connections[this.currentWaypoint];
-        if (!possibleNext) return null;
-        let choices = possibleNext.filter(w => w !== this.lastWaypoint);
-        if (choices.length === 0) choices = possibleNext;
-        return choices[Math.floor(Math.random() * choices.length)];
+      // BFS pathfinding to find route between waypoints
+      findPath(from, to) {
+        if (from === to) return [to];
+
+        const queue = [[from]];
+        const visited = new Set([from]);
+
+        while (queue.length > 0) {
+          const path = queue.shift();
+          const current = path[path.length - 1];
+
+          const neighbors = connections[current] || [];
+          for (const neighbor of neighbors) {
+            if (neighbor === to) {
+              return [...path, neighbor];
+            }
+            if (!visited.has(neighbor)) {
+              visited.add(neighbor);
+              queue.push([...path, neighbor]);
+            }
+          }
+        }
+        return [to]; // Direct if no path found
+      }
+
+      // Command agent to move to a hub
+      moveTo(targetHub, callback, isCommanded = true) {
+        if (!waypoints[targetHub]) {
+          console.warn('Unknown hub:', targetHub);
+          return;
+        }
+
+        this.path = this.findPath(this.currentWaypoint, targetHub);
+        this.pathIndex = 0;
+        this.state = 'traveling';
+        this.onArrival = callback;
+        this.isCommandedMove = isCommanded;
+
+        // Start walk animation
+        if (this.walkAction && this.idleAction) {
+          this.idleAction.fadeOut(0.3);
+          this.walkAction.reset().fadeIn(0.3).play();
+        }
+
+        if (isCommanded) {
+          console.log(`${this.agentName} moving to ${targetHub}, path:`, this.path);
+        }
+      }
+
+      // Pick a random nearby waypoint to wander to
+      pickWanderTarget() {
+        const nearby = connections[this.currentWaypoint] || [];
+        if (nearby.length === 0) return null;
+        return nearby[Math.floor(Math.random() * nearby.length)];
+      }
+
+      // Set agent status (idle, working, chatting)
+      setStatus(status, doing = '') {
+        const wasWorking = this.status === 'working';
+        this.status = status;
+        this.doing = doing;
+
+        if (status === 'idle' && this.state !== 'traveling') {
+          this.state = 'idle';
+          // Remove working glow
+          if (this.workingGlow) {
+            scene.remove(this.workingGlow);
+            this.workingGlow = null;
+          }
+        } else if (status === 'working') {
+          this.state = 'working';
+          // Add working glow effect
+          if (!this.workingGlow) {
+            this.createWorkingGlow();
+          }
+        } else if (status === 'chatting') {
+          this.state = 'chatting';
+        }
+      }
+
+      // Create a glowing ring effect when working
+      createWorkingGlow() {
+        const colors = {
+          planner: 0xc084fc,
+          designer: 0xf472b6,
+          coder: 0x60a5fa,
+          reviewer: 0x4ade80
+        };
+        const color = colors[this.agentType] || 0xffffff;
+
+        const glowGeom = new THREE.RingGeometry(0.8, 1.2, 32);
+        const glowMat = new THREE.MeshBasicMaterial({
+          color: color,
+          transparent: true,
+          opacity: 0.4,
+          side: THREE.DoubleSide
+        });
+        this.workingGlow = new THREE.Mesh(glowGeom, glowMat);
+        this.workingGlow.rotation.x = -Math.PI / 2;
+        this.workingGlow.position.copy(this.model.position);
+        this.workingGlow.position.y = 0.05;
+        scene.add(this.workingGlow);
       }
 
       update(delta) {
+        this.mixer.update(delta);
         this.stateTime += delta;
-        this.bouncePhase += delta * 8;
 
-        if (this.state === 'idle') {
-          this.model.position.y = Math.sin(this.bouncePhase * 0.5) * 0.05;
-          this.model.rotation.y += Math.sin(this.stateTime * 2) * 0.002;
-
-          if (this.stateTime > this.idleDuration) {
-            this.targetWaypoint = this.pickNextWaypoint();
-            if (this.targetWaypoint) {
-              this.state = 'walking';
-              this.stateTime = 0;
-            }
-          }
-        } else if (this.state === 'walking') {
-          const target = waypoints[this.targetWaypoint];
-          const dx = target.x - this.model.position.x;
-          const dz = target.z - this.model.position.z;
-          const dist = Math.sqrt(dx * dx + dz * dz);
-          const targetAngle = Math.atan2(dx, dz);
-
-          this.model.rotation.y = this.lerpAngle(this.model.rotation.y, targetAngle, delta * this.turnSpeed);
-          this.currentSpeed = Math.min(this.currentSpeed + 5 * delta, this.maxSpeed);
-          this.model.position.y = Math.abs(Math.sin(this.bouncePhase)) * 0.2;
-
-          if (dist > 0.5) {
-            this.model.position.x += (dx / dist) * this.currentSpeed * delta;
-            this.model.position.z += (dz / dist) * this.currentSpeed * delta;
-          } else {
-            this.lastWaypoint = this.currentWaypoint;
-            this.currentWaypoint = this.targetWaypoint;
-            this.targetWaypoint = null;
-            this.currentSpeed = 0;
-            this.state = 'idle';
-            this.stateTime = 0;
-            this.idleDuration = 1.5 + Math.random() * 3;
-            this.model.position.y = 0;
-          }
+        // Update working glow position
+        if (this.workingGlow) {
+          this.workingGlow.position.x = this.model.position.x;
+          this.workingGlow.position.z = this.model.position.z;
+          this.workingGlow.rotation.z += delta * 0.5; // Slow rotation
         }
+
+        switch (this.state) {
+          case 'idle':
+            // Subtle idle animation - occasional slight rotation
+            if (Math.random() < 0.001) {
+              this.model.rotation.y += (Math.random() - 0.5) * 0.15;
+            }
+            // Note: Wandering disabled - demo mode handles agent movement
+            break;
+
+          case 'working':
+          case 'chatting':
+            // Enhanced working animation
+            if (this.state === 'working') {
+              // Typing/working bob
+              this.model.position.y = Math.sin(this.stateTime * 4) * 0.05;
+              // Slight side-to-side sway like typing
+              this.model.rotation.y += Math.sin(this.stateTime * 2) * 0.002;
+              // Pulse the working glow
+              if (this.workingGlow) {
+                this.workingGlow.material.opacity = 0.3 + Math.sin(this.stateTime * 3) * 0.15;
+              }
+            }
+            break;
+
+          case 'traveling':
+            if (this.pathIndex >= this.path.length) {
+              // Arrived at final destination
+              this.state = 'idle';
+              this.currentHub = this.path[this.path.length - 1];
+              this.currentSpeed = 0;
+              this.model.position.y = 0;
+
+              if (this.idleAction && this.walkAction) {
+                this.walkAction.fadeOut(0.4);
+                this.idleAction.reset().fadeIn(0.4).play();
+              }
+
+              if (this.onArrival) {
+                this.onArrival();
+                this.onArrival = null;
+              }
+              break;
+            }
+
+            const targetWp = this.path[this.pathIndex];
+            const target = waypoints[targetWp];
+            const dx = target.x - this.model.position.x;
+            const dz = target.z - this.model.position.z;
+            const dist = Math.sqrt(dx * dx + dz * dz);
+
+            // Turn toward target
+            const targetAngle = Math.atan2(dx, dz);
+            this.model.rotation.y = this.lerpAngle(this.model.rotation.y, targetAngle, delta * this.turnSpeed);
+
+            // Accelerate/decelerate
+            if (dist > 2) {
+              this.currentSpeed = Math.min(this.currentSpeed + this.acceleration * delta, this.maxSpeed);
+            } else {
+              this.currentSpeed = Math.max(this.currentSpeed - this.deceleration * delta, 0.5);
+            }
+
+            if (dist > 0.5) {
+              const moveX = (dx / dist) * this.currentSpeed * delta;
+              const moveZ = (dz / dist) * this.currentSpeed * delta;
+              this.model.position.x += moveX;
+              this.model.position.z += moveZ;
+
+              // Walking bob
+              const bob = Math.sin(this.stateTime * 10) * 0.015;
+              this.model.position.y = bob;
+            } else {
+              // Reached waypoint, move to next in path
+              this.currentWaypoint = targetWp;
+              this.pathIndex++;
+            }
+            break;
+        }
+      }
+
+      // Get 3D position for speech bubble placement
+      getPosition() {
+        return this.model.position.clone();
       }
     }
 
-    // Load city building
-    function loadBuilding(name, x, z, scale = 8, rotation = 0) {
+    // Agent registry - maps agentId to AgentCharacter
+    const agentCharacters = new Map();
+
+    // ==================== LOADERS ====================
+    // Load an agent character controlled by the backend
+    function loadAgentCharacter(modelName, agentId, agentName, agentType, startHub, rig = 'medium', scale = 1) {
       totalToLoad++;
-      gltfLoader.load(CITY_PATH + name + '.glb', (gltf) => {
+      const pos = waypoints[startHub] || { x: 0, z: 0 };
+      gltfLoader.load(`assets/models/${modelName}.glb`, (gltf) => {
         const model = gltf.scene;
-        model.position.set(x, 0, z);
+        model.position.set(pos.x, 0, pos.z);
         model.scale.set(scale, scale, scale);
-        model.rotation.y = rotation;
-        model.traverse(child => {
+        model.rotation.y = Math.random() * Math.PI * 2;
+        model.traverse((child) => {
           if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
           }
         });
         scene.add(model);
-        updateProgress();
-      }, undefined, () => updateProgress());
+
+        const agent = new AgentCharacter(model, rig, agentId, agentName, agentType, startHub);
+        agentCharacters.set(agentId, agent);
+        characters.push(agent);
+        updateLoading();
+
+        console.log(`Loaded agent: ${agentName} (${agentType}) at ${startHub}`);
+      }, undefined, () => updateLoading());
     }
 
-    // Build city
-    function buildCity() {
-      // Streets
-      const streetMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-      const mainStreetNS = new THREE.Mesh(new THREE.PlaneGeometry(20, 300), streetMat);
-      mainStreetNS.rotation.x = -Math.PI / 2;
-      mainStreetNS.position.y = 0.01;
-      scene.add(mainStreetNS);
-
-      const mainStreetEW = new THREE.Mesh(new THREE.PlaneGeometry(300, 20), streetMat);
-      mainStreetEW.rotation.x = -Math.PI / 2;
-      mainStreetEW.position.y = 0.01;
-      scene.add(mainStreetEW);
-
-      // Crosswalk
-      const stripeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      for (let i = -5; i <= 5; i++) {
-        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 8), stripeMat);
-        stripe.rotation.x = -Math.PI / 2;
-        stripe.position.set(i * 2, 0.02, 0);
-        scene.add(stripe);
-      }
-
-      // Load Kenney City buildings
-      // Northwest block - Offices
-      loadBuilding('building-skyscraper-a', -50, -50, 10);
-      loadBuilding('building-skyscraper-b', -35, -55, 10, Math.PI / 2);
-      loadBuilding('building-a', -55, -35, 8);
-
-      // Northeast block - Shopping district
-      loadBuilding('building-skyscraper-c', 50, -50, 10);
-      loadBuilding('building-b', 35, -55, 8);
-      loadBuilding('building-c', 55, -35, 8, Math.PI);
-
-      // Southwest block - Residential
-      loadBuilding('building-d', -50, 50, 8);
-      loadBuilding('building-e', -35, 55, 8);
-      loadBuilding('building-f', -55, 35, 8, Math.PI / 2);
-
-      // Southeast block - Mixed use
-      loadBuilding('building-skyscraper-d', 50, 50, 10);
-      loadBuilding('building-g', 35, 55, 8, Math.PI);
-      loadBuilding('building-h', 55, 35, 8);
-
-      // Center area - Shops and cafes
-      loadBuilding('building-i', -30, -25, 6);
-      loadBuilding('building-j', 30, -25, 6);
-
-      // More buildings for density
-      loadBuilding('building-k', -70, 0, 8);
-      loadBuilding('building-l', 70, 0, 8);
-      loadBuilding('building-m', 0, -70, 8);
-      loadBuilding('building-n', 0, 70, 8);
-
-      // Background skyscrapers
-      loadBuilding('building-skyscraper-e', -80, -80, 12);
-      loadBuilding('building-skyscraper-a', 80, -80, 12, Math.PI);
-      loadBuilding('building-skyscraper-b', -80, 80, 12, Math.PI / 2);
-      loadBuilding('building-skyscraper-c', 80, 80, 12, -Math.PI / 2);
-
-      // Low detail buildings for far background
-      loadBuilding('low-detail-building-a', -100, -40, 15);
-      loadBuilding('low-detail-building-b', 100, -40, 15);
-      loadBuilding('low-detail-building-c', -100, 40, 15);
-      loadBuilding('low-detail-building-d', 100, 40, 15);
-
-      // Park area
-      const parkGround = new THREE.Mesh(
-        new THREE.CircleGeometry(25, 32),
-        new THREE.MeshStandardMaterial({ color: 0x90ee90 })
-      );
-      parkGround.rotation.x = -Math.PI / 2;
-      parkGround.position.set(0, 0.02, 45);
-      scene.add(parkGround);
-
-      // Cherry blossom trees
-      for (let i = 0; i < 8; i++) {
-        const angle = (i / 8) * Math.PI * 2;
-        const tree = createTree();
-        tree.position.set(Math.cos(angle) * 18, 0, 45 + Math.sin(angle) * 18);
-        scene.add(tree);
-      }
-
-      // Street lamps
-      for (let x = -80; x <= 80; x += 25) {
-        [12, -12].forEach(z => {
-          const lamp = createStreetLamp();
-          lamp.position.set(x, 0, z);
-          scene.add(lamp);
+    // Load a decorative character (for ambiance)
+    function loadDecorativeCharacter(name, startWaypoint, rig = 'medium', scale = 1) {
+      totalToLoad++;
+      const pos = waypoints[startWaypoint] || { x: 0, z: 0 };
+      gltfLoader.load(`assets/models/${name}.glb`, (gltf) => {
+        const model = gltf.scene;
+        model.position.set(pos.x, 0, pos.z);
+        model.scale.set(scale, scale, scale);
+        model.rotation.y = Math.random() * Math.PI * 2;
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
         });
+        scene.add(model);
+        updateLoading();
+      }, undefined, () => updateLoading());
+    }
+
+    function loadTownAsset(category, name, position, scale = 1, rotation = 0) {
+      totalToLoad++;
+      gltfLoader.load(`assets/town/${category}/${name}.gltf`, (gltf) => {
+        const model = gltf.scene;
+        model.position.set(position.x, position.y, position.z);
+        model.scale.set(scale, scale, scale);
+        model.rotation.y = rotation;
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        scene.add(model);
+        updateLoading();
+      }, undefined, () => updateLoading());
+    }
+
+    // ==================== BUILD TOWN ====================
+    async function buildTown() {
+      await loadAnimations();
+
+      // Scale factor for all structures (3x bigger)
+      const S = 3;
+
+      // === GROUND TILES ===
+      const hexW = 1.73 * S, hexH = 1.5 * S;
+      for (let x = -8; x <= 8; x++) {
+        for (let z = -8; z <= 8; z++) {
+          const offX = z % 2 === 0 ? 0 : hexW / 2;
+          const px = x * hexW + offX, pz = z * hexH;
+
+          // Road pattern - main cross + side streets
+          const isMainRoad = (Math.abs(x) <= 1 && Math.abs(z) <= 8) || (Math.abs(z) <= 1 && Math.abs(x) <= 8);
+          const isSideStreet = (Math.abs(x) >= 2 && Math.abs(x) <= 4 && Math.abs(z) === 4) ||
+                               (Math.abs(z) >= 2 && Math.abs(z) <= 4 && Math.abs(x) === 4);
+
+          if (isMainRoad || isSideStreet) {
+            loadTownAsset('tiles', 'hex_road_A', { x: px, y: 0.01, z: pz }, S);
+          } else {
+            loadTownAsset('tiles', 'hex_grass', { x: px, y: 0, z: pz }, S);
+          }
+        }
       }
 
-      // Add characters from GLB models
-      const startPoints = ['center', 'cafe', 'shop', 'park', 'station', 'school', 'ne', 'sw'];
-      characterModels.forEach((config, i) => {
-        const start = startPoints[i % startPoints.length];
-        loadCharacter(config, start);
+      // === HOUSES - Northwest District (Tavern Area) ===
+      loadTownAsset('buildings', 'building_stage_A', { x: -18, y: 0, z: -15 }, S * 1.3, Math.PI/4);
+      loadTownAsset('buildings', 'building_stage_B', { x: -24, y: 0, z: -12 }, S * 1.2, Math.PI/3);
+      loadTownAsset('buildings', 'building_stage_C', { x: -21, y: 0, z: -21 }, S * 1.1, Math.PI/5);
+      loadTownAsset('buildings', 'building_grain', { x: -15, y: 0, z: -21 }, S * 1.0, Math.PI/6);
+
+      // === HOUSES - Northeast District (Market Area) ===
+      loadTownAsset('buildings', 'building_stage_A', { x: 18, y: 0, z: -15 }, S * 1.3, -Math.PI/4);
+      loadTownAsset('buildings', 'building_stage_B', { x: 24, y: 0, z: -12 }, S * 1.2, -Math.PI/3);
+      loadTownAsset('buildings', 'building_stage_C', { x: 21, y: 0, z: -21 }, S * 1.1, -Math.PI/5);
+      loadTownAsset('buildings', 'building_grain', { x: 15, y: 0, z: -21 }, S * 1.0, -Math.PI/6);
+
+      // === HOUSES - Southwest District (Residential) ===
+      loadTownAsset('buildings', 'building_stage_A', { x: -18, y: 0, z: 15 }, S * 1.2, Math.PI * 0.75);
+      loadTownAsset('buildings', 'building_stage_B', { x: -24, y: 0, z: 12 }, S * 1.1, Math.PI * 0.6);
+      loadTownAsset('buildings', 'building_stage_C', { x: -21, y: 0, z: 21 }, S * 1.3, Math.PI * 0.8);
+      loadTownAsset('buildings', 'building_dirt', { x: -15, y: 0, z: 21 }, S * 1.0, Math.PI * 0.7);
+
+      // === HOUSES - Southeast District (Residential) ===
+      loadTownAsset('buildings', 'building_stage_A', { x: 18, y: 0, z: 15 }, S * 1.2, -Math.PI * 0.75);
+      loadTownAsset('buildings', 'building_stage_B', { x: 24, y: 0, z: 12 }, S * 1.1, -Math.PI * 0.6);
+      loadTownAsset('buildings', 'building_stage_C', { x: 21, y: 0, z: 21 }, S * 1.3, -Math.PI * 0.8);
+      loadTownAsset('buildings', 'building_grain', { x: 15, y: 0, z: 21 }, S * 1.0, -Math.PI * 0.7);
+
+      // === CENTRAL PLAZA ===
+      loadTownAsset('buildings', 'building_scaffolding', { x: 0, y: 0, z: 0 }, S * 2, 0);
+      loadTownAsset('props', 'flag_blue', { x: -4, y: 0, z: -4 }, S * 1.5);
+      loadTownAsset('props', 'flag_red', { x: 4, y: 0, z: -4 }, S * 1.5);
+      loadTownAsset('props', 'flag_green', { x: -4, y: 0, z: 4 }, S * 1.5);
+      loadTownAsset('props', 'flag_yellow', { x: 4, y: 0, z: 4 }, S * 1.5);
+
+      // === WALLS ===
+      for (let i = -5; i <= 5; i++) {
+        loadTownAsset('buildings', 'wall_straight', { x: i * 7.5, y: 0, z: -36 }, S, 0);
+        loadTownAsset('buildings', 'wall_straight', { x: i * 7.5, y: 0, z: 36 }, S, Math.PI);
+        loadTownAsset('buildings', 'wall_straight', { x: -36, y: 0, z: i * 7.5 }, S, -Math.PI/2);
+        loadTownAsset('buildings', 'wall_straight', { x: 36, y: 0, z: i * 7.5 }, S, Math.PI/2);
+      }
+
+      // Corner towers
+      loadTownAsset('buildings', 'wall_corner_A_outside', { x: -36, y: 0, z: -36 }, S * 1.4, 0);
+      loadTownAsset('buildings', 'wall_corner_A_outside', { x: 36, y: 0, z: -36 }, S * 1.4, Math.PI/2);
+      loadTownAsset('buildings', 'wall_corner_A_outside', { x: 36, y: 0, z: 36 }, S * 1.4, Math.PI);
+      loadTownAsset('buildings', 'wall_corner_A_outside', { x: -36, y: 0, z: 36 }, S * 1.4, -Math.PI/2);
+
+      // Gates
+      loadTownAsset('buildings', 'wall_straight_gate', { x: 0, y: 0, z: -36 }, S * 1.3, 0);
+      loadTownAsset('buildings', 'wall_straight_gate', { x: 0, y: 0, z: 36 }, S * 1.3, Math.PI);
+      loadTownAsset('buildings', 'wall_straight_gate', { x: -36, y: 0, z: 0 }, S * 1.3, -Math.PI/2);
+      loadTownAsset('buildings', 'wall_straight_gate', { x: 36, y: 0, z: 0 }, S * 1.3, Math.PI/2);
+
+      // === MARKET PROPS ===
+      loadTownAsset('props', 'barrel', { x: 16, y: 0, z: -13 }, S);
+      loadTownAsset('props', 'barrel', { x: 18, y: 0, z: -12 }, S);
+      loadTownAsset('props', 'crate_A_big', { x: 20, y: 0, z: -15 }, S);
+      loadTownAsset('props', 'crate_B_big', { x: 22, y: 0, z: -13 }, S);
+      loadTownAsset('props', 'sack', { x: 17, y: 0, z: -15 }, S);
+      loadTownAsset('props', 'sack', { x: 19, y: 0, z: -16 }, S);
+      loadTownAsset('props', 'tent', { x: 23, y: 0, z: -18 }, S * 1.2, -Math.PI/4);
+
+      // === TAVERN PROPS ===
+      loadTownAsset('props', 'barrel', { x: -16, y: 0, z: -13 }, S);
+      loadTownAsset('props', 'barrel', { x: -18, y: 0, z: -12 }, S);
+      loadTownAsset('props', 'barrel', { x: -15, y: 0, z: -11 }, S);
+      loadTownAsset('props', 'bucket_water', { x: -20, y: 0, z: -15 }, S);
+      loadTownAsset('props', 'crate_long_A', { x: -22, y: 0, z: -16 }, S);
+
+      // === RESIDENTIAL PROPS ===
+      loadTownAsset('props', 'wheelbarrow', { x: -20, y: 0, z: 12 }, S, Math.PI/3);
+      loadTownAsset('props', 'bucket_empty', { x: -16, y: 0, z: 16 }, S);
+      loadTownAsset('props', 'pallet', { x: -22, y: 0, z: 15 }, S);
+      loadTownAsset('props', 'resource_lumber', { x: -22, y: 0.1, z: 15 }, S);
+      loadTownAsset('props', 'ladder', { x: 20, y: 0, z: 16 }, S, -Math.PI/4);
+      loadTownAsset('props', 'crate_open', { x: 22, y: 0, z: 13 }, S);
+
+      // === TRAINING AREA ===
+      loadTownAsset('props', 'target', { x: 28, y: 0, z: 12 }, S);
+      loadTownAsset('props', 'target', { x: 28, y: 0, z: 18 }, S);
+      loadTownAsset('props', 'weaponrack', { x: 25, y: 0, z: 9 }, S, -Math.PI/2);
+      loadTownAsset('props', 'bucket_arrows', { x: 26, y: 0, z: 15 }, S);
+
+      // === FENCES ===
+      loadTownAsset('buildings', 'fence_wood_straight', { x: -12, y: 0, z: 10 }, S, Math.PI/2);
+      loadTownAsset('buildings', 'fence_wood_straight_gate', { x: -12, y: 0, z: 15 }, S, Math.PI/2);
+      loadTownAsset('buildings', 'fence_stone_straight', { x: 12, y: 0, z: -10 }, S, Math.PI/2);
+
+      // === NATURE - Inside Town ===
+      loadTownAsset('nature', 'tree_single_A', { x: -10, y: 0, z: -10 }, S);
+      loadTownAsset('nature', 'tree_single_B', { x: 10, y: 0, z: 10 }, S);
+      loadTownAsset('nature', 'tree_single_A', { x: -25, y: 0, z: 0 }, S * 0.9);
+      loadTownAsset('nature', 'tree_single_B', { x: 25, y: 0, z: 0 }, S * 0.9);
+      loadTownAsset('nature', 'rock_single_A', { x: -28, y: 0, z: -25 }, S * 0.8);
+      loadTownAsset('nature', 'rock_single_B', { x: 28, y: 0, z: 25 }, S * 0.8);
+
+      // === NATURE - Outside Walls ===
+      loadTownAsset('nature', 'trees_A_large', { x: -50, y: 0, z: -30 }, S * 1.5);
+      loadTownAsset('nature', 'trees_B_large', { x: -50, y: 0, z: 0 }, S * 1.4);
+      loadTownAsset('nature', 'trees_A_medium', { x: -50, y: 0, z: 30 }, S * 1.6);
+      loadTownAsset('nature', 'trees_B_large', { x: 50, y: 0, z: -30 }, S * 1.5);
+      loadTownAsset('nature', 'trees_A_large', { x: 50, y: 0, z: 0 }, S * 1.4);
+      loadTownAsset('nature', 'trees_B_medium', { x: 50, y: 0, z: 30 }, S * 1.6);
+      loadTownAsset('nature', 'trees_A_large', { x: 0, y: 0, z: -55 }, S * 1.7);
+      loadTownAsset('nature', 'trees_B_large', { x: 0, y: 0, z: 55 }, S * 1.7);
+
+      // Hills & Mountains
+      loadTownAsset('nature', 'hills_A_trees', { x: -70, y: 0, z: 0 }, S * 3);
+      loadTownAsset('nature', 'hills_B_trees', { x: 70, y: 0, z: 0 }, S * 3);
+      loadTownAsset('nature', 'hills_C_trees', { x: 0, y: 0, z: -70 }, S * 3);
+      loadTownAsset('nature', 'mountain_A_grass_trees', { x: -90, y: 0, z: -60 }, S * 5);
+      loadTownAsset('nature', 'mountain_B_grass_trees', { x: 90, y: 0, z: -60 }, S * 5);
+      loadTownAsset('nature', 'mountain_C_grass', { x: 0, y: 0, z: -100 }, S * 6);
+
+      // Clouds
+      loadTownAsset('nature', 'cloud_big', { x: -50, y: 40, z: -40 }, S * 4);
+      loadTownAsset('nature', 'cloud_small', { x: 40, y: 45, z: 30 }, S * 3);
+      loadTownAsset('nature', 'cloud_big', { x: 60, y: 35, z: -50 }, S * 3.5);
+      loadTownAsset('nature', 'cloud_small', { x: -30, y: 50, z: 50 }, S * 2.5);
+
+      // === HUB MARKERS ===
+      // Add visual markers for each hub
+      createHubMarker('town_square', 0xc9a959, 'Town Square');
+      createHubMarker('planning_room', 0xc084fc, 'Planning');
+      createHubMarker('design_studio', 0xf472b6, 'Design');
+      createHubMarker('coding_desk', 0x60a5fa, 'Coding');
+      createHubMarker('review_station', 0x4ade80, 'Review');
+      createHubMarker('deploy_station', 0xfbbf24, 'Deploy');
+
+      // === AGENT CHARACTERS ===
+      // These are controlled by the backend orchestrator
+      // Agent IDs match the database - will be updated when backend connects
+      // Spread them out across different starting positions
+
+      // Planner - Eliza the Witch - starts at planning room
+      loadAgentCharacter('Witch', 'agent_planner', 'Eliza', 'planner', 'planning_room', 'medium', 1);
+
+      // Designer - Marcus the Black Knight - starts at design studio
+      loadAgentCharacter('BlackKnight', 'agent_designer_1', 'Marcus', 'designer', 'design_studio', 'medium', 1);
+
+      // Designer 2 - Felix the Vampire - starts at town square
+      loadAgentCharacter('Vampire', 'agent_designer_2', 'Felix', 'designer', 'town_square', 'medium', 1);
+
+      // Coder - Ada the Protagonist - starts at coding desk
+      loadAgentCharacter('Protagonist_A', 'agent_coder_1', 'Ada', 'coder', 'coding_desk', 'medium', 1);
+
+      // Coder 2 - Byron the Hiker - starts at south plaza
+      loadAgentCharacter('Hiker', 'agent_coder_2', 'Byron', 'coder', 'southPlaza', 'medium', 1);
+
+      // Reviewer - Clara the Tiefling - starts at review station
+      loadAgentCharacter('Tiefling', 'agent_reviewer', 'Clara', 'reviewer', 'review_station', 'medium', 1);
+
+      // === DECORATIVE CHARACTERS ===
+      // Gate guards add ambiance
+      loadDecorativeCharacter('FrostGolem', 'deploy_station', 'large', 1.2);
+    }
+
+    // Create a glowing marker for a hub location
+    function createHubMarker(hubName, color, label) {
+      const hub = hubs[hubName];
+      if (!hub) return;
+
+      // Ground circle
+      const circleGeom = new THREE.CircleGeometry(2.5, 32);
+      const circleMat = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.3,
+        side: THREE.DoubleSide
       });
+      const circle = new THREE.Mesh(circleGeom, circleMat);
+      circle.rotation.x = -Math.PI / 2;
+      circle.position.set(hub.x, 0.02, hub.z);
+      scene.add(circle);
 
-      // If no buildings loaded, hide loading immediately
-      if (totalToLoad === 0) {
-        document.getElementById('loading').style.display = 'none';
-      }
+      // Glowing pillar
+      const pillarGeom = new THREE.CylinderGeometry(0.1, 0.1, 0.5, 8);
+      const pillarMat = new THREE.MeshBasicMaterial({ color: color });
+      const pillar = new THREE.Mesh(pillarGeom, pillarMat);
+      pillar.position.set(hub.x, 0.25, hub.z);
+      scene.add(pillar);
+
+      // Store reference for potential animations
+      hub.marker = { circle, pillar };
     }
 
-    function createTree() {
-      const group = new THREE.Group();
-      const trunkGeo = new THREE.CylinderGeometry(0.4, 0.5, 4, 8);
-      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
-      const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-      trunk.position.y = 2;
-      trunk.castShadow = true;
-      group.add(trunk);
-
-      const foliageGeo = new THREE.SphereGeometry(3.5, 16, 16);
-      const foliageMat = new THREE.MeshStandardMaterial({ color: 0xffb7c5 });
-      const foliage = new THREE.Mesh(foliageGeo, foliageMat);
-      foliage.position.y = 6;
-      foliage.castShadow = true;
-      group.add(foliage);
-
-      return group;
-    }
-
-    function createStreetLamp() {
-      const group = new THREE.Group();
-      const pole = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.15, 0.15, 7, 8),
-        new THREE.MeshStandardMaterial({ color: 0x2f2f2f })
-      );
-      pole.position.y = 3.5;
-      group.add(pole);
-
-      const lamp = new THREE.Mesh(
-        new THREE.SphereGeometry(0.5, 8, 8),
-        new THREE.MeshBasicMaterial({ color: 0xfffacd })
-      );
-      lamp.position.y = 7.2;
-      group.add(lamp);
-
-      return group;
-    }
-
-    buildCity();
+    // Start
+    buildTown();
 
     // Animation loop
+    let frameCount = 0;
     function animate() {
       requestAnimationFrame(animate);
       const delta = clock.getDelta();
       for (const char of characters) char.update(delta);
       controls.update();
       renderer.render(scene, camera);
+
+      // Only update bubble/label positions every 3 frames for performance
+      frameCount++;
+      if (frameCount % 3 === 0) {
+        updateAllBubblePositions();
+        updateAgentLabels();
+      }
     }
     animate();
 
+    // Resize
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // UI Code
+    // ==================== WEBSOCKET & UI ====================
     const wsStatus = document.getElementById('ws-status');
     const agentsList = document.getElementById('agents-list');
     const tasksList = document.getElementById('tasks-list');
@@ -706,57 +2337,817 @@
     const messagesList = document.getElementById('messages-list');
     const taskInput = document.getElementById('task-input');
     const submitTask = document.getElementById('submit-task');
+
+    let ws = null;
+    let serverAgents = [];
+    let serverTasks = [];
+    let completedResults = [];
+    let taskFiles = new Map(); // taskId -> [files]
+    let serverMessages = [];
+
+    // Agent type colors
+    const typeColors = {
+      planner: '#c084fc',
+      designer: '#f472b6',
+      coder: '#60a5fa',
+      reviewer: '#4ade80'
+    };
+
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        wsStatus.textContent = 'Online';
+        wsStatus.className = 'status connected';
+        submitTask.disabled = false;
+        console.log('WebSocket connected');
+        // Stop demo mode when server is online
+        stopDemoMode();
+      };
+
+      ws.onclose = () => {
+        wsStatus.textContent = 'Demo Mode';
+        wsStatus.className = 'status disconnected';
+        submitTask.disabled = true;
+        console.log('WebSocket disconnected, running in demo mode...');
+        // Restart demo mode
+        if (!demoModeActive) startDemoMode();
+        setTimeout(connectWebSocket, 5000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          handleServerMessage(message);
+        } catch (e) {
+          console.error('Failed to parse message:', e);
+        }
+      };
+    }
+
+    function handleServerMessage(message) {
+      switch (message.type) {
+        case 'connected':
+          console.log('Server welcome:', message.data.message);
+          break;
+
+        case 'state_update':
+          serverAgents = message.data.agents || [];
+          serverTasks = message.data.tasks || [];
+          serverMessages = message.data.messages || [];
+          updateUI();
+          syncAgentCharacters(serverAgents);
+          break;
+
+        case 'task_created':
+          console.log('New task created:', message.data);
+          break;
+
+        // === ORCHESTRATION EVENTS ===
+        case 'agent_move':
+          handleAgentMove(message.data);
+          break;
+
+        case 'agent_arrived':
+          handleAgentArrived(message.data);
+          break;
+
+        case 'agent_status':
+          handleAgentStatus(message.data);
+          break;
+
+        case 'agent_speak':
+          handleAgentSpeak(message.data);
+          break;
+
+        case 'agent_think':
+          handleAgentThink(message.data);
+          break;
+
+        case 'file_created':
+          handleFileCreated(message.data);
+          break;
+
+        case 'task_complete':
+          handleTaskComplete(message.data);
+          break;
+      }
+    }
+
+    // ==================== ORCHESTRATION EVENT HANDLERS ====================
+
+    // Sync agent characters with server state
+    function syncAgentCharacters(serverAgentList) {
+      for (const serverAgent of serverAgentList) {
+        // Try to find matching character by name or create mapping
+        let character = null;
+        for (const [id, char] of agentCharacters) {
+          if (char.agentName.toLowerCase() === serverAgent.name.toLowerCase() ||
+              char.agentType === serverAgent.type) {
+            character = char;
+            // Update the ID mapping
+            if (id !== serverAgent.id) {
+              agentCharacters.delete(id);
+              agentCharacters.set(serverAgent.id, char);
+              char.agentId = serverAgent.id;
+            }
+            break;
+          }
+        }
+
+        if (character) {
+          character.setStatus(serverAgent.status || 'idle');
+        }
+      }
+    }
+
+    // Agent starts moving to a hub
+    function handleAgentMove(data) {
+      const { agent, agentId, to, hub } = data;
+      const id = agentId || agent;
+
+      // Find character by ID or name
+      let character = agentCharacters.get(id);
+      if (!character) {
+        for (const [, char] of agentCharacters) {
+          if (char.agentName.toLowerCase() === (agent || '').toLowerCase()) {
+            character = char;
+            break;
+          }
+        }
+      }
+
+      if (character) {
+        const targetHub = hub || to;
+        character.moveTo(targetHub, () => {
+          console.log(`${character.agentName} arrived at ${targetHub}`);
+        });
+        showSpeechBubble(character, `Walking to ${hubs[targetHub]?.name || targetHub}...`, 'status', 2000);
+      }
+    }
+
+    // Agent arrived at destination
+    function handleAgentArrived(data) {
+      const { agent, agentId, hub } = data;
+      const id = agentId || agent;
+
+      let character = agentCharacters.get(id);
+      if (!character) {
+        for (const [, char] of agentCharacters) {
+          if (char.agentName.toLowerCase() === (agent || '').toLowerCase()) {
+            character = char;
+            break;
+          }
+        }
+      }
+
+      if (character) {
+        character.currentHub = hub;
+        character.state = 'idle';
+      }
+    }
+
+    // Agent status changed
+    function handleAgentStatus(data) {
+      const { agent, agentId, status, doing } = data;
+      const id = agentId || agent;
+
+      let character = agentCharacters.get(id);
+      if (!character) {
+        for (const [, char] of agentCharacters) {
+          if (char.agentName.toLowerCase() === (agent || '').toLowerCase()) {
+            character = char;
+            break;
+          }
+        }
+      }
+
+      if (character) {
+        character.setStatus(status, doing);
+        if (doing) {
+          showThoughtBubble(character, doing, 3000);
+        }
+      }
+    }
+
+    // Agent says something (speech bubble)
+    function handleAgentSpeak(data) {
+      const { agent, agentId, text, type, toAgent } = data;
+      const id = agentId || agent;
+
+      let character = agentCharacters.get(id);
+      if (!character) {
+        for (const [, char] of agentCharacters) {
+          if (char.agentName.toLowerCase() === (agent || '').toLowerCase()) {
+            character = char;
+            break;
+          }
+        }
+      }
+
+      if (character) {
+        const duration = Math.max(3000, text.length * 50); // Longer text = longer display
+        showSpeechBubble(character, text, type || 'saying', duration, toAgent);
+      }
+    }
+
+    // Agent thinks something (thought bubble)
+    function handleAgentThink(data) {
+      const { agent, agentId, text } = data;
+      const id = agentId || agent;
+
+      let character = agentCharacters.get(id);
+      if (!character) {
+        for (const [, char] of agentCharacters) {
+          if (char.agentName.toLowerCase() === (agent || '').toLowerCase()) {
+            character = char;
+            break;
+          }
+        }
+      }
+
+      if (character) {
+        showThoughtBubble(character, text, 2500);
+      }
+    }
+
+    // File was created
+    function handleFileCreated(data) {
+      const { taskId, filename, size } = data;
+      console.log(`File created: ${filename} (${size} bytes) for task ${taskId}`);
+
+      // Track file for the task
+      if (!taskFiles.has(taskId)) {
+        taskFiles.set(taskId, []);
+      }
+      taskFiles.get(taskId).push({ filename, size });
+
+      // Show announcement
+      const coder = [...agentCharacters.values()].find(c => c.agentType === 'coder');
+      if (coder) {
+        showSpeechBubble(coder, `Created ${filename}`, 'status', 2000);
+      }
+
+      // Update results display
+      updateResultsPanel();
+    }
+
+    // Task completed
+    function handleTaskComplete(data) {
+      const { taskId, result } = data;
+      console.log('Task complete:', taskId, result);
+
+      // Find the task
+      const task = serverTasks.find(t => t.id === taskId);
+      const files = taskFiles.get(taskId) || [];
+
+      // Add to completed results
+      completedResults.unshift({
+        taskId,
+        title: task?.title || `Task #${taskId}`,
+        completedAt: new Date(),
+        files,
+        result
+      });
+
+      // Keep only last 10 results
+      if (completedResults.length > 10) {
+        completedResults.pop();
+      }
+
+      // Update results panel
+      updateResultsPanel();
+
+      // All agents celebrate in town square
+      for (const [, character] of agentCharacters) {
+        character.moveTo('town_square', () => {
+          setTimeout(() => {
+            if (character.agentType === 'coder') {
+              showSpeechBubble(character, 'Shipped!', 'saying', 4000);
+            } else if (character.agentType === 'designer') {
+              showSpeechBubble(character, 'Looks great!', 'saying', 4000);
+            } else if (character.agentType === 'reviewer') {
+              showSpeechBubble(character, 'Approved!', 'saying', 4000);
+            }
+          }, 500);
+        });
+      }
+    }
+
+    // Update results panel display
+    function updateResultsPanel() {
+      const resultsList = document.getElementById('results-list');
+      const resultsCount = document.getElementById('results-count');
+
+      if (completedResults.length === 0) {
+        resultsList.innerHTML = `
+          <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
+            Completed task results will appear here
+          </div>`;
+        resultsCount.textContent = '0';
+        return;
+      }
+
+      resultsCount.textContent = completedResults.length;
+
+      resultsList.innerHTML = completedResults.map(result => `
+        <div class="result-item">
+          <div class="result-header">
+            <span class="result-title">${escapeHtml(result.title)}</span>
+            <span class="result-status">Completed</span>
+          </div>
+          ${result.files.length > 0 ? `
+            <div class="result-files">
+              ${result.files.map(file => `
+                <div class="result-file" onclick="downloadTaskFile(${result.taskId}, '${file.filename}')">
+                  <span class="result-file-icon">📄</span>
+                  <span>${file.filename}</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+          <div style="font-size: 10px; color: #8a9a7a; margin-top: 6px;">
+            ${result.completedAt.toLocaleTimeString()}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Helper to escape HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Download task file
+    window.downloadTaskFile = async function(taskId, filename) {
+      try {
+        const response = await fetch(`/api/tasks/${taskId}/files/${filename}`);
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      } catch (e) {
+        console.error('Error downloading file:', e);
+      }
+    };
+
+    // ==================== SPEECH BUBBLE SYSTEM ====================
+    const bubbleContainer = document.getElementById('bubble-container');
+    const labelsContainer = document.getElementById('labels-container');
+
+    function showSpeechBubble(character, text, type = 'saying', duration = 4000, toAgent = null) {
+      // Remove existing bubble for this agent
+      const existing = activeBubbles.get(character.agentId);
+      if (existing) {
+        existing.remove();
+      }
+
+      const bubble = document.createElement('div');
+      bubble.className = 'speech-bubble';
+      bubble.innerHTML = `
+        <div class="agent-label">
+          <span class="status-dot ${character.status}"></span>
+          ${character.agentName}${toAgent ? ` → ${toAgent}` : ''}
+        </div>
+        <div class="bubble-text">${text}</div>
+      `;
+      bubbleContainer.appendChild(bubble);
+      activeBubbles.set(character.agentId, bubble);
+
+      // Update position
+      updateBubblePosition(character, bubble, 4);
+
+      // Auto-remove after duration
+      setTimeout(() => {
+        bubble.classList.add('bubble-fading');
+        setTimeout(() => {
+          bubble.remove();
+          if (activeBubbles.get(character.agentId) === bubble) {
+            activeBubbles.delete(character.agentId);
+          }
+        }, 300);
+      }, duration);
+    }
+
+    function showThoughtBubble(character, text, duration = 2500) {
+      const bubble = document.createElement('div');
+      bubble.className = 'thought-bubble';
+      bubble.innerHTML = `
+        <div class="agent-label">${character.agentName} thinks...</div>
+        <div class="bubble-text">${text}</div>
+      `;
+      bubbleContainer.appendChild(bubble);
+
+      updateBubblePosition(character, bubble, 3.5);
+
+      setTimeout(() => {
+        bubble.classList.add('bubble-fading');
+        setTimeout(() => bubble.remove(), 300);
+      }, duration);
+    }
+
+    function updateBubblePosition(character, bubble, heightOffset) {
+      const pos = character.getPosition();
+      pos.y += heightOffset;
+
+      // Project 3D position to 2D screen coordinates
+      const vector = pos.clone().project(camera);
+      const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+      const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+
+      bubble.style.left = `${x}px`;
+      bubble.style.top = `${y}px`;
+    }
+
+    // Update all bubble positions in animation loop
+    function updateAllBubblePositions() {
+      for (const [agentId, bubble] of activeBubbles) {
+        const character = agentCharacters.get(agentId);
+        if (character) {
+          updateBubblePosition(character, bubble, 4);
+        }
+      }
+    }
+
+    // ==================== AGENT NAME LABELS ====================
+    function createAgentLabel(character) {
+      const label = document.createElement('div');
+      label.className = 'agent-name-label';
+      label.innerHTML = `${character.agentName}<span class="status-text">${character.agentType}</span>`;
+      labelsContainer.appendChild(label);
+      agentLabels.set(character.agentId, label);
+    }
+
+    function updateAgentLabels() {
+      for (const [agentId, label] of agentLabels) {
+        const character = agentCharacters.get(agentId);
+        if (character) {
+          const pos = character.getPosition();
+
+          // Calculate distance to camera
+          const distanceToCamera = camera.position.distanceTo(pos);
+
+          // Project position with height offset for label
+          const labelPos = pos.clone();
+          labelPos.y += 2.5;
+          const vector = labelPos.clone().project(camera);
+
+          // Check if character is behind camera (z > 1) or too far away
+          const isBehindCamera = vector.z > 1;
+          const isTooFar = distanceToCamera > 80;
+          const isOffScreen = Math.abs(vector.x) > 1.2 || Math.abs(vector.y) > 1.2;
+
+          if (isBehindCamera || isTooFar || isOffScreen) {
+            label.style.display = 'none';
+          } else {
+            label.style.display = 'block';
+            const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+
+            label.style.left = `${x}px`;
+            label.style.top = `${y}px`;
+
+            // Scale label based on distance
+            const scale = Math.max(0.6, Math.min(1, 40 / distanceToCamera));
+            label.style.transform = `translate(-50%, -100%) scale(${scale})`;
+
+            // Update status text and working class
+            const isWorking = character.status === 'working';
+            label.classList.toggle('working', isWorking);
+
+            const statusText = label.querySelector('.status-text');
+            if (statusText) {
+              statusText.textContent = character.doing || '';
+            }
+          }
+        }
+      }
+    }
+
+    // Create labels for all agents after they load
+    setTimeout(() => {
+      for (const [, character] of agentCharacters) {
+        createAgentLabel(character);
+      }
+    }, 3000);
+
+    // ==================== DEMO MODE ====================
+    // Simulates agent activity when server is offline
+    let demoModeActive = false;
+    let demoInterval = null;
+
+    const demoQuotes = {
+      planner: [
+        "Let me break this down into steps...",
+        "I see three main components here.",
+        "This needs design work first.",
+        "Ada, you're up for the coding!",
+        "Let's coordinate on this one.",
+      ],
+      designer: [
+        "I'm thinking clean, minimal design.",
+        "The color palette should be warm.",
+        "Let's use a card-based layout.",
+        "This needs better visual hierarchy.",
+        "I'll sketch out the architecture.",
+      ],
+      coder: [
+        "Writing the main component now...",
+        "This function needs refactoring.",
+        "Adding error handling here.",
+        "Almost done with this feature!",
+        "Let me add some tests.",
+      ],
+      reviewer: [
+        "Looking good so far!",
+        "Found a small issue here.",
+        "Nice clean code, approved!",
+        "Consider adding more comments.",
+        "This passes all checks.",
+      ]
+    };
+
+    function startDemoMode() {
+      if (demoModeActive) return;
+      demoModeActive = true;
+      console.log('Starting demo mode - agents will simulate work');
+
+      // Wait for agents to load, then start demo
+      const waitForAgents = setInterval(() => {
+        if (agentCharacters.size >= 4) {
+          clearInterval(waitForAgents);
+          runDemoSequence();
+        }
+      }, 500);
+    }
+
+    function runDemoSequence() {
+      const agents = [...agentCharacters.values()];
+      if (agents.length === 0) return;
+
+      // Welcome message from planner
+      const planner = agents.find(a => a.agentType === 'planner');
+      if (planner) {
+        setTimeout(() => {
+          showSpeechBubble(planner, "Welcome to Eliza Town!", 'saying', 4000);
+        }, 500);
+      }
+
+      // Start the demo loop - pick a random agent that's not busy
+      demoInterval = setInterval(() => {
+        if (!demoModeActive) return;
+
+        // Find agents that are actually free
+        const freeAgents = agents.filter(a => a.state === 'idle' && a.status === 'idle');
+        if (freeAgents.length > 0) {
+          const agent = freeAgents[Math.floor(Math.random() * freeAgents.length)];
+          demoAgentWork(agent);
+        }
+      }, 5000);
+
+      // Also run an immediate first action
+      setTimeout(() => {
+        const coder = agents.find(a => a.agentType === 'coder');
+        if (coder) {
+          // Force reset state in case it's stuck
+          if (coder.state !== 'traveling') {
+            coder.state = 'idle';
+            coder.status = 'idle';
+          }
+          if (coder.state === 'idle') {
+            demoAgentWork(coder);
+          }
+        }
+      }, 2000);
+    }
+
+    function demoAgentWork(agent) {
+      const workHub = agentHubs[agent.agentType];
+      if (!workHub) return;
+
+      // Safety: don't start if already traveling
+      if (agent.state === 'traveling') return;
+
+      const quotes = demoQuotes[agent.agentType] || demoQuotes.coder;
+      const quote = quotes[Math.floor(Math.random() * quotes.length)];
+
+      // Move to work hub
+      agent.moveTo(workHub, () => {
+        // Arrived at hub - start working
+        agent.setStatus('working', agent.agentType.charAt(0).toUpperCase() + agent.agentType.slice(1) + 'ing');
+        showSpeechBubble(agent, quote, 'saying', 3500);
+
+        // After working, go back to town square
+        setTimeout(() => {
+          if (!demoModeActive) return;
+          agent.setStatus('idle', '');
+          agent.moveTo('town_square', null, false);
+        }, 3500);
+      });
+    }
+
+    function stopDemoMode() {
+      demoModeActive = false;
+      if (demoInterval) {
+        clearInterval(demoInterval);
+        demoInterval = null;
+      }
+      console.log('Demo mode stopped');
+    }
+
+    // Auto-start demo mode after a delay (gives time for loading)
+    setTimeout(() => {
+      startDemoMode();
+    }, 4000);
+
+    function updateUI() {
+      // Update agents list
+      if (serverAgents.length > 0) {
+        agentsList.innerHTML = serverAgents.map(agent => `
+          <div class="agent-card" data-agent-id="${agent.id}">
+            <div class="agent-avatar" style="background: linear-gradient(135deg, ${typeColors[agent.type] || '#667eea'}, #4a5568);">
+              ${agent.name.charAt(0)}
+            </div>
+            <div class="agent-info">
+              <div class="agent-name">${agent.name}</div>
+              <div class="agent-role">${agent.type}</div>
+            </div>
+            <div class="agent-status ${agent.status}">${agent.status}</div>
+          </div>
+        `).join('');
+      }
+
+      // Update tasks list
+      const activeTasks = serverTasks.filter(t => t.status !== 'completed').slice(0, 5);
+      taskCount.textContent = activeTasks.length;
+
+      if (activeTasks.length > 0) {
+        tasksList.innerHTML = activeTasks.map(task => `
+          <div class="task-item ${task.status}">
+            <div class="task-title">${task.title}</div>
+            <div class="task-meta">Priority: ${task.priority} | Status: ${task.status}</div>
+          </div>
+        `).join('');
+      } else {
+        tasksList.innerHTML = '<div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">No active tasks</div>';
+      }
+
+      // Update messages list
+      if (serverMessages.length > 0) {
+        const recentMessages = serverMessages.slice(0, 15);
+        messagesList.innerHTML = recentMessages.map(msg => {
+          const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return `
+            <div class="message-item">
+              <div class="message-header">
+                <span class="message-agent">${msg.agent_name || 'Agent'}</span>
+                <span class="message-time">${time}</span>
+              </div>
+              <div class="message-content">
+                <span class="message-type ${msg.type}">${msg.type}</span>
+                ${msg.content}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Additional UI elements
     const charCount = document.getElementById('char-count');
     const prioritySelect = document.getElementById('priority-select');
     const submitText = document.getElementById('submit-text');
     const serverDot = document.getElementById('server-dot');
     const serverStatusText = document.getElementById('server-status-text');
 
-    let ws = null, serverOnline = false;
-
-    taskInput.addEventListener('input', () => { charCount.textContent = taskInput.value.length; });
-
-    function connectWebSocket() {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
-      ws.onopen = () => { wsStatus.textContent = 'Online'; wsStatus.className = 'status connected'; submitTask.disabled = false; };
-      ws.onclose = () => { wsStatus.textContent = 'Offline'; wsStatus.className = 'status disconnected'; submitTask.disabled = true; setTimeout(connectWebSocket, 3000); };
-      ws.onerror = () => {};
-      ws.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.type === 'state_update') updateUI(m.data); } catch {} };
-    }
-
-    function updateUI(data) {
-      if (data.agents?.length > 0) {
-        agentsList.innerHTML = data.agents.map(a => `<div class="agent-card"><div class="agent-avatar">${a.name.charAt(0)}</div><div class="agent-info"><div class="agent-name">${a.name}</div><div class="agent-role">${a.type}</div></div><div class="agent-status ${a.status}">${a.status}</div></div>`).join('');
+    // Generate or retrieve session ID for per-user task isolation
+    function getSessionId() {
+      let sessionId = localStorage.getItem('eliza-session-id');
+      if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('eliza-session-id', sessionId);
       }
-      const active = (data.tasks || []).filter(t => t.status !== 'completed').slice(0, 5);
-      taskCount.textContent = active.length;
-      if (active.length > 0) tasksList.innerHTML = active.map(t => `<div class="task-item"><div class="task-title">${t.title}</div><div class="task-meta">Priority: ${t.priority}</div></div>`).join('');
-      if (data.messages?.length > 0) messagesList.innerHTML = data.messages.slice(0, 10).map(m => `<div class="message-item"><span class="message-agent">${m.agent_name || 'Agent'}</span>: <span class="message-type ${m.type}">${m.type}</span>${m.content}</div>`).join('');
+      return sessionId;
     }
+    const SESSION_ID = getSessionId();
 
+    let serverOnline = false;
+
+    // Character count
+    taskInput.addEventListener('input', () => {
+      charCount.textContent = taskInput.value.length;
+    });
+
+    // Check server health
     async function checkServerHealth() {
       try {
-        const res = await fetch('/api/health');
-        if (res.ok) { const d = await res.json(); serverOnline = true; serverDot.classList.add('online'); serverStatusText.textContent = d.dbAvailable ? 'Server online!' : 'Server online'; submitTask.disabled = !d.dbAvailable; }
-      } catch { serverOnline = false; serverDot.classList.remove('online'); serverStatusText.textContent = 'Server offline'; submitTask.disabled = true; }
+        const response = await fetch('/api/health');
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Health check:', data);
+          serverOnline = true;
+          serverDot.classList.add('online');
+          if (data.dbAvailable && data.orchestrationReady) {
+            serverStatusText.textContent = 'Server online - agents ready';
+            submitTask.disabled = false;
+          } else if (data.dbAvailable) {
+            serverStatusText.textContent = 'Server online - waiting for orchestration';
+            submitTask.disabled = false;
+          } else if (!data.hasDbUrl) {
+            serverStatusText.textContent = 'Server online - DATABASE_URL not set';
+            submitTask.disabled = true;
+          } else if (data.dbError) {
+            serverStatusText.textContent = `DB Error: ${data.dbError.substring(0, 50)}`;
+            submitTask.disabled = true;
+          } else {
+            serverStatusText.textContent = 'Server online - connecting to database...';
+            submitTask.disabled = true;
+          }
+        }
+      } catch (error) {
+        serverOnline = false;
+        serverDot.classList.remove('online');
+        serverStatusText.textContent = 'Server offline - task submission unavailable';
+        submitTask.disabled = true;
+      }
     }
 
+    // Check health on load and periodically
     checkServerHealth();
     setInterval(checkServerHealth, 10000);
 
+    // Submit task with improved UX
     submitTask.addEventListener('click', async () => {
       const title = taskInput.value.trim();
       if (!title || !serverOnline) return;
-      submitTask.disabled = true; submitText.textContent = 'Sending...';
+
+      const priority = parseInt(prioritySelect.value);
+
+      submitTask.disabled = true;
+      submitTask.classList.add('submitting');
+      submitText.textContent = 'Submitting...';
+
       try {
-        const res = await fetch('/api/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, priority: parseInt(prioritySelect.value) }) });
-        if (res.ok) { taskInput.value = ''; charCount.textContent = '0'; submitTask.classList.add('success'); submitText.textContent = 'Sent!'; setTimeout(() => { submitTask.classList.remove('success'); submitText.textContent = 'Send Task'; submitTask.disabled = false; }, 2000); }
-      } catch { submitText.textContent = 'Failed'; setTimeout(() => { submitText.textContent = 'Send Task'; submitTask.disabled = false; }, 2000); }
+        const response = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Session-Id': SESSION_ID
+          },
+          body: JSON.stringify({ title, priority })
+        });
+
+        if (response.ok) {
+          taskInput.value = '';
+          charCount.textContent = '0';
+          submitTask.classList.remove('submitting');
+          submitTask.classList.add('success');
+          submitText.textContent = 'Task Created!';
+
+          setTimeout(() => {
+            submitTask.classList.remove('success');
+            submitText.textContent = 'Submit Task';
+            submitTask.disabled = false;
+          }, 2000);
+        } else {
+          throw new Error('Server returned error');
+        }
+      } catch (error) {
+        console.error('Error submitting task:', error);
+        submitTask.classList.remove('submitting');
+        submitTask.classList.add('error');
+        submitText.textContent = 'Failed - Try Again';
+
+        setTimeout(() => {
+          submitTask.classList.remove('error');
+          submitText.textContent = 'Submit Task';
+          submitTask.disabled = false;
+        }, 2000);
+      }
     });
 
-    taskInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !submitTask.disabled) { e.preventDefault(); submitTask.click(); } });
+    taskInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey && !submitTask.disabled) {
+        e.preventDefault();
+        submitTask.click();
+      }
+    });
 
+    // Initialize WebSocket connection
     connectWebSocket();
   </script>
 </body>

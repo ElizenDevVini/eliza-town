@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     priority INTEGER DEFAULT 5, -- 1 (highest) to 10 (lowest)
     assigned_agent_id INTEGER REFERENCES agents(id),
     parent_task_id INTEGER REFERENCES tasks(id),
+    session_id VARCHAR(64), -- per-user browser session isolation
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP
@@ -106,6 +107,10 @@ INSERT INTO hubs (name, type, position_x, position_z) VALUES
     ('Library', 'general', 15, 15)
 ON CONFLICT (name) DO NOTHING;
 
+-- Add session_id column if it doesn't exist (for existing databases)
+-- MUST run BEFORE creating index on session_id
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS session_id VARCHAR(64);
+
 -- Create indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_agents_status ON agents(status);
 CREATE INDEX IF NOT EXISTS idx_agents_hub ON agents(current_hub_id);
@@ -115,3 +120,4 @@ CREATE INDEX IF NOT EXISTS idx_subtasks_task ON subtasks(task_id);
 CREATE INDEX IF NOT EXISTS idx_messages_agent ON messages(agent_id);
 CREATE INDEX IF NOT EXISTS idx_messages_task ON messages(task_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
+CREATE INDEX IF NOT EXISTS idx_tasks_session ON tasks(session_id);

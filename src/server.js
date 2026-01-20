@@ -4,6 +4,7 @@ import cors from 'cors';
 import { createServer } from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import * as ws from './websocket/index.js';
 
 // Try to load dotenv, but don't fail if it doesn't exist
 try {
@@ -24,6 +25,8 @@ const PORT = process.env.PORT || 3000;
 // Track if database is available
 let dbAvailable = false;
 let orchestrationReady = false;
+let wsInitialized = false;
+let dbError = null;
 
 // Global error handlers to prevent crashes
 process.on('uncaughtException', (err) => {
@@ -44,6 +47,10 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     dbAvailable,
     orchestrationReady,
+    wsInitialized,
+    dbError: dbError ? dbError.message : null,
+    hasDbUrl: !!process.env.DATABASE_URL,
+    hasApiKey: !!process.env.ANTHROPIC_API_KEY,
     timestamp: Date.now()
   });
 });
@@ -68,10 +75,17 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(rootDir, 'index.html'));
 });
 
+// Initialize WebSocket BEFORE server starts listening
+// This ensures the upgrade handler is ready for any incoming connections
+ws.initialize(server);
+wsInitialized = true;
+console.log('WebSocket server initialized');
+
 // Start the server immediately so static files work
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Eliza Town server running on port ${PORT}`);
   console.log('Static file serving is active');
+  console.log('WebSocket ready on /ws');
 });
 
 // Try to initialize database and orchestration (non-blocking)
@@ -107,11 +121,6 @@ async function initializeBackend() {
       console.log(`Created ${DEFAULT_AGENTS.length} default agents`);
     }
 
-    // Initialize WebSocket
-    const ws = await import('./websocket/index.js');
-    ws.initialize(server);
-    console.log('WebSocket server initialized');
-
     // Mount API routes (now that db is available)
     const { default: apiRoutes } = await import('./api/routes.js');
     app.use('/api', apiRoutes);
@@ -122,16 +131,18 @@ async function initializeBackend() {
     await orchestration.initialize();
     orchestrationReady = true;
 
-    // Auto-start orchestration loop (only if ANTHROPIC_API_KEY is set)
+    // Auto-start orchestration loop (works with or without API key - uses simulation mode if no key)
+    orchestration.start(5000);
     if (process.env.ANTHROPIC_API_KEY) {
-      orchestration.start(5000);
-      console.log('Orchestration loop started (5s interval)');
+      console.log('Orchestration loop started (5s interval) - LIVE MODE with Claude API');
     } else {
-      console.log('ANTHROPIC_API_KEY not set - orchestration loop disabled');
+      console.log('Orchestration loop started (5s interval) - SIMULATION MODE (no ANTHROPIC_API_KEY)');
     }
 
   } catch (error) {
+    dbError = error;
     console.error('Backend initialization error:', error.message);
+    console.error('Full error:', error);
     console.log('Server will continue serving static files');
   }
 }
