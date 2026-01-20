@@ -2392,6 +2392,7 @@
         const response = await fetch('/api/health');
         if (response.ok) {
           const data = await response.json();
+          console.log('Health check:', data);
           serverOnline = true;
           serverDot.classList.add('online');
           if (data.dbAvailable && data.orchestrationReady) {
@@ -2400,8 +2401,14 @@
           } else if (data.dbAvailable) {
             serverStatusText.textContent = 'Server online - waiting for orchestration';
             submitTask.disabled = false;
+          } else if (!data.hasDbUrl) {
+            serverStatusText.textContent = 'Server online - DATABASE_URL not set';
+            submitTask.disabled = true;
+          } else if (data.dbError) {
+            serverStatusText.textContent = `DB Error: ${data.dbError.substring(0, 50)}`;
+            submitTask.disabled = true;
           } else {
-            serverStatusText.textContent = 'Server online - database not configured';
+            serverStatusText.textContent = 'Server online - connecting to database...';
             submitTask.disabled = true;
           }
         }

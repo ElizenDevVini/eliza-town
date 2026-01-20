@@ -26,6 +26,7 @@ const PORT = process.env.PORT || 3000;
 let dbAvailable = false;
 let orchestrationReady = false;
 let wsInitialized = false;
+let dbError = null;
 
 // Global error handlers to prevent crashes
 process.on('uncaughtException', (err) => {
@@ -47,6 +48,9 @@ app.get('/api/health', (req, res) => {
     dbAvailable,
     orchestrationReady,
     wsInitialized,
+    dbError: dbError ? dbError.message : null,
+    hasDbUrl: !!process.env.DATABASE_URL,
+    hasApiKey: !!process.env.ANTHROPIC_API_KEY,
     timestamp: Date.now()
   });
 });
@@ -136,7 +140,9 @@ async function initializeBackend() {
     }
 
   } catch (error) {
+    dbError = error;
     console.error('Backend initialization error:', error.message);
+    console.error('Full error:', error);
     console.log('Server will continue serving static files');
   }
 }
