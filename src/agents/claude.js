@@ -251,3 +251,106 @@ Respond with just the message, no JSON needed.`;
   const response = await callClaude(agentId, agentType, null, prompt);
   return response.success ? response.content : null;
 }
+
+// Chat with user - agents respond to user messages
+export async function chatWithUser(agents, userMessage, agentEnergies = {}) {
+  const client = getAnthropicClient();
+  const responses = [];
+
+  // Build context about all agents
+  const agentDescriptions = agents.map(a => {
+    const energy = agentEnergies[a.id] || 50;
+    const isTired = energy < 20;
+    return `- ${a.name} (${a.type}): Energy ${energy}%, ${isTired ? 'TIRED' : 'ready to work'}`;
+  }).join('\n');
+
+  for (const agent of agents) {
+    const energy = agentEnergies[agent.id] || 50;
+    const isTired = energy < 20;
+
+    const systemPrompt = `You are ${agent.name}, a ${agent.type} agent in Eliza Town.
+Your personality: ${agent.personality || 'Helpful and professional'}
+Your current energy: ${energy}%
+${isTired ? 'You are VERY TIRED and need food to work.' : 'You are energized and ready to help.'}
+
+Other agents in town:
+${agentDescriptions}
+
+Respond naturally and briefly (1-2 short sentences max). Stay in character.
+If the user mentions food/feeding and you're tired, express gratitude.
+If asked to work while tired, explain you need food first.`;
+
+    const prompt = `User says: "${userMessage}"
+
+Respond as ${agent.name}:`;
+
+    if (client) {
+      try {
+        const response = await client.messages.create({
+          model: MODEL,
+          max_tokens: 100,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: prompt }]
+        });
+
+        const text = response.content[0].type === 'text' ? response.content[0].text : '';
+        responses.push({
+          agentId: agent.id,
+          agentName: agent.name,
+          response: text.trim()
+        });
+      } catch (error) {
+        console.error(`Chat error for ${agent.name}:`, error.message);
+        responses.push({
+          agentId: agent.id,
+          agentName: agent.name,
+          response: getSimulatedChatResponse(agent, userMessage, isTired)
+        });
+      }
+    } else {
+      // Simulated response
+      responses.push({
+        agentId: agent.id,
+        agentName: agent.name,
+        response: getSimulatedChatResponse(agent, userMessage, isTired)
+      });
+    }
+  }
+
+  return responses;
+}
+
+function getSimulatedChatResponse(agent, userMessage, isTired) {
+  const lower = userMessage.toLowerCase();
+  const hasFoodWord = ['food', 'feed', 'eat', 'hungry', 'meal', 'brought'].some(w => lower.includes(w));
+
+  if (hasFoodWord && isTired) {
+    const thankYouResponses = [
+      "Thank you so much! I was starving!",
+      "Food! Finally! Thank you!",
+      "You're a lifesaver, thanks!",
+      "Ah, food! Much appreciated!",
+    ];
+    return thankYouResponses[Math.floor(Math.random() * thankYouResponses.length)];
+  }
+
+  if (isTired) {
+    const tiredResponses = [
+      "I'm so tired... need food...",
+      "Can barely keep my eyes open...",
+      "Need sustenance to work...",
+      "Too exhausted right now...",
+    ];
+    return tiredResponses[Math.floor(Math.random() * tiredResponses.length)];
+  }
+
+  const normalResponses = {
+    planner: ["I'll coordinate the team!", "Let me plan this out.", "On it!"],
+    designer: ["I have some ideas!", "Let me sketch something.", "Thinking about the design..."],
+    coder: ["I can code that!", "Let me write some code.", "Ready to implement!"],
+    reviewer: ["I'll review it!", "Looking good so far.", "Let me check this."],
+  };
+
+  const options = normalResponses[agent.type] || normalResponses.coder;
+  return options[Math.floor(Math.random() * options.length)];
+}

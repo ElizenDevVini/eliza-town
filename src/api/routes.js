@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as db from '../db/index.js';
 import * as orchestration from '../orchestration/loop.js';
 import * as storage from '../storage/index.js';
+import { chatWithUser } from '../agents/claude.js';
 
 const router = Router();
 
@@ -281,6 +282,25 @@ router.post('/orchestration/stop', (req, res) => {
     orchestration.stop();
     res.json({ status: 'stopped' });
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// === Agent Chat ===
+
+router.post('/chat', async (req, res) => {
+  try {
+    const { message, agentEnergies } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: 'message is required' });
+    }
+
+    const agents = await db.getAgents();
+    const responses = await chatWithUser(agents, message, agentEnergies || {});
+
+    res.json({ responses });
+  } catch (error) {
+    console.error('Chat error:', error);
     res.status(500).json({ error: error.message });
   }
 });

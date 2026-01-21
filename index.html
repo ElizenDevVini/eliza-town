@@ -2665,12 +2665,10 @@
       };
 
       ws.onclose = () => {
-        wsStatus.textContent = 'Demo Mode';
+        wsStatus.textContent = 'Disconnected';
         wsStatus.className = 'status disconnected';
         submitTask.disabled = true;
-        console.log('WebSocket disconnected, running in demo mode...');
-        // Restart demo mode
-        if (!demoModeActive) startDemoMode();
+        console.log('WebSocket disconnected, reconnecting...');
         setTimeout(connectWebSocket, 5000);
       };
 
@@ -3316,184 +3314,69 @@
       }
     }
 
-    // Agent chat input handler
+    // Agent chat input handler - calls Claude API
     const agentChatInput = document.getElementById('agent-chat-input');
     if (agentChatInput) {
-      agentChatInput.addEventListener('keydown', (e) => {
+      agentChatInput.addEventListener('keydown', async (e) => {
         if (e.key === 'Enter') {
-          const message = agentChatInput.value.trim().toLowerCase();
+          const message = agentChatInput.value.trim();
           if (!message) return;
 
           agentChatInput.value = '';
+          agentChatInput.disabled = true;
+          agentChatInput.placeholder = 'Thinking...';
 
           // Check for food-related words
-          const foodWords = ['food', 'feed', 'eat', 'hungry', 'meal', 'dinner', 'lunch', 'breakfast', 'snack', 'brought food', 'bring food'];
-          const hasFoodWord = foodWords.some(word => message.includes(word));
+          const foodWords = ['food', 'feed', 'eat', 'hungry', 'meal', 'brought'];
+          const hasFoodWord = foodWords.some(word => message.toLowerCase().includes(word));
 
-          if (hasFoodWord) {
-            // User is offering food
-            let delay = 0;
-            for (const [, character] of agentCharacters) {
-              setTimeout(() => {
-                character.speak("Thank you for the food!", 2);
-              }, delay);
-              delay += 300;
-            }
-            setTimeout(() => {
-              feedAllAgents();
-            }, 500);
-          } else {
-            // Generic response - agents respond to user
-            const responses = [
-              "I hear you!",
-              "Got it!",
-              "Understood.",
-              "Okay!",
-              "Sure thing!",
-            ];
-            let delay = 0;
-            for (const [, character] of agentCharacters) {
-              if (Math.random() < 0.5) { // Only some agents respond
-                setTimeout(() => {
-                  const response = responses[Math.floor(Math.random() * responses.length)];
-                  character.speak(response, 2);
-                }, delay);
-                delay += 400;
+          // Build agent energies map
+          const agentEnergies = {};
+          for (const [id, character] of agentCharacters) {
+            agentEnergies[id] = character.energy;
+          }
+
+          try {
+            // Call Claude API for responses
+            const response = await fetch('/api/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message, agentEnergies })
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+
+              // Display each agent's response in speech bubbles
+              let delay = 0;
+              for (const agentResponse of data.responses) {
+                const character = agentCharacters.get(agentResponse.agentId);
+                if (character && agentResponse.response) {
+                  setTimeout(() => {
+                    character.speak(agentResponse.response, 4);
+                  }, delay);
+                  delay += 800;
+                }
               }
+
+              // If food was mentioned and agents were tired, feed them after responses
+              if (hasFoodWord) {
+                setTimeout(() => {
+                  feedAllAgents();
+                }, delay + 500);
+              }
+            } else {
+              console.error('Chat API error');
             }
+          } catch (error) {
+            console.error('Chat error:', error);
           }
+
+          agentChatInput.disabled = false;
+          agentChatInput.placeholder = 'Talk to agents...';
         }
       });
     }
-
-    // ==================== DEMO MODE ====================
-    // Simulates agent activity when server is offline
-    let demoModeActive = false;
-    let demoInterval = null;
-
-    const demoQuotes = {
-      planner: [
-        "Let me break this down into steps...",
-        "I see three main components here.",
-        "This needs design work first.",
-        "Ada, you're up for the coding!",
-        "Let's coordinate on this one.",
-      ],
-      designer: [
-        "I'm thinking clean, minimal design.",
-        "The color palette should be warm.",
-        "Let's use a card-based layout.",
-        "This needs better visual hierarchy.",
-        "I'll sketch out the architecture.",
-      ],
-      coder: [
-        "Writing the main component now...",
-        "This function needs refactoring.",
-        "Adding error handling here.",
-        "Almost done with this feature!",
-        "Let me add some tests.",
-      ],
-      reviewer: [
-        "Looking good so far!",
-        "Found a small issue here.",
-        "Nice clean code, approved!",
-        "Consider adding more comments.",
-        "This passes all checks.",
-      ]
-    };
-
-    function startDemoMode() {
-      if (demoModeActive) return;
-      demoModeActive = true;
-      console.log('Starting demo mode - agents will simulate work');
-
-      // Wait for agents to load, then start demo
-      const waitForAgents = setInterval(() => {
-        if (agentCharacters.size >= 4) {
-          clearInterval(waitForAgents);
-          runDemoSequence();
-        }
-      }, 500);
-    }
-
-    function runDemoSequence() {
-      const agents = [...agentCharacters.values()];
-      if (agents.length === 0) return;
-
-      // Welcome message from planner
-      const planner = agents.find(a => a.agentType === 'planner');
-      if (planner) {
-        setTimeout(() => {
-          showSpeechBubble(planner, "Welcome to Eliza Town!", 'saying', 4000);
-        }, 500);
-      }
-
-      // Start the demo loop - pick a random agent that's not busy
-      demoInterval = setInterval(() => {
-        if (!demoModeActive) return;
-
-        // Find agents that are actually free
-        const freeAgents = agents.filter(a => a.state === 'idle' && a.status === 'idle');
-        if (freeAgents.length > 0) {
-          const agent = freeAgents[Math.floor(Math.random() * freeAgents.length)];
-          demoAgentWork(agent);
-        }
-      }, 5000);
-
-      // Also run an immediate first action
-      setTimeout(() => {
-        const coder = agents.find(a => a.agentType === 'coder');
-        if (coder) {
-          // Force reset state in case it's stuck
-          if (coder.state !== 'traveling') {
-            coder.state = 'idle';
-            coder.status = 'idle';
-          }
-          if (coder.state === 'idle') {
-            demoAgentWork(coder);
-          }
-        }
-      }, 2000);
-    }
-
-    function demoAgentWork(agent) {
-      const workHub = agentHubs[agent.agentType];
-      if (!workHub) return;
-
-      // Safety: don't start if already traveling
-      if (agent.state === 'traveling') return;
-
-      const quotes = demoQuotes[agent.agentType] || demoQuotes.coder;
-      const quote = quotes[Math.floor(Math.random() * quotes.length)];
-
-      // Move to work hub
-      agent.moveTo(workHub, () => {
-        // Arrived at hub - start working
-        agent.setStatus('working', agent.agentType.charAt(0).toUpperCase() + agent.agentType.slice(1) + 'ing');
-        showSpeechBubble(agent, quote, 'saying', 3500);
-
-        // After working, go back to town square
-        setTimeout(() => {
-          if (!demoModeActive) return;
-          agent.setStatus('idle', '');
-          agent.moveTo('town_square', null, false);
-        }, 3500);
-      });
-    }
-
-    function stopDemoMode() {
-      demoModeActive = false;
-      if (demoInterval) {
-        clearInterval(demoInterval);
-        demoInterval = null;
-      }
-      console.log('Demo mode stopped');
-    }
-
-    // Auto-start demo mode after a delay (gives time for loading)
-    setTimeout(() => {
-      startDemoMode();
-    }, 4000);
 
     function updateUI() {
       // Update agents list
