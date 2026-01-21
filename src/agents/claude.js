@@ -90,8 +90,8 @@ export async function callClaude(agentId, agentType, taskId, prompt, context = {
     const taskMatch = prompt.match(/Task:\s*([^\n]+)/);
     const taskTitle = taskMatch ? taskMatch[1] : 'Unknown Task';
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+    // Simulate API delay (fast for better UX)
+    await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
 
     const simulatedContent = getSimulatedResponse(agentType, taskTitle);
     const duration = Date.now() - startTime;

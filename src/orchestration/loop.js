@@ -43,11 +43,11 @@ export async function initialize() {
   console.log(`Orchestration initialized with ${agents.length} agents`);
 }
 
-export function start(intervalMs = 5000) {
+export function start(intervalMs = 2000) {
   if (isRunning) return;
   isRunning = true;
   loopInterval = setInterval(tick, intervalMs);
-  console.log('Orchestration loop started');
+  console.log('Orchestration loop started (interval: ' + intervalMs + 'ms)');
 }
 
 export function stop() {
@@ -435,13 +435,13 @@ async function moveAgentToHubWithEvent(agent, targetHub) {
 
   if (!hub || currentHub === targetHub) return;
 
-  // Calculate travel time based on distance
+  // Calculate travel time based on distance (faster for better UX)
   const currentPos = HUBS[currentHub] || HUBS.town_square;
   const distance = Math.sqrt(
     Math.pow(hub.x - currentPos.x, 2) +
     Math.pow(hub.z - currentPos.z, 2)
   );
-  const travelTime = Math.max(1500, distance * 100); // min 1.5s, 100ms per unit
+  const travelTime = Math.max(500, distance * 30); // min 0.5s, 30ms per unit (fast)
 
   // Emit move event
   broadcast({

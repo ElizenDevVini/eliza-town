@@ -3,6 +3,7 @@ import * as db from '../db/index.js';
 import * as orchestration from '../orchestration/loop.js';
 import * as storage from '../storage/index.js';
 import { chatWithUser } from '../agents/claude.js';
+import * as oauth from '../services/oauth.js';
 
 const router = Router();
 
@@ -324,6 +325,164 @@ router.post('/chat', async (req, res) => {
     res.json({ responses });
   } catch (error) {
     console.error('Chat error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// === OAuth Integrations ===
+
+// Get configured OAuth providers
+router.get('/oauth/providers', (req, res) => {
+  const providers = oauth.getConfiguredProviders();
+  const providerInfo = {
+    slack: { name: 'Slack', icon: 'slack', configured: oauth.isConfigured('slack') },
+    gmail: { name: 'Gmail', icon: 'mail', configured: oauth.isConfigured('gmail') }
+  };
+  res.json(providerInfo);
+});
+
+// Get connected integrations for current session
+router.get('/oauth/connected', async (req, res) => {
+  try {
+    const sessionId = getSessionId(req);
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Session ID required' });
+    }
+    const integrations = await oauth.getConnectedIntegrations(sessionId);
+    res.json(integrations);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Start OAuth flow
+router.get('/oauth/:provider/auth', (req, res) => {
+  const { provider } = req.params;
+  const sessionId = req.query.session_id;
+
+  if (!sessionId) {
+    return res.status(400).json({ error: 'session_id query parameter required' });
+  }
+
+  if (!oauth.isConfigured(provider)) {
+    return res.status(400).json({ error: `${provider} OAuth not configured` });
+  }
+
+  const redirectUri = `${req.protocol}://${req.get('host')}/api/oauth/${provider}/callback`;
+  const authUrl = oauth.getAuthUrl(provider, sessionId, redirectUri);
+
+  res.redirect(authUrl);
+});
+
+// OAuth callback
+router.get('/oauth/:provider/callback', async (req, res) => {
+  const { provider } = req.params;
+  const { code, state, error } = req.query;
+
+  if (error) {
+    return res.redirect(`/?oauth_error=${encodeURIComponent(error)}`);
+  }
+
+  try {
+    const stateData = JSON.parse(Buffer.from(state, 'base64').toString());
+    const { sessionId } = stateData;
+
+    const redirectUri = `${req.protocol}://${req.get('host')}/api/oauth/${provider}/callback`;
+    const tokenData = await oauth.exchangeCode(provider, code, redirectUri);
+
+    await oauth.saveToken(sessionId, provider, tokenData);
+
+    res.redirect(`/?oauth_success=${provider}`);
+  } catch (err) {
+    console.error('OAuth callback error:', err);
+    res.redirect(`/?oauth_error=${encodeURIComponent(err.message)}`);
+  }
+});
+
+// Disconnect OAuth provider
+router.delete('/oauth/:provider', async (req, res) => {
+  try {
+    const { provider } = req.params;
+    const sessionId = getSessionId(req);
+
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Session ID required' });
+    }
+
+    await oauth.disconnect(sessionId, provider);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// === Slack Actions ===
+
+router.post('/slack/send', async (req, res) => {
+  try {
+    const sessionId = getSessionId(req);
+    const { channel, text } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Session ID required' });
+    }
+    if (!channel || !text) {
+      return res.status(400).json({ error: 'channel and text required' });
+    }
+
+    const result = await oauth.sendSlackMessage(sessionId, channel, text);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/slack/channels', async (req, res) => {
+  try {
+    const sessionId = getSessionId(req);
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Session ID required' });
+    }
+
+    const channels = await oauth.getSlackChannels(sessionId);
+    res.json(channels);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// === Gmail Actions ===
+
+router.post('/gmail/send', async (req, res) => {
+  try {
+    const sessionId = getSessionId(req);
+    const { to, subject, body } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Session ID required' });
+    }
+    if (!to || !subject || !body) {
+      return res.status(400).json({ error: 'to, subject, and body required' });
+    }
+
+    const result = await oauth.sendGmail(sessionId, to, subject, body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/gmail/messages', async (req, res) => {
+  try {
+    const sessionId = getSessionId(req);
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Session ID required' });
+    }
+
+    const maxResults = parseInt(req.query.limit) || 10;
+    const messages = await oauth.getGmailMessages(sessionId, maxResults);
+    res.json(messages);
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });

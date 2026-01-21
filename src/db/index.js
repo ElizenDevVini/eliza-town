@@ -311,4 +311,46 @@ export async function cleanupOrphanedTasks() {
   );
 }
 
+// OAuth token management
+export async function saveOAuthToken(sessionId, provider, tokenData) {
+  const result = await query(
+    `INSERT INTO oauth_tokens (session_id, provider, access_token, refresh_token, token_type, scope, expires_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     ON CONFLICT (session_id, provider) DO UPDATE SET
+       access_token = EXCLUDED.access_token,
+       refresh_token = COALESCE(EXCLUDED.refresh_token, oauth_tokens.refresh_token),
+       token_type = EXCLUDED.token_type,
+       scope = EXCLUDED.scope,
+       expires_at = EXCLUDED.expires_at,
+       updated_at = CURRENT_TIMESTAMP
+     RETURNING *`,
+    [sessionId, provider, tokenData.access_token, tokenData.refresh_token,
+     tokenData.token_type || 'Bearer', tokenData.scope, tokenData.expires_at]
+  );
+  return result.rows[0];
+}
+
+export async function getOAuthToken(sessionId, provider) {
+  const result = await query(
+    `SELECT * FROM oauth_tokens WHERE session_id = $1 AND provider = $2`,
+    [sessionId, provider]
+  );
+  return result.rows[0];
+}
+
+export async function getOAuthTokens(sessionId) {
+  const result = await query(
+    `SELECT provider, scope, expires_at, created_at FROM oauth_tokens WHERE session_id = $1`,
+    [sessionId]
+  );
+  return result.rows;
+}
+
+export async function deleteOAuthToken(sessionId, provider) {
+  return await query(
+    `DELETE FROM oauth_tokens WHERE session_id = $1 AND provider = $2`,
+    [sessionId, provider]
+  );
+}
+
 export default pool;

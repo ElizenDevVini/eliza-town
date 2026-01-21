@@ -111,6 +111,21 @@ ON CONFLICT (name) DO NOTHING;
 -- MUST run BEFORE creating index on session_id
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS session_id VARCHAR(64);
 
+-- OAuth tokens for external service integrations
+CREATE TABLE IF NOT EXISTS oauth_tokens (
+    id SERIAL PRIMARY KEY,
+    session_id VARCHAR(64) NOT NULL,
+    provider VARCHAR(30) NOT NULL, -- 'slack', 'gmail', 'github'
+    access_token TEXT NOT NULL,
+    refresh_token TEXT,
+    token_type VARCHAR(30) DEFAULT 'Bearer',
+    scope TEXT,
+    expires_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(session_id, provider)
+);
+
 -- Create indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_agents_status ON agents(status);
 CREATE INDEX IF NOT EXISTS idx_agents_hub ON agents(current_hub_id);
@@ -121,3 +136,4 @@ CREATE INDEX IF NOT EXISTS idx_messages_agent ON messages(agent_id);
 CREATE INDEX IF NOT EXISTS idx_messages_task ON messages(task_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
 CREATE INDEX IF NOT EXISTS idx_tasks_session ON tasks(session_id);
+CREATE INDEX IF NOT EXISTS idx_oauth_session ON oauth_tokens(session_id);

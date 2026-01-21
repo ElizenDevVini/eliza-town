@@ -353,6 +353,86 @@
     .message-type.status { background: #2a3a2a; color: #8abc8a; }
     .message-type.announcement { background: #4a2a2a; color: #d48a8a; }
 
+    /* Integrations Panel */
+    #integrations-panel { flex: 0 0 auto; }
+    #integrations-panel .panel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .integration-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(50, 40, 30, 0.5);
+      border: 1px solid #4a3a2a;
+      border-radius: 4px;
+      padding: 8px;
+    }
+
+    .integration-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-weight: bold;
+      font-size: 14px;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .integration-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .integration-name {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #f4e4c1;
+    }
+
+    .integration-status {
+      font-size: 9px;
+      color: #8a7a6a;
+    }
+
+    .integration-status.connected {
+      color: #8abc8a;
+    }
+
+    .integration-btn {
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid #6b5a3e;
+      background: linear-gradient(180deg, #5c4a32, #4a3728);
+      color: #f4e4c1;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .integration-btn:hover {
+      background: linear-gradient(180deg, #6c5a42, #5a4738);
+      border-color: #8b6914;
+    }
+
+    .integration-btn.connected {
+      background: rgba(34, 85, 34, 0.4);
+      border-color: #4a7c4a;
+      color: #8fbc8f;
+    }
+
+    .integration-btn.connected:hover {
+      background: rgba(85, 34, 34, 0.4);
+      border-color: #7c4a4a;
+    }
+
     /* Task Input - Medieval Scroll Style - Compact */
     #task-input-container {
       padding: 10px;
@@ -1399,6 +1479,30 @@
       <div class="panel-content" id="messages-list">
         <div style="color: #6b7280; font-size: 12px; text-align: center; padding: 20px;">
           Waiting for activity...
+        </div>
+      </div>
+    </div>
+
+    <div id="integrations-panel" class="panel">
+      <div class="panel-header">
+        <span>Integrations</span>
+      </div>
+      <div class="panel-content" id="integrations-list">
+        <div class="integration-item" id="slack-integration">
+          <div class="integration-icon" style="background: #4A154B;">S</div>
+          <div class="integration-info">
+            <div class="integration-name">Slack</div>
+            <div class="integration-status" id="slack-status">Not connected</div>
+          </div>
+          <button class="integration-btn" id="slack-connect-btn" onclick="connectIntegration('slack')">Connect</button>
+        </div>
+        <div class="integration-item" id="gmail-integration">
+          <div class="integration-icon" style="background: #EA4335;">G</div>
+          <div class="integration-info">
+            <div class="integration-name">Gmail</div>
+            <div class="integration-status" id="gmail-status">Not connected</div>
+          </div>
+          <button class="integration-btn" id="gmail-connect-btn" onclick="connectIntegration('gmail')">Connect</button>
         </div>
       </div>
     </div>
@@ -3572,6 +3676,93 @@
       .then(r => r.json())
       .then(data => console.log('Cleaned up orphaned tasks:', data.cleared))
       .catch(e => console.log('Cleanup not available:', e.message));
+
+    // === OAuth Integration Functions ===
+    async function loadConnectedIntegrations() {
+      try {
+        const response = await fetch('/api/oauth/connected', {
+          headers: { 'X-Session-Id': SESSION_ID }
+        });
+        if (response.ok) {
+          const integrations = await response.json();
+          updateIntegrationUI(integrations);
+        }
+      } catch (error) {
+        console.log('Could not load integrations:', error.message);
+      }
+    }
+
+    function updateIntegrationUI(integrations) {
+      const slackStatus = document.getElementById('slack-status');
+      const slackBtn = document.getElementById('slack-connect-btn');
+      const gmailStatus = document.getElementById('gmail-status');
+      const gmailBtn = document.getElementById('gmail-connect-btn');
+
+      const slackConnected = integrations.find(i => i.provider === 'slack');
+      const gmailConnected = integrations.find(i => i.provider === 'gmail');
+
+      if (slackConnected) {
+        slackStatus.textContent = 'Connected';
+        slackStatus.classList.add('connected');
+        slackBtn.textContent = 'Disconnect';
+        slackBtn.classList.add('connected');
+        slackBtn.onclick = () => disconnectIntegration('slack');
+      } else {
+        slackStatus.textContent = 'Not connected';
+        slackStatus.classList.remove('connected');
+        slackBtn.textContent = 'Connect';
+        slackBtn.classList.remove('connected');
+        slackBtn.onclick = () => connectIntegration('slack');
+      }
+
+      if (gmailConnected) {
+        gmailStatus.textContent = 'Connected';
+        gmailStatus.classList.add('connected');
+        gmailBtn.textContent = 'Disconnect';
+        gmailBtn.classList.add('connected');
+        gmailBtn.onclick = () => disconnectIntegration('gmail');
+      } else {
+        gmailStatus.textContent = 'Not connected';
+        gmailStatus.classList.remove('connected');
+        gmailBtn.textContent = 'Connect';
+        gmailBtn.classList.remove('connected');
+        gmailBtn.onclick = () => connectIntegration('gmail');
+      }
+    }
+
+    window.connectIntegration = function(provider) {
+      window.location.href = `/api/oauth/${provider}/auth?session_id=${SESSION_ID}`;
+    };
+
+    window.disconnectIntegration = async function(provider) {
+      try {
+        const response = await fetch(`/api/oauth/${provider}`, {
+          method: 'DELETE',
+          headers: { 'X-Session-Id': SESSION_ID }
+        });
+        if (response.ok) {
+          loadConnectedIntegrations();
+        }
+      } catch (error) {
+        console.error('Failed to disconnect:', error);
+      }
+    };
+
+    // Check for OAuth redirect results
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('oauth_success')) {
+      const provider = urlParams.get('oauth_success');
+      console.log(`Successfully connected ${provider}`);
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    if (urlParams.has('oauth_error')) {
+      console.error('OAuth error:', urlParams.get('oauth_error'));
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Load connected integrations on startup
+    loadConnectedIntegrations();
 
     // Initialize WebSocket connection
     connectWebSocket();
