@@ -680,6 +680,156 @@
       animation: bubbleFadeOut 0.3s ease-in forwards;
     }
 
+    /* Live Speech Bubbles - floating above characters */
+    .live-speech-bubble {
+      position: absolute;
+      max-width: 200px;
+      padding: 10px 14px;
+      background: linear-gradient(180deg, #4a3728, #3d2d1f);
+      border: 2px solid #c9a959;
+      border-radius: 12px;
+      color: #f4e4c1;
+      font-family: 'Crimson Text', serif;
+      font-size: 13px;
+      line-height: 1.4;
+      transform: translate(-50%, -100%);
+      animation: speechPop 0.3s ease-out;
+      z-index: 50;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .live-speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 10px 8px 0;
+      border-style: solid;
+      border-color: #3d2d1f transparent transparent;
+    }
+
+    @keyframes speechPop {
+      0% { opacity: 0; transform: translate(-50%, -80%) scale(0.8); }
+      50% { transform: translate(-50%, -105%) scale(1.05); }
+      100% { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+    }
+
+    /* Energy Meter Panel */
+    #sentience-panel {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      width: 200px;
+      background: linear-gradient(180deg, rgba(60, 45, 30, 0.95), rgba(40, 30, 20, 0.95));
+      border: 2px solid #8b6914;
+      border-radius: 10px;
+      padding: 12px;
+      z-index: 50;
+      font-family: 'Cinzel', serif;
+    }
+
+    #sentience-panel h3 {
+      color: #c9a959;
+      font-size: 12px;
+      margin: 0 0 10px 0;
+      text-align: center;
+      border-bottom: 1px solid #5a4a3a;
+      padding-bottom: 8px;
+    }
+
+    .energy-bar-container {
+      margin-bottom: 8px;
+    }
+
+    .energy-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #b8a88a;
+      margin-bottom: 3px;
+    }
+
+    .energy-bar {
+      height: 8px;
+      background: #2a1f15;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #5a4a3a;
+    }
+
+    .energy-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #c9a959, #e8d48a);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .energy-bar-fill.low {
+      background: linear-gradient(90deg, #c94444, #e87a7a);
+    }
+
+    .energy-bar-fill.eating {
+      background: linear-gradient(90deg, #44c944, #7ae87a);
+      animation: energyPulse 0.5s ease-in-out infinite;
+    }
+
+    @keyframes energyPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Food Button */
+    #food-button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      background: linear-gradient(180deg, #5c4a32, #4a3728);
+      border: 2px solid #8b6914;
+      border-radius: 8px;
+      color: #f4e4c1;
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    #food-button:hover {
+      background: linear-gradient(180deg, #6c5a42, #5a4738);
+      border-color: #c9a959;
+      transform: translateY(-1px);
+    }
+
+    #food-button:active {
+      transform: translateY(1px);
+    }
+
+    #food-button .food-icon {
+      font-size: 16px;
+    }
+
+    /* Status indicator on name labels */
+    .agent-name-label.tired {
+      border: 1px solid #c94444;
+      background: rgba(100, 30, 30, 0.8);
+    }
+
+    .agent-name-label.eating {
+      border: 1px solid #44c944;
+      background: rgba(30, 100, 30, 0.8);
+      animation: eatPulse 0.5s ease-in-out infinite;
+    }
+
+    @keyframes eatPulse {
+      0%, 100% { box-shadow: 0 0 5px rgba(68, 201, 68, 0.5); }
+      50% { box-shadow: 0 0 15px rgba(68, 201, 68, 0.8); }
+    }
+
     /* Agent Modal - Full Screen Centered */
     #agent-modal-backdrop {
       position: fixed;
@@ -1069,6 +1219,19 @@
   <div id="info">
     Click agent to inspect | Mouse: Rotate | Scroll: Zoom
   </div>
+
+  <!-- Sentience Panel - Energy Meters -->
+  <div id="sentience-panel">
+    <h3>Agent Energy</h3>
+    <div id="energy-meters"></div>
+    <button id="food-button" onclick="feedAllAgents()">
+      <span class="food-icon">🍖</span>
+      <span>Bring Food</span>
+    </button>
+  </div>
+
+  <!-- Live Speech Bubbles Container -->
+  <div id="speech-bubbles-container"></div>
 
   <!-- Powered by Eliza OS Branding -->
   <div id="branding">
@@ -1780,11 +1943,24 @@
         this.deceleration = 4;
         this.turnSpeed = 6;
 
-        // State: 'idle', 'working', 'traveling', 'chatting'
-        this.state = 'idle';
-        this.status = 'idle';
+        // State: 'idle', 'working', 'traveling', 'chatting', 'tired', 'eating'
+        this.state = 'tired'; // Start tired for demo
+        this.status = 'tired';
         this.stateTime = 0;
         this.doing = '';
+
+        // Sentience - Energy system
+        this.energy = 10; // Start with low energy (0-100)
+        this.maxEnergy = 100;
+        this.energyDrainRate = 0.5; // Energy lost per second when working
+        this.tiredThreshold = 20; // Below this, agent is tired
+        this.isEating = false;
+        this.eatDuration = 3; // Seconds to eat
+        this.eatTimer = 0;
+
+        // Speech bubble
+        this.currentSpeech = '';
+        this.speechTimer = 0;
 
         // Idle wandering
         this.idleDuration = 3 + Math.random() * 4;
@@ -1795,11 +1971,25 @@
         const movementClips = rig === 'large' ? animationClips.largeMovement : animationClips.mediumMovement;
 
         if (generalClips?.length > 0) {
+          // Normal idle
           const idleOptions = generalClips.filter(c => c.name.includes('Idle'));
           const idleClip = idleOptions[Math.floor(Math.random() * idleOptions.length)] || generalClips[0];
           this.idleAction = this.mixer.clipAction(idleClip);
           this.idleAction.setEffectiveTimeScale(0.8 + Math.random() * 0.4);
-          this.idleAction.play();
+
+          // Tired animation (slower idle or sitting)
+          const sittingClip = generalClips.find(c => c.name.includes('Sit')) || idleClip;
+          this.tiredAction = this.mixer.clipAction(sittingClip);
+          this.tiredAction.setEffectiveTimeScale(0.5); // Slower for tired look
+
+          // Eating animation (use interact or idle with different speed)
+          const interactClip = generalClips.find(c => c.name.includes('Interact') || c.name.includes('Pick')) || idleClip;
+          this.eatAction = this.mixer.clipAction(interactClip);
+          this.eatAction.setEffectiveTimeScale(1.2);
+          this.eatAction.setLoop(THREE.LoopRepeat);
+
+          // Start with tired animation
+          this.tiredAction.play();
         }
 
         if (movementClips?.length > 0) {
@@ -1930,6 +2120,14 @@
         this.mixer.update(delta);
         this.stateTime += delta;
 
+        // Update speech timer
+        if (this.speechTimer > 0) {
+          this.speechTimer -= delta;
+          if (this.speechTimer <= 0) {
+            this.currentSpeech = '';
+          }
+        }
+
         // Update working glow position
         if (this.workingGlow) {
           this.workingGlow.position.x = this.model.position.x;
@@ -1938,18 +2136,66 @@
         }
 
         switch (this.state) {
+          case 'tired':
+            // Tired animation - slow swaying, droopy
+            this.model.position.y = Math.sin(this.stateTime * 0.5) * 0.02 - 0.05; // Slight droop
+            if (Math.random() < 0.002) {
+              // Occasional tired head bob
+              this.model.rotation.z = Math.sin(this.stateTime) * 0.03;
+            }
+            break;
+
+          case 'eating':
+            // Eating animation
+            this.eatTimer -= delta;
+            this.model.position.y = Math.sin(this.stateTime * 6) * 0.03; // Chewing motion
+
+            if (this.eatTimer <= 0) {
+              // Done eating - restore energy
+              this.energy = Math.min(this.energy + 60, this.maxEnergy);
+              this.isEating = false;
+              this.state = 'idle';
+              this.status = 'idle';
+
+              // Switch to idle animation
+              if (this.eatAction && this.idleAction) {
+                this.eatAction.fadeOut(0.3);
+                this.idleAction.reset().fadeIn(0.3).play();
+              }
+
+              this.speak("Mmm, that was delicious! I feel energized!", 3);
+              updateSentience();
+            }
+            break;
+
           case 'idle':
             // Subtle idle animation - occasional slight rotation
             if (Math.random() < 0.001) {
               this.model.rotation.y += (Math.random() - 0.5) * 0.15;
             }
+            this.model.position.y = 0;
+            this.model.rotation.z = 0;
             // Note: Wandering disabled - demo mode handles agent movement
             break;
 
           case 'working':
           case 'chatting':
-            // Enhanced working animation
+            // Drain energy while working
             if (this.state === 'working') {
+              this.energy = Math.max(0, this.energy - this.energyDrainRate * delta);
+
+              // Check if too tired to continue
+              if (this.energy < this.tiredThreshold) {
+                this.state = 'tired';
+                this.status = 'tired';
+                if (this.idleAction && this.tiredAction) {
+                  this.idleAction.fadeOut(0.5);
+                  this.tiredAction.reset().fadeIn(0.5).play();
+                }
+                this.speak("I'm too tired to work... need food...", 4);
+                updateSentience();
+              }
+
               // Typing/working bob
               this.model.position.y = Math.sin(this.stateTime * 4) * 0.05;
               // Slight side-to-side sway like typing
@@ -1964,14 +2210,19 @@
           case 'traveling':
             if (this.pathIndex >= this.path.length) {
               // Arrived at final destination
-              this.state = 'idle';
+              this.state = this.energy < this.tiredThreshold ? 'tired' : 'idle';
+              this.status = this.state;
               this.currentHub = this.path[this.path.length - 1];
               this.currentSpeed = 0;
               this.model.position.y = 0;
 
               if (this.idleAction && this.walkAction) {
                 this.walkAction.fadeOut(0.4);
-                this.idleAction.reset().fadeIn(0.4).play();
+                if (this.state === 'tired' && this.tiredAction) {
+                  this.tiredAction.reset().fadeIn(0.4).play();
+                } else {
+                  this.idleAction.reset().fadeIn(0.4).play();
+                }
               }
 
               if (this.onArrival) {
@@ -2014,6 +2265,38 @@
             }
             break;
         }
+      }
+
+      // Make agent speak
+      speak(text, duration = 3) {
+        this.currentSpeech = text;
+        this.speechTimer = duration;
+      }
+
+      // Check if agent is tired
+      isTired() {
+        return this.energy < this.tiredThreshold;
+      }
+
+      // Feed the agent
+      feed() {
+        if (this.isEating) return;
+
+        this.isEating = true;
+        this.eatTimer = this.eatDuration;
+        this.state = 'eating';
+        this.status = 'eating';
+
+        // Switch to eating animation
+        if (this.tiredAction && this.eatAction) {
+          this.tiredAction.fadeOut(0.3);
+          this.eatAction.reset().fadeIn(0.3).play();
+        } else if (this.idleAction && this.eatAction) {
+          this.idleAction.fadeOut(0.3);
+          this.eatAction.reset().fadeIn(0.3).play();
+        }
+
+        this.speak("*nom nom nom*", 2);
       }
 
       // Get 3D position for speech bubble placement
@@ -2306,6 +2589,8 @@
 
     // Animation loop
     let frameCount = 0;
+    let sentienceUpdateCounter = 0;
+
     function animate() {
       requestAnimationFrame(animate);
       const delta = clock.getDelta();
@@ -2318,6 +2603,13 @@
       if (frameCount % 3 === 0) {
         updateAllBubblePositions();
         updateAgentLabels();
+        updateSpeechBubbles();
+      }
+
+      // Update sentience panel every 30 frames
+      sentienceUpdateCounter++;
+      if (sentienceUpdateCounter % 30 === 0) {
+        updateSentience();
       }
     }
     animate();
@@ -2825,13 +3117,26 @@
             const scale = Math.max(0.6, Math.min(1, 40 / distanceToCamera));
             label.style.transform = `translate(-50%, -100%) scale(${scale})`;
 
-            // Update status text and working class
+            // Update status text and classes based on state
             const isWorking = character.status === 'working';
+            const isTired = character.state === 'tired';
+            const isEating = character.state === 'eating';
+
             label.classList.toggle('working', isWorking);
+            label.classList.toggle('tired', isTired);
+            label.classList.toggle('eating', isEating);
 
             const statusText = label.querySelector('.status-text');
             if (statusText) {
-              statusText.textContent = character.doing || '';
+              if (isTired) {
+                statusText.textContent = '💤 tired';
+                statusText.style.display = 'inline';
+              } else if (isEating) {
+                statusText.textContent = '🍖 eating';
+                statusText.style.display = 'inline';
+              } else {
+                statusText.textContent = character.doing || '';
+              }
             }
           }
         }
@@ -2843,7 +3148,140 @@
       for (const [, character] of agentCharacters) {
         createAgentLabel(character);
       }
+      // Initialize sentience panel
+      updateSentience();
     }, 3000);
+
+    // ==================== SENTIENCE SYSTEM ====================
+    // Manages agent energy, speech, and feeding
+
+    const speechBubblesContainer = document.getElementById('speech-bubbles-container');
+    const activeSpeechBubbles = new Map();
+
+    // Update energy meters UI
+    function updateSentience() {
+      const container = document.getElementById('energy-meters');
+      if (!container) return;
+
+      let html = '';
+      for (const [, character] of agentCharacters) {
+        const energyPercent = Math.round((character.energy / character.maxEnergy) * 100);
+        const isLow = character.energy < character.tiredThreshold;
+        const isEating = character.state === 'eating';
+
+        html += `
+          <div class="energy-bar-container">
+            <div class="energy-bar-label">
+              <span>${character.agentName}</span>
+              <span>${energyPercent}%</span>
+            </div>
+            <div class="energy-bar">
+              <div class="energy-bar-fill ${isLow ? 'low' : ''} ${isEating ? 'eating' : ''}"
+                   style="width: ${energyPercent}%"></div>
+            </div>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
+    }
+
+    // Update speech bubbles for all agents
+    function updateSpeechBubbles() {
+      for (const [agentId, character] of agentCharacters) {
+        const existingBubble = activeSpeechBubbles.get(agentId);
+
+        if (character.currentSpeech && character.speechTimer > 0) {
+          const pos = character.getPosition();
+          const labelPos = pos.clone();
+          labelPos.y += 3;
+          const vector = labelPos.clone().project(camera);
+
+          const isBehindCamera = vector.z > 1;
+          if (isBehindCamera) {
+            if (existingBubble) {
+              existingBubble.style.display = 'none';
+            }
+            continue;
+          }
+
+          const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+          const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+
+          if (existingBubble) {
+            existingBubble.style.left = `${x}px`;
+            existingBubble.style.top = `${y}px`;
+            existingBubble.style.display = 'block';
+            existingBubble.textContent = character.currentSpeech;
+          } else {
+            const bubble = document.createElement('div');
+            bubble.className = 'live-speech-bubble';
+            bubble.textContent = character.currentSpeech;
+            bubble.style.left = `${x}px`;
+            bubble.style.top = `${y}px`;
+            speechBubblesContainer.appendChild(bubble);
+            activeSpeechBubbles.set(agentId, bubble);
+          }
+        } else {
+          if (existingBubble) {
+            existingBubble.remove();
+            activeSpeechBubbles.delete(agentId);
+          }
+        }
+      }
+    }
+
+    // Feed all agents
+    window.feedAllAgents = function() {
+      let fedCount = 0;
+      for (const [, character] of agentCharacters) {
+        if (character.isTired() || character.energy < 80) {
+          character.feed();
+          fedCount++;
+        }
+      }
+
+      if (fedCount === 0) {
+        // All agents are already energized
+        for (const [, character] of agentCharacters) {
+          character.speak("Thanks, but I'm not hungry!", 2);
+        }
+      }
+
+      updateSentience();
+    };
+
+    // Check if any agents can work
+    function canAgentsWork() {
+      for (const [, character] of agentCharacters) {
+        if (!character.isTired() && character.state !== 'eating') {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // Make all tired agents complain
+    function tiredAgentsComplain() {
+      const tiredPhrases = [
+        "I'm too tired to work...",
+        "Need food... so hungry...",
+        "*yawn* Can't focus...",
+        "My energy is depleted...",
+        "Please bring us food!",
+        "So sleepy... need sustenance...",
+      ];
+
+      let delay = 0;
+      for (const [, character] of agentCharacters) {
+        if (character.isTired()) {
+          setTimeout(() => {
+            const phrase = tiredPhrases[Math.floor(Math.random() * tiredPhrases.length)];
+            character.speak(phrase, 3);
+          }, delay);
+          delay += 500;
+        }
+      }
+    }
 
     // ==================== DEMO MODE ====================
     // Simulates agent activity when server is offline
@@ -3094,6 +3532,18 @@
     submitTask.addEventListener('click', async () => {
       const title = taskInput.value.trim();
       if (!title || !serverOnline) return;
+
+      // Check if agents are too tired
+      if (!canAgentsWork()) {
+        tiredAgentsComplain();
+        submitTask.classList.add('error');
+        submitText.textContent = 'Agents are tired!';
+        setTimeout(() => {
+          submitTask.classList.remove('error');
+          submitText.textContent = 'Submit Task';
+        }, 2000);
+        return;
+      }
 
       const priority = parseInt(prioritySelect.value);
 
