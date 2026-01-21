@@ -104,7 +104,11 @@ async function tick() {
       t.session_id && activeSessions.includes(t.session_id)
     );
     for (const task of inProgressTasks) {
-      await processTask(task);
+      try {
+        await processTask(task);
+      } catch (taskError) {
+        console.error(`Error processing task ${task.id}:`, taskError.message);
+      }
     }
 
     // Generate ambient activity (thoughts, chats)

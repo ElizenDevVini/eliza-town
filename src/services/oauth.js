@@ -129,93 +129,113 @@ export function getConfiguredProviders() {
 
 // === Slack API ===
 export async function sendSlackMessage(sessionId, channel, text) {
-  const token = await getToken(sessionId, 'slack');
-  if (!token) {
-    throw new Error('Slack not connected');
-  }
+  try {
+    const token = await getToken(sessionId, 'slack');
+    if (!token) {
+      throw new Error('Slack not connected');
+    }
 
-  const response = await fetch('https://slack.com/api/chat.postMessage', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token.access_token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ channel, text })
-  });
+    const response = await fetch('https://slack.com/api/chat.postMessage', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ channel, text })
+    });
 
-  const data = await response.json();
-  if (!data.ok) {
-    throw new Error(data.error || 'Failed to send Slack message');
+    const data = await response.json();
+    if (!data.ok) {
+      throw new Error(data.error || 'Failed to send Slack message');
+    }
+    return data;
+  } catch (error) {
+    console.error('Slack send error:', error.message);
+    throw error;
   }
-  return data;
 }
 
 export async function getSlackChannels(sessionId) {
-  const token = await getToken(sessionId, 'slack');
-  if (!token) {
-    throw new Error('Slack not connected');
-  }
+  try {
+    const token = await getToken(sessionId, 'slack');
+    if (!token) {
+      throw new Error('Slack not connected');
+    }
 
-  const response = await fetch('https://slack.com/api/conversations.list?types=public_channel,private_channel', {
-    headers: { 'Authorization': `Bearer ${token.access_token}` }
-  });
+    const response = await fetch('https://slack.com/api/conversations.list?types=public_channel,private_channel', {
+      headers: { 'Authorization': `Bearer ${token.access_token}` }
+    });
 
-  const data = await response.json();
-  if (!data.ok) {
-    throw new Error(data.error || 'Failed to get Slack channels');
+    const data = await response.json();
+    if (!data.ok) {
+      throw new Error(data.error || 'Failed to get Slack channels');
+    }
+    return data.channels;
+  } catch (error) {
+    console.error('Slack channels error:', error.message);
+    throw error;
   }
-  return data.channels;
 }
 
 // === Gmail API ===
 export async function sendGmail(sessionId, to, subject, body) {
-  const token = await getToken(sessionId, 'gmail');
-  if (!token) {
-    throw new Error('Gmail not connected');
+  try {
+    const token = await getToken(sessionId, 'gmail');
+    if (!token) {
+      throw new Error('Gmail not connected');
+    }
+
+    // Create RFC 2822 formatted email
+    const email = [
+      `To: ${to}`,
+      `Subject: ${subject}`,
+      'Content-Type: text/plain; charset=utf-8',
+      '',
+      body
+    ].join('\r\n');
+
+    const encodedEmail = Buffer.from(email).toString('base64')
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+    const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ raw: encodedEmail })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'Failed to send email');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Gmail send error:', error.message);
+    throw error;
   }
-
-  // Create RFC 2822 formatted email
-  const email = [
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    'Content-Type: text/plain; charset=utf-8',
-    '',
-    body
-  ].join('\r\n');
-
-  const encodedEmail = Buffer.from(email).toString('base64')
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-
-  const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token.access_token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ raw: encodedEmail })
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error?.message || 'Failed to send email');
-  }
-  return await response.json();
 }
 
 export async function getGmailMessages(sessionId, maxResults = 10) {
-  const token = await getToken(sessionId, 'gmail');
-  if (!token) {
-    throw new Error('Gmail not connected');
-  }
+  try {
+    const token = await getToken(sessionId, 'gmail');
+    if (!token) {
+      throw new Error('Gmail not connected');
+    }
 
-  const response = await fetch(
-    `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${maxResults}`,
-    { headers: { 'Authorization': `Bearer ${token.access_token}` } }
-  );
+    const response = await fetch(
+      `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${maxResults}`,
+      { headers: { 'Authorization': `Bearer ${token.access_token}` } }
+    );
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error?.message || 'Failed to get emails');
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'Failed to get emails');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Gmail messages error:', error.message);
+    throw error;
   }
-  return await response.json();
 }

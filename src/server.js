@@ -131,12 +131,12 @@ async function initializeBackend() {
     await orchestration.initialize();
     orchestrationReady = true;
 
-    // Auto-start orchestration loop (works with or without API key - uses simulation mode if no key)
-    orchestration.start(5000);
+    // Auto-start orchestration loop with faster interval (2s instead of 5s)
+    orchestration.start(2000);
     if (process.env.ANTHROPIC_API_KEY) {
-      console.log('Orchestration loop started (5s interval) - LIVE MODE with Claude API');
+      console.log('Orchestration loop started (2s interval) - LIVE MODE with Claude API');
     } else {
-      console.log('Orchestration loop started (5s interval) - SIMULATION MODE (no ANTHROPIC_API_KEY)');
+      console.log('Orchestration loop started (2s interval) - SIMULATION MODE (no ANTHROPIC_API_KEY)');
     }
 
   } catch (error) {
