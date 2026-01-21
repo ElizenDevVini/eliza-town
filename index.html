@@ -3136,27 +3136,25 @@
         const scale = Math.max(0.5, Math.min(1, 30 / distanceToCamera));
         label.style.transform = `translate(-50%, -100%) scale(${scale})`;
 
-            // Update status text and classes based on state
-            const isWorking = character.status === 'working';
-            const isTired = character.state === 'tired';
-            const isEating = character.state === 'eating';
+        // Update status text and classes based on state
+        const isWorking = character.status === 'working';
+        const isTired = character.state === 'tired';
+        const isEating = character.state === 'eating';
 
-            label.classList.toggle('working', isWorking);
-            label.classList.toggle('tired', isTired);
-            label.classList.toggle('eating', isEating);
+        label.classList.toggle('working', isWorking);
+        label.classList.toggle('tired', isTired);
+        label.classList.toggle('eating', isEating);
 
-            const statusText = label.querySelector('.status-text');
-            if (statusText) {
-              if (isTired) {
-                statusText.textContent = 'tired';
-                statusText.style.display = 'inline';
-              } else if (isEating) {
-                statusText.textContent = 'eating';
-                statusText.style.display = 'inline';
-              } else {
-                statusText.textContent = character.doing || '';
-              }
-            }
+        const statusText = label.querySelector('.status-text');
+        if (statusText) {
+          if (isTired) {
+            statusText.textContent = 'tired';
+            statusText.style.display = 'inline';
+          } else if (isEating) {
+            statusText.textContent = 'eating';
+            statusText.style.display = 'inline';
+          } else {
+            statusText.textContent = character.doing || '';
           }
         }
       }
