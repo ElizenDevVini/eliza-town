@@ -716,45 +716,55 @@
       100% { opacity: 1; transform: translate(-50%, -100%) scale(1); }
     }
 
+    #speech-bubbles-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 40;
+    }
+
     /* Energy Meter Panel - Left side */
     #sentience-panel {
       position: fixed;
       top: 10px;
       left: 10px;
-      width: 180px;
+      width: 220px;
       background: linear-gradient(180deg, rgba(60, 45, 30, 0.95), rgba(40, 30, 20, 0.95));
       border: 2px solid #8b6914;
       border-radius: 10px;
-      padding: 12px;
+      padding: 15px;
       z-index: 50;
       font-family: 'Cinzel', serif;
     }
 
     #sentience-panel h3 {
       color: #c9a959;
-      font-size: 12px;
-      margin: 0 0 10px 0;
+      font-size: 14px;
+      margin: 0 0 12px 0;
       text-align: center;
       border-bottom: 1px solid #5a4a3a;
-      padding-bottom: 8px;
+      padding-bottom: 10px;
     }
 
     .energy-bar-container {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .energy-bar-label {
       display: flex;
       justify-content: space-between;
-      font-size: 10px;
+      font-size: 11px;
       color: #b8a88a;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
     }
 
     .energy-bar {
-      height: 8px;
+      height: 12px;
       background: #2a1f15;
-      border-radius: 4px;
+      border-radius: 6px;
       overflow: hidden;
       border: 1px solid #5a4a3a;
     }
@@ -762,7 +772,7 @@
     .energy-bar-fill {
       height: 100%;
       background: linear-gradient(90deg, #c9a959, #e8d48a);
-      border-radius: 3px;
+      border-radius: 5px;
       transition: width 0.3s ease;
     }
 
@@ -780,37 +790,32 @@
       50% { opacity: 0.7; }
     }
 
-    /* Food Button */
-    #food-button {
+    /* Agent Chat Input */
+    #agent-chat {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #5a4a3a;
+    }
+
+    #agent-chat-input {
       width: 100%;
-      margin-top: 10px;
       padding: 10px;
-      background: linear-gradient(180deg, #5c4a32, #4a3728);
-      border: 2px solid #8b6914;
-      border-radius: 8px;
+      background: #2a1f15;
+      border: 1px solid #5a4a3a;
+      border-radius: 6px;
       color: #f4e4c1;
-      font-family: 'Cinzel', serif;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      font-family: 'Crimson Text', serif;
+      font-size: 13px;
+      outline: none;
+      box-sizing: border-box;
     }
 
-    #food-button:hover {
-      background: linear-gradient(180deg, #6c5a42, #5a4738);
+    #agent-chat-input:focus {
       border-color: #c9a959;
-      transform: translateY(-1px);
     }
 
-    #food-button:active {
-      transform: translateY(1px);
-    }
-
-    #food-button .food-icon {
-      font-size: 16px;
+    #agent-chat-input::placeholder {
+      color: #8a7a6a;
     }
 
     /* Status indicator on name labels */
@@ -1220,13 +1225,13 @@
     Click agent to inspect | Mouse: Rotate | Scroll: Zoom
   </div>
 
-  <!-- Sentience Panel - Energy Meters -->
+  <!-- Sentience Panel - Energy Meters and Chat -->
   <div id="sentience-panel">
-    <h3>Agent Energy</h3>
+    <h3>Agent Status</h3>
     <div id="energy-meters"></div>
-    <button id="food-button" onclick="feedAllAgents()">
-      Bring Food
-    </button>
+    <div id="agent-chat">
+      <input type="text" id="agent-chat-input" placeholder="Talk to agents..." maxlength="100">
+    </div>
   </div>
 
   <!-- Live Speech Bubbles Container -->
@@ -3208,13 +3213,14 @@
         const existingBubble = activeSpeechBubbles.get(agentId);
 
         if (character.currentSpeech && character.speechTimer > 0) {
-          const pos = character.getPosition();
-          const labelPos = pos.clone();
-          labelPos.y += 3;
-          const vector = labelPos.clone().project(camera);
+          if (!character.model) continue;
 
-          const isBehindCamera = vector.z > 1;
-          if (isBehindCamera) {
+          const pos = character.model.position.clone();
+          pos.y += 2.8;
+          const vector = pos.clone().project(camera);
+
+          // Check if behind camera or invalid
+          if (vector.z > 1 || isNaN(vector.x) || isNaN(vector.y)) {
             if (existingBubble) {
               existingBubble.style.display = 'none';
             }
@@ -3224,11 +3230,21 @@
           const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
           const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
 
+          // Skip if off screen
+          if (x < 0 || x > window.innerWidth || y < 0 || y > window.innerHeight) {
+            if (existingBubble) {
+              existingBubble.style.display = 'none';
+            }
+            continue;
+          }
+
           if (existingBubble) {
             existingBubble.style.left = `${x}px`;
             existingBubble.style.top = `${y}px`;
             existingBubble.style.display = 'block';
-            existingBubble.textContent = character.currentSpeech;
+            if (existingBubble.textContent !== character.currentSpeech) {
+              existingBubble.textContent = character.currentSpeech;
+            }
           } else {
             const bubble = document.createElement('div');
             bubble.className = 'live-speech-bubble';
@@ -3282,7 +3298,7 @@
       const tiredPhrases = [
         "I'm too tired to work...",
         "Need food... so hungry...",
-        "*yawn* Can't focus...",
+        "Can't focus...",
         "My energy is depleted...",
         "Please bring us food!",
         "So sleepy... need sustenance...",
@@ -3298,6 +3314,56 @@
           delay += 500;
         }
       }
+    }
+
+    // Agent chat input handler
+    const agentChatInput = document.getElementById('agent-chat-input');
+    if (agentChatInput) {
+      agentChatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const message = agentChatInput.value.trim().toLowerCase();
+          if (!message) return;
+
+          agentChatInput.value = '';
+
+          // Check for food-related words
+          const foodWords = ['food', 'feed', 'eat', 'hungry', 'meal', 'dinner', 'lunch', 'breakfast', 'snack', 'brought food', 'bring food'];
+          const hasFoodWord = foodWords.some(word => message.includes(word));
+
+          if (hasFoodWord) {
+            // User is offering food
+            let delay = 0;
+            for (const [, character] of agentCharacters) {
+              setTimeout(() => {
+                character.speak("Thank you for the food!", 2);
+              }, delay);
+              delay += 300;
+            }
+            setTimeout(() => {
+              feedAllAgents();
+            }, 500);
+          } else {
+            // Generic response - agents respond to user
+            const responses = [
+              "I hear you!",
+              "Got it!",
+              "Understood.",
+              "Okay!",
+              "Sure thing!",
+            ];
+            let delay = 0;
+            for (const [, character] of agentCharacters) {
+              if (Math.random() < 0.5) { // Only some agents respond
+                setTimeout(() => {
+                  const response = responses[Math.floor(Math.random() * responses.length)];
+                  character.speak(response, 2);
+                }, delay);
+                delay += 400;
+              }
+            }
+          }
+        }
+      });
     }
 
     // ==================== DEMO MODE ====================
