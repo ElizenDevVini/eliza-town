@@ -276,4 +276,39 @@ export async function logApiCall(agentId, taskId, model, inputTokens, outputToke
   return result.rows[0];
 }
 
+// Clear tasks for a specific session
+export async function clearSessionTasks(sessionId) {
+  // First delete messages for these tasks
+  await query(
+    `DELETE FROM messages WHERE task_id IN (SELECT id FROM tasks WHERE session_id = $1) OR subtask_id IN (SELECT id FROM subtasks WHERE task_id IN (SELECT id FROM tasks WHERE session_id = $1))`,
+    [sessionId]
+  );
+  // Then delete subtasks
+  await query(
+    `DELETE FROM subtasks WHERE task_id IN (SELECT id FROM tasks WHERE session_id = $1)`,
+    [sessionId]
+  );
+  // Then delete the tasks
+  return await query(
+    `DELETE FROM tasks WHERE session_id = $1`,
+    [sessionId]
+  );
+}
+
+// Clean up orphaned tasks (no session_id)
+export async function cleanupOrphanedTasks() {
+  // First delete messages for orphaned tasks
+  await query(
+    `DELETE FROM messages WHERE task_id IN (SELECT id FROM tasks WHERE session_id IS NULL) OR subtask_id IN (SELECT id FROM subtasks WHERE task_id IN (SELECT id FROM tasks WHERE session_id IS NULL))`
+  );
+  // Delete subtasks for orphaned tasks
+  await query(
+    `DELETE FROM subtasks WHERE task_id IN (SELECT id FROM tasks WHERE session_id IS NULL)`
+  );
+  // Delete orphaned tasks
+  return await query(
+    `DELETE FROM tasks WHERE session_id IS NULL`
+  );
+}
+
 export default pool;

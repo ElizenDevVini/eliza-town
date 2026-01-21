@@ -1,7 +1,7 @@
 import * as db from '../db/index.js';
 import * as claude from '../agents/claude.js';
 import { AGENT_TYPES, getAgentConfig } from '../agents/config.js';
-import { broadcast } from '../websocket/index.js';
+import { broadcast, getActiveSessions } from '../websocket/index.js';
 import * as storage from '../storage/index.js';
 
 let isRunning = false;
@@ -69,9 +69,16 @@ async function tick() {
     // Update traveling agents
     await updateTravelingAgents();
 
-    // Check for pending tasks
-    const pendingTasks = await db.getTasks('pending');
-    console.log(`[TICK] Pending tasks: ${pendingTasks.length}`);
+    // Get active sessions - only process tasks from active WebSocket connections
+    const activeSessions = getActiveSessions();
+    console.log(`[TICK] Active sessions: ${activeSessions.length}`);
+
+    // Check for pending tasks - filter to only active sessions
+    const allPendingTasks = await db.getTasks('pending');
+    const pendingTasks = allPendingTasks.filter(t =>
+      t.session_id && activeSessions.includes(t.session_id)
+    );
+    console.log(`[TICK] Pending tasks (active sessions): ${pendingTasks.length} of ${allPendingTasks.length}`);
 
     // Find idle planner agents
     const planners = [...state.agents.values()].filter(
@@ -91,8 +98,11 @@ async function tick() {
       await assignTaskToPlanner(planner, task);
     }
 
-    // Process in-progress tasks
-    const inProgressTasks = await db.getTasks('in_progress');
+    // Process in-progress tasks - also filter by active sessions
+    const allInProgressTasks = await db.getTasks('in_progress');
+    const inProgressTasks = allInProgressTasks.filter(t =>
+      t.session_id && activeSessions.includes(t.session_id)
+    );
     for (const task of inProgressTasks) {
       await processTask(task);
     }

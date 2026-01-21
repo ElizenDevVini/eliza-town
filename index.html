@@ -2641,6 +2641,18 @@
     let taskFiles = new Map(); // taskId -> [files]
     let serverMessages = [];
 
+    // Generate or retrieve session ID for per-user task isolation
+    function getSessionId() {
+      let sessionId = localStorage.getItem('eliza-session-id');
+      if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('eliza-session-id', sessionId);
+      }
+      return sessionId;
+    }
+    const SESSION_ID = getSessionId();
+    console.log('Session ID:', SESSION_ID);
+
     // Agent type colors
     const typeColors = {
       planner: '#c084fc',
@@ -2660,8 +2672,13 @@
         wsStatus.className = 'status connected';
         submitTask.disabled = false;
         console.log('WebSocket connected');
-        // Stop demo mode when server is online
-        stopDemoMode();
+
+        // Register this session with the server
+        ws.send(JSON.stringify({
+          type: 'register_session',
+          sessionId: SESSION_ID
+        }));
+        console.log('Registered session:', SESSION_ID);
       };
 
       ws.onclose = () => {
@@ -3395,8 +3412,10 @@
         `).join('');
       }
 
-      // Update tasks list
-      const activeTasks = serverTasks.filter(t => t.status !== 'completed').slice(0, 5);
+      // Update tasks list - filter by current session
+      const activeTasks = serverTasks.filter(t =>
+        t.status !== 'completed' && t.session_id === SESSION_ID
+      ).slice(0, 5);
       taskCount.textContent = activeTasks.length;
 
       if (activeTasks.length > 0) {
@@ -3437,17 +3456,6 @@
     const submitText = document.getElementById('submit-text');
     const serverDot = document.getElementById('server-dot');
     const serverStatusText = document.getElementById('server-status-text');
-
-    // Generate or retrieve session ID for per-user task isolation
-    function getSessionId() {
-      let sessionId = localStorage.getItem('eliza-session-id');
-      if (!sessionId) {
-        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('eliza-session-id', sessionId);
-      }
-      return sessionId;
-    }
-    const SESSION_ID = getSessionId();
 
     let serverOnline = false;
 
@@ -3562,6 +3570,12 @@
         submitTask.click();
       }
     });
+
+    // Clean up orphaned tasks (tasks without a session) on page load
+    fetch('/api/tasks/cleanup', { method: 'POST' })
+      .then(r => r.json())
+      .then(data => console.log('Cleaned up orphaned tasks:', data.cleared))
+      .catch(e => console.log('Cleanup not available:', e.message));
 
     // Initialize WebSocket connection
     connectWebSocket();

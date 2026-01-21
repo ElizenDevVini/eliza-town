@@ -286,6 +286,29 @@ router.post('/orchestration/stop', (req, res) => {
   }
 });
 
+// === Session Management ===
+
+// Clear tasks for a session (or orphaned tasks without session)
+router.delete('/tasks/session/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const result = await db.clearSessionTasks(sessionId);
+    res.json({ cleared: result.rowCount });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Clear all orphaned tasks (no session_id or old sessions)
+router.post('/tasks/cleanup', async (req, res) => {
+  try {
+    const result = await db.cleanupOrphanedTasks();
+    res.json({ cleared: result.rowCount });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // === Agent Chat ===
 
 router.post('/chat', async (req, res) => {

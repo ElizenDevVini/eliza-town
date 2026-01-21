@@ -2,6 +2,8 @@ import { WebSocketServer } from 'ws';
 
 let wss = null;
 const clients = new Set();
+const sessionClients = new Map(); // sessionId -> Set of WebSocket clients
+const clientSessions = new Map(); // ws -> sessionId
 
 export function initialize(server) {
   // Create WebSocket server without automatic upgrade handling
@@ -36,6 +38,17 @@ export function initialize(server) {
 
     ws.on('close', () => {
       console.log('WebSocket client disconnected');
+      const sessionId = clientSessions.get(ws);
+      if (sessionId) {
+        const sessionSet = sessionClients.get(sessionId);
+        if (sessionSet) {
+          sessionSet.delete(ws);
+          if (sessionSet.size === 0) {
+            sessionClients.delete(sessionId);
+          }
+        }
+        clientSessions.delete(ws);
+      }
       clients.delete(ws);
     });
 
@@ -62,9 +75,27 @@ function handleMessage(ws, data) {
     case 'subscribe':
       // Could implement channel subscriptions here
       break;
+    case 'register_session':
+      // Register this client's session ID
+      const sessionId = data.sessionId;
+      if (sessionId) {
+        clientSessions.set(ws, sessionId);
+        if (!sessionClients.has(sessionId)) {
+          sessionClients.set(sessionId, new Set());
+        }
+        sessionClients.get(sessionId).add(ws);
+        console.log(`Registered session: ${sessionId}`);
+        ws.send(JSON.stringify({ type: 'session_registered', sessionId }));
+      }
+      break;
     default:
       console.log('Unknown WebSocket message type:', data.type);
   }
+}
+
+// Get all active session IDs
+export function getActiveSessions() {
+  return [...sessionClients.keys()];
 }
 
 export function broadcast(message) {
