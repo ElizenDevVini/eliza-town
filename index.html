@@ -716,12 +716,12 @@
       100% { opacity: 1; transform: translate(-50%, -100%) scale(1); }
     }
 
-    /* Energy Meter Panel */
+    /* Energy Meter Panel - Left side */
     #sentience-panel {
       position: fixed;
-      top: 80px;
-      right: 20px;
-      width: 200px;
+      top: 10px;
+      left: 10px;
+      width: 180px;
       background: linear-gradient(180deg, rgba(60, 45, 30, 0.95), rgba(40, 30, 20, 0.95));
       border: 2px solid #8b6914;
       border-radius: 10px;
@@ -1225,8 +1225,7 @@
     <h3>Agent Energy</h3>
     <div id="energy-meters"></div>
     <button id="food-button" onclick="feedAllAgents()">
-      <span class="food-icon">🍖</span>
-      <span>Bring Food</span>
+      Bring Food
     </button>
   </div>
 
@@ -1970,26 +1969,26 @@
         const generalClips = rig === 'large' ? animationClips.largeGeneral : animationClips.mediumGeneral;
         const movementClips = rig === 'large' ? animationClips.largeMovement : animationClips.mediumMovement;
 
-        if (generalClips?.length > 0) {
+        if (generalClips && generalClips.length > 0) {
           // Normal idle
           const idleOptions = generalClips.filter(c => c.name.includes('Idle'));
-          const idleClip = idleOptions[Math.floor(Math.random() * idleOptions.length)] || generalClips[0];
+          const idleClip = idleOptions.length > 0 ? idleOptions[0] : generalClips[0];
           this.idleAction = this.mixer.clipAction(idleClip);
           this.idleAction.setEffectiveTimeScale(0.8 + Math.random() * 0.4);
 
-          // Tired animation (slower idle or sitting)
-          const sittingClip = generalClips.find(c => c.name.includes('Sit')) || idleClip;
-          this.tiredAction = this.mixer.clipAction(sittingClip);
-          this.tiredAction.setEffectiveTimeScale(0.5); // Slower for tired look
+          // Tired animation - use same idle but slower
+          this.tiredAction = this.mixer.clipAction(idleClip);
+          this.tiredAction.setEffectiveTimeScale(0.4);
 
-          // Eating animation (use interact or idle with different speed)
-          const interactClip = generalClips.find(c => c.name.includes('Interact') || c.name.includes('Pick')) || idleClip;
-          this.eatAction = this.mixer.clipAction(interactClip);
-          this.eatAction.setEffectiveTimeScale(1.2);
+          // Eating animation - use idle with faster speed
+          this.eatAction = this.mixer.clipAction(idleClip);
+          this.eatAction.setEffectiveTimeScale(1.5);
           this.eatAction.setLoop(THREE.LoopRepeat);
 
-          // Start with tired animation
-          this.tiredAction.play();
+          // Start with idle animation (tired state uses slower idle in update)
+          this.idleAction.play();
+        } else {
+          console.warn('No animation clips for', this.agentName);
         }
 
         if (movementClips?.length > 0) {
@@ -2296,7 +2295,7 @@
           this.eatAction.reset().fadeIn(0.3).play();
         }
 
-        this.speak("*nom nom nom*", 2);
+        this.speak("Eating...", 2);
       }
 
       // Get 3D position for speech bubble placement
@@ -3087,35 +3086,55 @@
     function updateAgentLabels() {
       for (const [agentId, label] of agentLabels) {
         const character = agentCharacters.get(agentId);
-        if (character) {
-          const pos = character.getPosition();
+        if (!character || !character.model) {
+          label.style.display = 'none';
+          continue;
+        }
 
-          // Calculate distance to camera
-          const distanceToCamera = camera.position.distanceTo(pos);
+        const pos = character.model.position.clone();
 
-          // Project position with height offset for label
-          const labelPos = pos.clone();
-          labelPos.y += 2.5;
-          const vector = labelPos.clone().project(camera);
+        // Skip if position is invalid
+        if (isNaN(pos.x) || isNaN(pos.y) || isNaN(pos.z)) {
+          label.style.display = 'none';
+          continue;
+        }
 
-          // Check if character is behind camera (z > 1) or too far away
-          const isBehindCamera = vector.z > 1;
-          const isTooFar = distanceToCamera > 80;
-          const isOffScreen = Math.abs(vector.x) > 1.2 || Math.abs(vector.y) > 1.2;
+        const distanceToCamera = camera.position.distanceTo(pos);
 
-          if (isBehindCamera || isTooFar || isOffScreen) {
-            label.style.display = 'none';
-          } else {
-            label.style.display = 'block';
-            const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
-            const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+        // Hide if too far
+        if (distanceToCamera > 100) {
+          label.style.display = 'none';
+          continue;
+        }
 
-            label.style.left = `${x}px`;
-            label.style.top = `${y}px`;
+        // Project position with height offset for label
+        const labelPos = pos.clone();
+        labelPos.y += 2.2;
+        const vector = labelPos.clone().project(camera);
 
-            // Scale label based on distance
-            const scale = Math.max(0.6, Math.min(1, 40 / distanceToCamera));
-            label.style.transform = `translate(-50%, -100%) scale(${scale})`;
+        // Check if behind camera
+        if (vector.z > 1) {
+          label.style.display = 'none';
+          continue;
+        }
+
+        // Calculate screen position
+        const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+
+        // Check if on screen
+        if (x < -50 || x > window.innerWidth + 50 || y < -50 || y > window.innerHeight + 50) {
+          label.style.display = 'none';
+          continue;
+        }
+
+        label.style.display = 'block';
+        label.style.left = `${x}px`;
+        label.style.top = `${y}px`;
+
+        // Scale label based on distance
+        const scale = Math.max(0.5, Math.min(1, 30 / distanceToCamera));
+        label.style.transform = `translate(-50%, -100%) scale(${scale})`;
 
             // Update status text and classes based on state
             const isWorking = character.status === 'working';
@@ -3129,10 +3148,10 @@
             const statusText = label.querySelector('.status-text');
             if (statusText) {
               if (isTired) {
-                statusText.textContent = '💤 tired';
+                statusText.textContent = 'tired';
                 statusText.style.display = 'inline';
               } else if (isEating) {
-                statusText.textContent = '🍖 eating';
+                statusText.textContent = 'eating';
                 statusText.style.display = 'inline';
               } else {
                 statusText.textContent = character.doing || '';
