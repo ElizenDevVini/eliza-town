@@ -1,6 +1,6 @@
 {
   "name": "eliza-town",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Autonomous agent orchestration platform with 3D town visualization",
   "type": "module",
   "scripts": {
@@ -17,6 +17,6 @@
     "dotenv": "^16.4.5"
   },
   "engines": {
-    "node": "20.x"
+    "node": ">=20"
   }
 }
