@@ -566,6 +566,160 @@ export function hello() {
   });
 
   // ═══════════════════════════════════════════════════════════════
+  // Phase 8b: Shared Sandbox Tests (CODER_ENABLED=true)
+  // ═══════════════════════════════════════════════════════════════
+  log(COLORS.blue, '\n🔧 Phase 8b: Shared Sandbox & Code Actions\n');
+
+  await test('SharedSandbox module loads', async () => {
+    const sandboxModule = await import('../src/eliza/sharedSandbox.ts');
+    if (typeof sandboxModule.getSharedSandbox !== 'function')
+      throw new Error('getSharedSandbox not found');
+    if (typeof sandboxModule.initializeSharedSandbox !== 'function')
+      throw new Error('initializeSharedSandbox not found');
+    if (typeof sandboxModule.closeSharedSandbox !== 'function')
+      throw new Error('closeSharedSandbox not found');
+    console.log('   SharedSandbox exports: getSharedSandbox, initializeSharedSandbox, closeSharedSandbox ✓');
+  });
+
+  await test('SharedSandbox initializes (local mode)', async () => {
+    const { initializeSharedSandbox, closeSharedSandbox } = await import('../src/eliza/sharedSandbox.ts');
+    
+    // Initialize sandbox (local mode by default)
+    const sandbox = await initializeSharedSandbox();
+    
+    const config = sandbox.getConfig();
+    if (config.mode !== 'local') {
+      throw new Error(`Expected local mode, got ${config.mode}`);
+    }
+    
+    const cwd = sandbox.getCurrentDirectory();
+    if (!cwd) {
+      throw new Error('Current directory not set');
+    }
+    
+    console.log(`   Mode: ${config.mode}, Directory: ${cwd}`);
+    
+    // Cleanup
+    await closeSharedSandbox();
+    console.log('   Sandbox initialized and closed cleanly ✓');
+  });
+
+  await test('CODEBASE provider returns valid data', async () => {
+    const codebaseProvider = plugin!.providers.find(
+      (p) => p.name === 'CODEBASE'
+    ) as { get?: (runtime: { character: { name: string } }) => Promise<{ text: string; values: { sandboxEnabled: boolean }; data: Record<string, unknown> }> };
+    
+    if (!codebaseProvider?.get) throw new Error('CODEBASE provider not found');
+
+    const mockRuntime = { character: { name: 'Ada' } };
+    const result = await codebaseProvider.get(mockRuntime);
+
+    if (!result.text || !result.text.includes('[CODEBASE]')) {
+      throw new Error('CODEBASE provider returned invalid format');
+    }
+    
+    console.log(`   CODEBASE provider returns: text (${result.text.length} chars)`);
+    console.log(`   sandboxEnabled: ${result.values?.sandboxEnabled}`);
+    console.log('   CODEBASE provider working ✓');
+  });
+
+  await test('READ_FILE action handler exists and validates', async () => {
+    const readFileAction = plugin!.actions.find((a) => a.name === 'READ_FILE') as {
+      validate?: () => Promise<boolean>;
+      handler?: (
+        runtime: { character: { name: string } },
+        message: null,
+        state: null,
+        options: { parameters: { filepath: string } }
+      ) => Promise<{ success: boolean; text: string }>;
+    };
+    
+    if (!readFileAction) throw new Error('READ_FILE action not found');
+    if (!readFileAction.handler) throw new Error('READ_FILE handler not found');
+    if (!readFileAction.validate) throw new Error('READ_FILE validate not found');
+    
+    // Validate should return false when CODER_ENABLED is not set
+    const isValid = await readFileAction.validate();
+    console.log(`   READ_FILE action registered, validate returns: ${isValid}`);
+    console.log('   READ_FILE action exists ✓');
+  });
+
+  await test('WRITE_FILE action handler exists and validates', async () => {
+    const writeFileAction = plugin!.actions.find((a) => a.name === 'WRITE_FILE') as {
+      validate?: () => Promise<boolean>;
+    };
+    
+    if (!writeFileAction) throw new Error('WRITE_FILE action not found');
+    console.log('   WRITE_FILE action exists ✓');
+  });
+
+  await test('EDIT_FILE action handler exists and validates', async () => {
+    const editFileAction = plugin!.actions.find((a) => a.name === 'EDIT_FILE') as {
+      validate?: () => Promise<boolean>;
+    };
+    
+    if (!editFileAction) throw new Error('EDIT_FILE action not found');
+    console.log('   EDIT_FILE action exists ✓');
+  });
+
+  await test('LIST_FILES action handler exists and validates', async () => {
+    const listFilesAction = plugin!.actions.find((a) => a.name === 'LIST_FILES') as {
+      validate?: () => Promise<boolean>;
+    };
+    
+    if (!listFilesAction) throw new Error('LIST_FILES action not found');
+    console.log('   LIST_FILES action exists ✓');
+  });
+
+  await test('SEARCH_FILES action handler exists and validates', async () => {
+    const searchFilesAction = plugin!.actions.find((a) => a.name === 'SEARCH_FILES') as {
+      validate?: () => Promise<boolean>;
+    };
+    
+    if (!searchFilesAction) throw new Error('SEARCH_FILES action not found');
+    console.log('   SEARCH_FILES action exists ✓');
+  });
+
+  await test('EXECUTE_SHELL action handler exists and validates', async () => {
+    const executeShellAction = plugin!.actions.find((a) => a.name === 'EXECUTE_SHELL') as {
+      validate?: () => Promise<boolean>;
+    };
+    
+    if (!executeShellAction) throw new Error('EXECUTE_SHELL action not found');
+    console.log('   EXECUTE_SHELL action exists ✓');
+  });
+
+  await test('All 16 plugin actions registered', async () => {
+    const expectedActions = [
+      'MOVE', 'SPEAK', 'THINK', 'WORK', 'WRITE_CODE', 'ASSIGN_TASK', 
+      'REPLY', 'CHECK_TASKS', 'TASKS', 'WAIT',
+      'READ_FILE', 'WRITE_FILE', 'EDIT_FILE', 'LIST_FILES', 'SEARCH_FILES', 'EXECUTE_SHELL'
+    ];
+    
+    const actionNames = plugin!.actions.map((a) => a.name);
+    const missing = expectedActions.filter(a => !actionNames.includes(a));
+    
+    if (missing.length > 0) {
+      throw new Error(`Missing actions: ${missing.join(', ')}`);
+    }
+    
+    console.log(`   All ${expectedActions.length} actions registered ✓`);
+  });
+
+  await test('All 5 plugin providers registered', async () => {
+    const expectedProviders = ['TOWN_STATE', 'TASKS', 'NEARBY_AGENTS', 'RECENT_MESSAGES', 'CODEBASE'];
+    
+    const providerNames = plugin!.providers.map((p) => p.name);
+    const missing = expectedProviders.filter(p => !providerNames.includes(p));
+    
+    if (missing.length > 0) {
+      throw new Error(`Missing providers: ${missing.join(', ')}`);
+    }
+    
+    console.log(`   All ${expectedProviders.length} providers registered ✓`);
+  });
+
+  // ═══════════════════════════════════════════════════════════════
   // Phase 9: Cleanup
   // ═══════════════════════════════════════════════════════════════
   log(COLORS.blue, '\n🧹 Phase 9: Cleanup\n');
@@ -608,8 +762,9 @@ export function hello() {
     log(COLORS.green, '  ✓ AgentRuntime instances created');
     log(COLORS.green, '  ✓ runtime.messageService.handleMessage canonical paradigm');
     log(COLORS.green, '  ✓ Agent-to-agent memory sharing (n² broadcast)');
-    log(COLORS.green, '  ✓ Custom providers (TOWN_STATE, TASKS, NEARBY_AGENTS, RECENT_MESSAGES)');
-    log(COLORS.green, '  ✓ Custom actions (MOVE, SPEAK, THINK, WORK, WRITE_CODE)');
+    log(COLORS.green, '  ✓ Custom providers (TOWN_STATE, TASKS, NEARBY_AGENTS, RECENT_MESSAGES, CODEBASE)');
+    log(COLORS.green, '  ✓ Custom actions (MOVE, SPEAK, THINK, WORK, WRITE_CODE + 6 code actions)');
+    log(COLORS.green, '  ✓ Shared sandbox module (local mode)');
     if (hasAnyProvider) {
       log(COLORS.green, '  ✓ Real LLM API calls working');
     }

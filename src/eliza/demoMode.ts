@@ -166,11 +166,24 @@ async function initializeSandbox(): Promise<string> {
       const targetDir = path.join(sandboxDir, 'eliza');
 
       try {
-        await fs.access(targetDir);
-        console.log('[DemoMode] Eliza repo already in sandbox');
+        // Check if path exists (symlink or real file)
+        const stat = await fs.lstat(targetDir);
+        if (stat.isSymbolicLink()) {
+          // Symlink exists - verify it points to the right place
+          const linkTarget = await fs.readlink(targetDir);
+          if (linkTarget !== elizaDir) {
+            // Wrong target, remove and recreate
+            await fs.unlink(targetDir);
+            await fs.symlink(elizaDir, targetDir, 'dir');
+            console.log('[DemoMode] Updated eliza repo symlink in sandbox');
+          } else {
+            console.log('[DemoMode] Eliza repo already in sandbox');
+          }
+        } else {
+          console.log('[DemoMode] Eliza directory exists (not symlink)');
+        }
       } catch {
-        // Create symlink to eliza directory for read operations
-        // Writes will go to sandbox
+        // Path doesn't exist - create symlink
         console.log('[DemoMode] Setting up eliza repo in sandbox');
         await fs.symlink(elizaDir, targetDir, 'dir');
       }
