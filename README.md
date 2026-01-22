@@ -1,6 +1,6 @@
 # Eliza Town
 
-A 3D multi-agent orchestration visualization powered by [Eliza OS](https://github.com/elizaOS/eliza). Watch autonomous AI agents collaborate in a medieval town to complete software engineering tasks.
+A 3D multi-agent orchestration visualization powered by [Eliza OS](https://github.com/elizaOS/eliza). Watch autonomous AI agents collaborate in a medieval town to complete software engineering tasks with **real code execution**.
 
 ## Open Source
 
@@ -18,17 +18,21 @@ This project is **open source** under the MIT License. We welcome contributions 
 
 - **3D Visualization**: Medieval town built with Three.js and KayKit assets
 - **Autonomous Agents**: AI agents with distinct roles (planner, designer, coder, reviewer)
+- **Real Code Execution**: Agents can read, write, edit files and run shell commands
+- **E2B Sandbox Support**: Safe cloud sandboxes for public demos
+- **Demo Mode**: Continuous automated building for showcases
 - **Hub-Based Navigation**: Agents travel between locations (town square, workshop, library, tavern)
 - **Real-Time Updates**: WebSocket-powered live status and message updates
-- **Task Orchestration**: Automatic task breakdown, assignment, and completion
+- **Task Orchestration**: Official ElizaOS orchestrator with sub-agent execution
 - **Agent Customization**: Configure agent personalities, capabilities, and LLM models
 
 ## Tech Stack
 
-- **Frontend**: Three.js, Vanilla JavaScript, WebSocket
-- **Backend**: Node.js, Express
-- **Database**: PostgreSQL
-- **AI**: Claude API (Anthropic) - runs in simulation mode without API key
+- **Frontend**: React + Three.js (React Three Fiber), Zustand
+- **Backend**: Node.js, Express, ElizaOS Runtime
+- **Database**: PostgreSQL (optional, in-memory supported)
+- **AI**: Multiple LLM providers (Groq, Anthropic, OpenAI)
+- **Code Execution**: ElizaOS plugin-code, plugin-shell, E2B sandbox
 - **Assets**: KayKit Medieval Builder Pack
 
 ## Quick Start
@@ -63,16 +67,59 @@ npm start
 ### Environment Variables
 
 ```bash
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/eliza_town
-
-# Optional: Claude API for real AI responses (runs simulation without it)
+# LLM Provider (choose one or more)
+LLM_PROVIDER=groq  # groq, anthropic, or openai
+GROQ_API_KEY=gsk_your_key
 ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+
+# Database (optional - uses in-memory without it)
+DATABASE_URL=postgresql://user:password@localhost:5432/eliza_town
 
 # Server
 PORT=3000
 NODE_ENV=development
+
+# Code Execution (for real file operations)
+CODER_ENABLED=true
+SHELL_ENABLED=true
+CODER_ALLOWED_DIRECTORY=/path/to/sandbox
+
+# E2B Cloud Sandbox (for secure public demos)
+USE_E2B=true
+E2B_API_KEY=e2b_your_key
+
+# Demo Mode
+DEMO_MODE=true
 ```
+
+## Running Modes
+
+### Development Mode
+```bash
+npm run dev
+```
+Runs with hot-reload. Agents generate code but don't execute unless enabled.
+
+### Demo Mode
+```bash
+npm run demo
+# or
+DEMO_MODE=true npm start
+```
+Agents continuously explore and build in a sandbox. Great for showcases.
+
+### With Code Execution
+```bash
+CODER_ENABLED=true SHELL_ENABLED=true npm start
+```
+Agents can read/write files and run commands in the allowed directory.
+
+### With E2B Cloud Sandbox
+```bash
+USE_E2B=true E2B_API_KEY=your_key npm start
+```
+Code execution happens in isolated cloud sandboxes (recommended for public demos).
 
 ## Project Structure
 
@@ -127,17 +174,32 @@ eliza-town/
 ## API Endpoints
 
 ```
+# Agents
 GET  /api/agents           # List all agents
 GET  /api/agents/:id       # Get agent details
 PATCH /api/agents/:id      # Update agent settings
+POST /api/agents/:id/decide # Trigger agent decision
 
+# Tasks (basic)
 GET  /api/tasks            # List all tasks
 POST /api/tasks            # Create new task
 GET  /api/tasks/:id        # Get task details
 
-GET  /api/messages         # Get recent messages
-GET  /api/hubs             # List hub locations
+# Orchestrated Tasks (with sub-agent execution)
+GET  /api/orchestrated-tasks      # List orchestrated tasks
+POST /api/orchestrated-tasks      # Create and auto-execute task
+POST /api/orchestrated-tasks/:id/execute  # Execute a task
 
+# Demo Mode
+GET  /api/demo/status      # Get demo mode status
+POST /api/demo/start       # Start demo mode
+POST /api/demo/stop        # Stop demo mode
+
+# Configuration
+GET  /api/execution/config # Get current execution mode
+
+# ElizaOS
+GET  /api/eliza/runtimes   # Get runtime info
 GET  /api/orchestration/debug  # Debug orchestration state
 ```
 

@@ -1,22 +1,58 @@
 {
   "name": "eliza-town",
-  "version": "1.0.0",
-  "description": "Autonomous agent orchestration platform with 3D town visualization",
+  "version": "2.0.0",
+  "description": "Autonomous agent orchestration platform with 3D town visualization - powered by ElizaOS",
   "type": "module",
   "scripts": {
-    "dev": "node --watch src/server.js",
-    "start": "node src/server.js",
-    "db:init": "node src/db/init.js"
+    "dev": "concurrently \"bun run dev:server\" \"bun run dev:client\"",
+    "dev:server": "PORT=3001 bun --watch src/server.ts",
+    "dev:client": "cd client && bun run dev",
+    "start": "bun dist/server.js",
+    "demo": "DEMO_MODE=true bun src/server.ts",
+    "build": "bun run build:server && bun run build:client",
+    "build:server": "tsc",
+    "build:client": "cd client && bun run build",
+    "db:init": "bun src/db/init.ts",
+    "setup:plugins": "bun scripts/setup-plugins.ts",
+    "build:plugins": "cd eliza && bun run build --filter=@elizaos/core && bun run build --filter=@elizaos/plugin-openai && bun run build --filter=@elizaos/plugin-anthropic && bun run build --filter=@elizaos/plugin-groq && bun run build --filter=@elizaos/plugin-inmemorydb && bun run build --filter=@elizaos/plugin-code && bun run build --filter=@elizaos/plugin-shell",
+    "test": "bun scripts/test-plugins.ts",
+    "test:e2e": "bun scripts/test-plugins.ts",
+    "test:integration": "bun scripts/integration-tests.ts",
+    "postinstall": "cd client && bun install",
+    "typecheck": "tsc --noEmit",
+    "lint:unused": "npx knip"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.27.0",
-    "pg": "^8.12.0",
-    "ws": "^8.18.0",
-    "express": "^4.21.0",
+    "@elizaos/core": "next",
+    "@elizaos/plugin-agent-orchestrator": "next",
+    "@elizaos/plugin-anthropic": "next",
+    "@elizaos/plugin-code": "next",
+    "@elizaos/plugin-goals": "next",
+    "@elizaos/plugin-groq": "next",
+    "@elizaos/plugin-inmemorydb": "next",
+    "@elizaos/plugin-openai": "next",
+    "@elizaos/plugin-shell": "next",
+    "@elizaos/plugin-todo": "next",
+    "@e2b/code-interpreter": "^1.0.4",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "pg": "^8.12.0",
+    "ws": "^8.18.0"
+  },
+  "overrides": {
+    "@elizaos/core": "$@elizaos/core"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.1",
+    "@types/pg": "^8.11.10",
+    "@types/ws": "^8.5.13",
+    "concurrently": "^8.2.2",
+    "typescript": "^5.7.2"
   },
   "engines": {
-    "node": "20.x"
+    "node": ">=20"
   }
 }
