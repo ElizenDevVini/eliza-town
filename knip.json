@@ -1,0 +1,12 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["scripts/*.ts"],
+  "project": ["src/**/*.ts"],
+  "ignore": ["eliza/**", "vibecraft/**", "client/**", "assets/**"],
+  "ignoreDependencies": [
+    "@elizaos/*"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreBinaries": ["knip"],
+  "include": ["files", "dependencies", "unlisted", "duplicates"]
+}

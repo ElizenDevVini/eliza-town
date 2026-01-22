@@ -7,15 +7,33 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const OUTPUT_DIR = path.join(__dirname, '../../output');
 
+// Type definitions
+export interface FileInfo {
+  name: string;
+  path: string;
+  size: number;
+  created?: Date;
+}
+
+export interface CoderFile {
+  path?: string;
+  name?: string;
+  content?: string;
+}
+
+export interface CoderOutput {
+  files?: CoderFile[];
+}
+
 // Ensure output directory exists
-async function ensureOutputDir(taskId) {
+async function ensureOutputDir(taskId: number | string): Promise<string> {
   const taskDir = path.join(OUTPUT_DIR, `task_${taskId}`);
   await fs.mkdir(taskDir, { recursive: true });
   return taskDir;
 }
 
 // Save a file for a task
-export async function saveTaskFile(taskId, filename, content) {
+export async function saveTaskFile(taskId: number | string, filename: string, content: string): Promise<string> {
   const taskDir = await ensureOutputDir(taskId);
   const filepath = path.join(taskDir, filename);
   await fs.writeFile(filepath, content, 'utf-8');
@@ -24,11 +42,11 @@ export async function saveTaskFile(taskId, filename, content) {
 }
 
 // Save multiple files from coder output
-export async function saveCoderOutput(taskId, output) {
-  const savedFiles = [];
+export async function saveCoderOutput(taskId: number | string, output: string | CoderOutput): Promise<FileInfo[]> {
+  const savedFiles: FileInfo[] = [];
 
   try {
-    const parsed = typeof output === 'string' ? JSON.parse(output) : output;
+    const parsed: CoderOutput = typeof output === 'string' ? JSON.parse(output) : output;
 
     if (parsed.files && Array.isArray(parsed.files)) {
       for (const file of parsed.files) {
@@ -42,14 +60,15 @@ export async function saveCoderOutput(taskId, output) {
         });
       }
     }
-  } catch (e) {
+  } catch {
     // If not valid JSON or no files, save raw output
-    if (output && output.length > 0) {
-      const filepath = await saveTaskFile(taskId, 'output.txt', output);
+    const outputStr = typeof output === 'string' ? output : JSON.stringify(output);
+    if (outputStr && outputStr.length > 0) {
+      const filepath = await saveTaskFile(taskId, 'output.txt', outputStr);
       savedFiles.push({
         name: 'output.txt',
         path: filepath,
-        size: output.length
+        size: outputStr.length
       });
     }
   }
@@ -58,13 +77,13 @@ export async function saveCoderOutput(taskId, output) {
 }
 
 // Get all files for a task
-export async function getTaskFiles(taskId) {
+export async function getTaskFiles(taskId: number | string): Promise<FileInfo[]> {
   const taskDir = path.join(OUTPUT_DIR, `task_${taskId}`);
 
   try {
     const files = await fs.readdir(taskDir);
     const fileInfos = await Promise.all(
-      files.map(async (filename) => {
+      files.map(async (filename): Promise<FileInfo> => {
         const filepath = path.join(taskDir, filename);
         const stat = await fs.stat(filepath);
         return {
@@ -76,20 +95,13 @@ export async function getTaskFiles(taskId) {
       })
     );
     return fileInfos;
-  } catch (e) {
+  } catch {
     return [];
   }
 }
 
 // Get file content
-export async function getTaskFile(taskId, filename) {
+export async function getTaskFile(taskId: number | string, filename: string): Promise<string> {
   const filepath = path.join(OUTPUT_DIR, `task_${taskId}`, filename);
   return await fs.readFile(filepath, 'utf-8');
-}
-
-// Create a zip of all task files
-export async function getTaskZip(taskId) {
-  const files = await getTaskFiles(taskId);
-  // For simplicity, return file list - in production use archiver
-  return files;
 }
