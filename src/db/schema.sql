@@ -111,6 +111,17 @@ ON CONFLICT (name) DO NOTHING;
 -- MUST run BEFORE creating index on session_id
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS session_id VARCHAR(64);
 
+-- User sandboxes track per-user isolated sandbox environments
+CREATE TABLE IF NOT EXISTS user_sandboxes (
+    id SERIAL PRIMARY KEY,
+    session_id VARCHAR(128) NOT NULL UNIQUE,
+    directory TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_accessed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    file_count INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
 -- Create indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_agents_status ON agents(status);
 CREATE INDEX IF NOT EXISTS idx_agents_hub ON agents(current_hub_id);
@@ -121,3 +132,5 @@ CREATE INDEX IF NOT EXISTS idx_messages_agent ON messages(agent_id);
 CREATE INDEX IF NOT EXISTS idx_messages_task ON messages(task_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
 CREATE INDEX IF NOT EXISTS idx_tasks_session ON tasks(session_id);
+CREATE INDEX IF NOT EXISTS idx_user_sandboxes_session ON user_sandboxes(session_id);
+CREATE INDEX IF NOT EXISTS idx_user_sandboxes_active ON user_sandboxes(is_active);

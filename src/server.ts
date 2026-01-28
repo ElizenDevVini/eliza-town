@@ -8,6 +8,8 @@ import { fileURLToPath } from 'url';
 import * as ws from './websocket/index.js';
 import { startVisualDemo, stopVisualDemo, isVisualDemoRunning, getDemoState } from './eliza/visualDemo.js';
 import apiRoutes, { setDbAvailable } from './api/routes.js';
+import sandboxRoutes from './api/sandboxRoutes.js';
+import { initializeUserSandboxes, closeUserSandboxes } from './eliza/userSandboxManager.js';
 
 import type { HealthResponse } from './types/index.js';
 
@@ -33,6 +35,7 @@ let dbAvailable = false;
 let orchestrationReady = false;
 let wsInitialized = false;
 let visualDemoActive = false;
+let userSandboxesActive = false;
 let dbError: Error | null = null;
 let orchestrationModule: typeof import('./eliza/orchestration.js') | null = null;
 
@@ -58,6 +61,7 @@ app.get('/api/health', (_req, res) => {
     orchestrationReady,
     wsInitialized,
     visualDemoActive,
+    userSandboxesActive,
     dbError: dbError ? dbError.message : null,
     hasDbUrl: !!process.env.DATABASE_URL,
     hasOpenAIKey: !!process.env.OPENAI_API_KEY,
@@ -134,6 +138,7 @@ export function requireDatabase(
 }
 
 app.use('/api', apiRoutes);
+app.use('/api/sandbox', sandboxRoutes);
 
 // SPA fallback - serve index.html for all non-API routes
 app.get('*', (req, res, next) => {
@@ -255,34 +260,44 @@ async function initializeBackend(): Promise<void> {
   }
 }
 
+// Initialize user sandboxes (always available, independent of LLM/DB)
+async function initializeUserSandboxService(): Promise<void> {
+  try {
+    await initializeUserSandboxes(ws.broadcast);
+    userSandboxesActive = true;
+    console.log('✓ User sandboxes enabled (per-session isolation)');
+  } catch (error) {
+    console.warn('User sandboxes not available:', (error as Error).message);
+  }
+}
+
 // Initialize backend asynchronously
 initializeBackend();
+initializeUserSandboxService();
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('Shutting down...');
+async function shutdown(): Promise<void> {
   if (orchestrationReady && orchestrationModule) {
     orchestrationModule.stop();
   }
   if (visualDemoActive) {
     stopVisualDemo();
   }
+  if (userSandboxesActive) {
+    await closeUserSandboxes();
+  }
   server.close(() => {
     console.log('Server closed');
     process.exit(0);
   });
+}
+
+process.on('SIGTERM', () => {
+  console.log('Shutting down...');
+  shutdown();
 });
 
 process.on('SIGINT', () => {
   console.log('\nShutting down...');
-  if (orchestrationReady && orchestrationModule) {
-    orchestrationModule.stop();
-  }
-  if (visualDemoActive) {
-    stopVisualDemo();
-  }
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
+  shutdown();
 });

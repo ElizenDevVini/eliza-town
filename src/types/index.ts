@@ -461,6 +461,24 @@ export interface StartOrchestrationBody {
 }
 
 // ============================================================================
+// User Sandbox Types
+// ============================================================================
+
+export interface UserSandboxInfo {
+  sessionId: string;
+  directory: string;
+  createdAt: number;
+  lastAccessedAt: number;
+  fileCount: number;
+}
+
+export interface UserSandboxStats {
+  activeSandboxes: number;
+  sandboxes: UserSandboxInfo[];
+  baseDirectory: string;
+}
+
+// ============================================================================
 // Health Check Response
 // ============================================================================
 
@@ -470,6 +488,7 @@ export interface HealthResponse {
   orchestrationReady: boolean;
   wsInitialized: boolean;
   visualDemoActive: boolean;
+  userSandboxesActive: boolean;
   dbError: string | null;
   hasDbUrl: boolean;
   hasOpenAIKey: boolean;
